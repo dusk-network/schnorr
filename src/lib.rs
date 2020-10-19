@@ -7,7 +7,7 @@
 mod error;
 
 use crate::error::Error;
-use dusk_bls12_381::Scalar;
+use dusk_bls12_381::Scalar as BlsScalar;
 use dusk_jubjub::{AffinePoint, ExtendedPoint, Fr, GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED};
 use poseidon252::perm_uses::fixed_hash::two_outputs;
 use poseidon252::sponge::sponge::sponge_hash;
@@ -16,7 +16,7 @@ use std::io;
 use std::io::{Read, Write};
 
 #[derive(Default, Clone, Copy, Debug)]
-pub struct Message(pub Scalar);
+pub struct Message(pub BlsScalar);
 
 
 pub struct SecretKey(pub Fr);
@@ -27,9 +27,9 @@ impl SecretKey {
     where
         T: Rng + CryptoRng,
     {
-        let scalar = Fr::random(rand);
+        let fr = Fr::random(rand);
 
-        SecretKey(scalar)
+        SecretKey(fr)
     }
 
     /// This will create a new [`PublicKeyPair`] from a given [`SecretKey`].
@@ -43,39 +43,41 @@ impl SecretKey {
         }
     }
 
-    pub fn sign(&self, message: &Message) -> (Signature, PublicKeyPair, Scalar) {
+    pub fn sign(&self, message: &Message) -> (Signature, PublicKeyPair, BlsScalar) {
         /// Generate Key pair from secret key
         /// pk = sk * G
         /// pk_prime = sk * G_NUMS
         let pk_pair = self.to_public_key_pair();
 
         /// Create random scalar value for scheme, r
-        let r = Fr::random(&mut rand::thread_rng());
+        let r = BlsScalar::random(&mut rand::thread_rng());
+        let r_1 = Fr::from_raw(*r.reduce().internal_repr());
 
         /// Derive two affine points from r, to sign with the message
         /// R = r * G
-        /// R_prime = r * G_NUMS
-        let R = AffinePoint::from(GENERATOR_EXTENDED * r);
-        let R_prime = AffinePoint::from(GENERATOR_NUMS_EXTENDED * r);
+        /// R_prime = r * G_NUM
+        let R = AffinePoint::from(GENERATOR_EXTENDED * r_1);
+        let R_prime = AffinePoint::from(GENERATOR_NUMS_EXTENDED * r_1);
 
         /// Hash the input message, H(m)
         let h = sponge_hash(&[message.0]);
 
         /// Compute challenge value, c = H(pk_r||pk_r_prime||h);
         let c = sponge_hash(&[
+            R.get_x(),
+            R.get_y(),
+            R_prime.get_x(),
+            R_prime.get_y(),
             h,
-            pk_pair.public_key.get_x(),
-            pk_pair.public_key.get_y(),
-            pk_pair.public_key_prime.get_x(),
-            pk_pair.public_key_prime.get_y(),
         ]);
+
 
         /// Convert r into a Bls Scalar for use in arithmetic
         /// operations
-        let r_1 = Scalar::from(r);
+
 
         /// Compute scalar signature, u = r - c * sk,
-        let u_a: Scalar = r_1 - (c * Scalar::from(self.0));
+        let u_a: BlsScalar = r - (c * BlsScalar::from(self.0));
         let u = Fr::from_raw(*u_a.reduce().internal_repr());
 
         (
@@ -119,23 +121,24 @@ impl PublicKeyPair {
 #[allow(non_snake_case)]
 #[derive(Clone, Copy, Debug)]
 pub struct Signature {
-    U: Fr,
-    R: AffinePoint,
-    R_prime: AffinePoint,
+    pub U: Fr,
+    pub R: AffinePoint,
+    pub R_prime: AffinePoint,
 }
 
 impl Signature {
     /// Function to verify that two given point in a Schnorr signature
     /// have the same DLP
-    pub fn verify(&self, pk_pair: &PublicKeyPair, h: Scalar) -> Result<(), Error> {
+    pub fn verify(&self, pk_pair: &PublicKeyPair, h: BlsScalar) -> Result<(), Error> {
         /// Compute challenge value, c = H(pk_r||pk_r_prime||h);
         let c = sponge_hash(&[
+            self.R.get_x(),
+            self.R.get_y(),
+            self.R_prime.get_x(),
+            self.R_prime.get_y(),
             h,
-            pk_pair.public_key.get_x(),
-            pk_pair.public_key.get_y(),
-            pk_pair.public_key_prime.get_x(),
-            pk_pair.public_key_prime.get_y(),
         ]);
+
 
         /// Compute verification steps
         /// u * G + c * pk
@@ -144,12 +147,13 @@ impl Signature {
                 + (ExtendedPoint::from(pk_pair.public_key)
                     * Fr::from_raw(*c.reduce().internal_repr())),
         );
-        /// u * G + c * pk
+        /// u * G_nums + c * pk_prime
         let point_2 = AffinePoint::from(
             (GENERATOR_NUMS_EXTENDED * self.U)
                 + (ExtendedPoint::from(pk_pair.public_key_prime)
                 * Fr::from_raw(*c.reduce().internal_repr())),
         );
+
 
         match point_1.eq(&self.R) && point_2.eq(&self.R_prime) {
             true => Ok(()),
