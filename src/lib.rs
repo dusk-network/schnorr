@@ -62,16 +62,12 @@ impl SecretKey {
         /// Hash the input message, H(m)
         let h = sponge_hash(&[message.0]);
 
-        /// Compute challenge value, c = H(pk_r||pk_r_prime||h);
+        /// Compute challenge value, c = H(R||R_prime||h);
         let c = sponge_hash(&[R.get_x(), R.get_y(), R_prime.get_x(), R_prime.get_y(), h]);
         let c = JubJubScalar::from_raw(*c.reduce().internal_repr());
 
-        /// Convert r into a Bls Scalar for use in arithmetic
-        /// operations
-
         /// Compute scalar signature, u = r - c * sk,
         let u = r - (c * self.0);
-        //        let u = JubJubScalar::from_raw(*u_a.reduce().internal_repr());
 
         (
             Signature {
@@ -123,7 +119,7 @@ impl Signature {
     /// Function to verify that two given point in a Schnorr signature
     /// have the same DLP
     pub fn verify(&self, pk_pair: &PublicKeyPair, h: BlsScalar) -> Result<(), Error> {
-        /// Compute challenge value, c = H(pk_r||pk_r_prime||h);
+        /// Compute challenge value, c = H(R||R||h);
         let c = sponge_hash(&[
             self.R.get_x(),
             self.R.get_y(),
