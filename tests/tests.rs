@@ -16,20 +16,23 @@ mod integrations {
     fn sign_verify() {
         let secret = SecretKey::new(&mut rand::thread_rng());
         let message = BlsScalar::random(&mut rand::thread_rng());
+        let pk_pair = PublicKeyPair::from(&secret);
 
-        let (sig, pk_pair) = secret.sign(message);
+        let sig = secret.sign(message);
         let b = sig.verify(&pk_pair, message);
 
         assert!(b.is_ok());
     }
     #[test]
-    // Test to see failure with wrong Public Key
+    // Test to see failure with random Public Key
     fn test_wrong_keys() {
         let secret = SecretKey::new(&mut rand::thread_rng());
         let message = BlsScalar::random(&mut rand::thread_rng());
 
-        let (sig, pk_pair) = secret.sign(message);
-        let pk_pair = PublicKeyPair::new();
+        let sig = secret.sign(message);
+
+        // Derive random public key
+        let pk_pair = PublicKeyPair::new(&mut rand::thread_rng());
         let b = sig.verify(&pk_pair, message);
 
         assert!(b.is_err());

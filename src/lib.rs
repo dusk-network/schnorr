@@ -44,11 +44,7 @@ impl SecretKey {
     // Signs a chosen message with a given secret key
     // using the dusk variant of the Schnorr signature scheme.
     #[allow(non_snake_case)]
-    pub fn sign(&self, message: BlsScalar) -> (Signature, PublicKeyPair) {
-        // Generate Key pair from secret key
-        // pk = sk * G
-        // pk_prime = sk * G_NUMS
-        let pk_pair = self.to_public_key_pair();
+    pub fn sign(&self, message: BlsScalar) -> Signature {
 
         // Create random scalar value for scheme, r
         let r = JubJubScalar::random(&mut rand::thread_rng());
@@ -69,14 +65,11 @@ impl SecretKey {
         // Compute scalar signature, u = r - c * sk,
         let u = r - (c * self.0);
 
-        (
             Signature {
                 U: u,
                 R: R,
                 R_prime: R_prime,
-            },
-            pk_pair,
-        )
+            }
     }
 }
 
@@ -94,15 +87,18 @@ impl From<&SecretKey> for PublicKeyPair {
 
 impl PublicKeyPair {
     /// This will create a new ['PublicKeyPair'] from a random JubJub scalar.
-    pub fn new() -> PublicKeyPair {
-        let sk = JubJubScalar::random(&mut rand::thread_rng());
+    pub fn new<T>(rand: &mut T) -> PublicKeyPair
+        where
+            T: Rng + CryptoRng,
+    {
+        let sk = JubJubScalar::random(rand);
+
         let pk = AffinePoint::from(GENERATOR_EXTENDED * sk);
         let pk_prime = AffinePoint::from(GENERATOR_NUMS_EXTENDED * sk);
         PublicKeyPair {
             public_key: pk,
             public_key_prime: pk_prime,
         }
-
     }
     /// This will create a new ['PublicKeyPair'] from a ['SecretKey'].
     pub fn from_secret(secret: &SecretKey) -> PublicKeyPair {
