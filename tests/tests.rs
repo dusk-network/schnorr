@@ -4,36 +4,34 @@
 //
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
-use dusk_bls12_381::Scalar;
+use dusk_bls12_381::Scalar as BlsScalar;
 
 #[cfg(test)]
 mod integrations {
     use super::*;
-    use Schnorr::{Message, PublicKeyPair, SecretKey};
+    use schnorr::{PublicKeyPair, SecretKey};
 
     #[test]
     // TestSignVerify
     fn sign_verify() {
         let secret = SecretKey::new(&mut rand::thread_rng());
-        let message = Message(Scalar::random(&mut rand::thread_rng()));
+        let message = BlsScalar::random(&mut rand::thread_rng());
 
-        let (sig, pk_pair, h) = secret.sign(&message);
-        let b = sig.verify(&pk_pair, h);
+        let (sig, pk_pair) = secret.sign(message);
+        let b = sig.verify(&pk_pair, message);
 
         assert!(b.is_ok());
     }
-}
+    #[test]
+    // Test to see failure with wrong Public Key
+    fn test_wrong_keys() {
+        let secret = SecretKey::new(&mut rand::thread_rng());
+        let message = BlsScalar::random(&mut rand::thread_rng());
 
-// #[test]
-// // Test to see failure with wrong Public Key
-// fn test_wrong_keys() {
-//     let keypair = KeyPair::new(&mut rand::thread_rng()).unwrap();
-//     let mut rng = rand::thread_rng();
-//
-//     let message = Message(Scalar::random(&mut rng));
-//
-//     let a = keypair.sign(&message);
-//     let b = a.verify(&message, &PublicKey::new(&mut rand::thread_rng()).unwrap());
-//
-//     assert!(b.is_err());
-// }
+        let (sig, pk_pair) = secret.sign(message);
+        let pk_pair = PublicKeyPair::new();
+        let b = sig.verify(&pk_pair, message);
+
+        assert!(b.is_err());
+    }
+}
