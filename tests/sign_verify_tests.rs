@@ -4,10 +4,10 @@
 //
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
-use dusk_bls12_381::Scalar as BlsScalar;
+use dusk_plonk::bls12_381::Scalar as BlsScalar;
 
 #[cfg(test)]
-mod integrations {
+mod tests {
     use super::*;
     use schnorr::{PublicKeyPair, SecretKey};
 
@@ -27,12 +27,13 @@ mod integrations {
     // Test to see failure with random Public Key
     fn test_wrong_keys() {
         let secret = SecretKey::new(&mut rand::thread_rng());
+        let wrong_secret = SecretKey::new(&mut rand::thread_rng());
         let message = BlsScalar::random(&mut rand::thread_rng());
 
         let sig = secret.sign(message);
 
         // Derive random public key
-        let pk_pair = PublicKeyPair::new(&mut rand::thread_rng());
+        let pk_pair = PublicKeyPair::from(&wrong_secret);
         let b = sig.verify(&pk_pair, message);
 
         assert!(b.is_err());
