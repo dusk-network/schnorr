@@ -11,3 +11,4 @@ poseidon252 = { git = "https://github.com/dusk-network/Poseidon252" , tag = "v0.
 rand = "0.7.0"
 thiserror = "1.0"
 dusk-plonk = {version = "0.3.1", features = ["trace-print"]}
+rand_core = "0.5.1"

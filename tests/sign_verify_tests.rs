@@ -18,7 +18,7 @@ mod tests {
         let message = BlsScalar::random(&mut rand::thread_rng());
         let pk_pair = PublicKeyPair::from(&secret);
 
-        let sig = secret.sign(message);
+        let sig = secret.sign(&mut rand::thread_rng(),message);
         let b = sig.verify(&pk_pair, message);
 
         assert!(b.is_ok());
@@ -30,7 +30,7 @@ mod tests {
         let wrong_secret = SecretKey::new(&mut rand::thread_rng());
         let message = BlsScalar::random(&mut rand::thread_rng());
 
-        let sig = secret.sign(message);
+        let sig = secret.sign(&mut rand::thread_rng(),message);
 
         // Derive random public key
         let pk_pair = PublicKeyPair::from(&wrong_secret);

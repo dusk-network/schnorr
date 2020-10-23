@@ -8,10 +8,12 @@ mod error;
 
 use crate::error::Error;
 use dusk_plonk::bls12_381::Scalar as BlsScalar;
-use dusk_plonk::jubjub::{ExtendedPoint, Fr as JubJubScalar, GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED,
+use dusk_plonk::jubjub::{
+    ExtendedPoint, Fr as JubJubScalar, GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED,
 };
 use poseidon252::sponge::sponge::sponge_hash;
-use rand::{CryptoRng, Rng};
+use rand::{Rng};
+use rand_core::{CryptoRng, RngCore};
 
 /// Method to create a challenge hash for
 /// signature scheme
@@ -52,13 +54,15 @@ impl SecretKey {
         SecretKey(fr)
     }
 
-
     // Signs a chosen message with a given secret key
     // using the dusk variant of the Schnorr signature scheme.
     #[allow(non_snake_case)]
-    pub fn sign(&self, message: BlsScalar) -> Signature {
+    pub fn sign<R>(&self, rng: &mut R, message: BlsScalar) -> Signature
+    where
+        R: RngCore + CryptoRng,
+    {
         // Create random scalar value for scheme, r
-        let r = JubJubScalar::random(&mut rand::thread_rng());
+        let r = JubJubScalar::random(rng);
 
         // Derive two points from r, to sign with the message
         // R = r * G
@@ -93,7 +97,6 @@ impl From<&SecretKey> for PublicKeyPair {
     }
 }
 
-
 /// An Schnorr signature, produced by signing a [`Message`] with a
 /// [`SecretKey`].
 #[allow(non_snake_case)]
@@ -108,7 +111,6 @@ impl Signature {
     /// Function to verify that two given point in a Schnorr signature
     /// have the same DLP
     pub fn verify(&self, public_key_pair: &PublicKeyPair, message: BlsScalar) -> Result<(), Error> {
-
         // Compute challenge value, c = H(R||R_prime||H(m));
         let c = challenge_hash(self.R, self.R_prime, message);
 

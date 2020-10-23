@@ -22,4 +22,3 @@ pub enum Error {
     #[error("Invalid signature for verification")]
     InvalidSignature,
 }
-
