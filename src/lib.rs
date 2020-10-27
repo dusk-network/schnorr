@@ -6,12 +6,12 @@
 
 mod error;
 
-use crate::error::Error;
 use dusk_plonk::bls12_381::Scalar as BlsScalar;
 use dusk_plonk::jubjub::{
     ExtendedPoint, Fr as JubJubScalar, GENERATOR_EXTENDED,
     GENERATOR_NUMS_EXTENDED,
 };
+pub use error::Error;
 use poseidon252::sponge::sponge::sponge_hash;
 use rand::Rng;
 use rand_core::{CryptoRng, RngCore};
