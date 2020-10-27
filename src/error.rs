@@ -9,9 +9,6 @@ use thiserror::Error;
 #[derive(Error, Debug)]
 /// Standard error for the interface
 pub enum Error {
-    /// Cryptographic invalidity
-    #[error("Generic Error in signature scheme")]
-    Generic,
     /// Invalid secret key
     #[error("Invalid seed provided to generate Secret key")]
     InvalidSeed,

@@ -5,37 +5,33 @@
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
 use dusk_plonk::bls12_381::Scalar as BlsScalar;
+use schnorr::{PublicKeyPair, SecretKey};
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use schnorr::{PublicKeyPair, SecretKey};
+#[test]
+// TestSignVerify
+fn sign_verify() {
+    let sk = SecretKey::new(&mut rand::thread_rng());
+    let message = BlsScalar::random(&mut rand::thread_rng());
+    let pk_pair = PublicKeyPair::from(&sk);
 
-    #[test]
-    // TestSignVerify
-    fn sign_verify() {
-        let secret = SecretKey::new(&mut rand::thread_rng());
-        let message = BlsScalar::random(&mut rand::thread_rng());
-        let pk_pair = PublicKeyPair::from(&secret);
+    let sig = sk.sign(&mut rand::thread_rng(), message);
+    let b = sig.verify(&pk_pair, message);
 
-        let sig = secret.sign(&mut rand::thread_rng(),message);
-        let b = sig.verify(&pk_pair, message);
+    assert!(b.is_ok());
+}
 
-        assert!(b.is_ok());
-    }
-    #[test]
-    // Test to see failure with random Public Key
-    fn test_wrong_keys() {
-        let secret = SecretKey::new(&mut rand::thread_rng());
-        let wrong_secret = SecretKey::new(&mut rand::thread_rng());
-        let message = BlsScalar::random(&mut rand::thread_rng());
+#[test]
+// Test to see failure with random Public Key
+fn test_wrong_keys() {
+    let sk = SecretKey::new(&mut rand::thread_rng());
+    let wrong_sk = SecretKey::new(&mut rand::thread_rng());
+    let message = BlsScalar::random(&mut rand::thread_rng());
 
-        let sig = secret.sign(&mut rand::thread_rng(),message);
+    let sig = sk.sign(&mut rand::thread_rng(), message);
 
-        // Derive random public key
-        let pk_pair = PublicKeyPair::from(&wrong_secret);
-        let b = sig.verify(&pk_pair, message);
+    // Derive random public key
+    let pk_pair = PublicKeyPair::from(&wrong_sk);
+    let b = sig.verify(&pk_pair, message);
 
-        assert!(b.is_err());
-    }
+    assert!(b.is_err());
 }

@@ -9,14 +9,14 @@ mod error;
 use crate::error::Error;
 use dusk_plonk::bls12_381::Scalar as BlsScalar;
 use dusk_plonk::jubjub::{
-    ExtendedPoint, Fr as JubJubScalar, GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED,
+    ExtendedPoint, Fr as JubJubScalar, GENERATOR_EXTENDED,
+    GENERATOR_NUMS_EXTENDED,
 };
 use poseidon252::sponge::sponge::sponge_hash;
-use rand::{Rng};
+use rand::Rng;
 use rand_core::{CryptoRng, RngCore};
 
-/// Method to create a challenge hash for
-/// signature scheme
+/// Method to create a challenge hash for signature scheme
 #[allow(non_snake_case)]
 pub fn challenge_hash(
     R: ExtendedPoint,
@@ -35,13 +35,12 @@ pub fn challenge_hash(
         h,
     ]);
 
-    let c = JubJubScalar::from_raw(*c_hash.reduce().internal_repr());
-
-    c
+    JubJubScalar::from_raw(*c_hash.reduce().internal_repr())
 }
 
 #[derive(Default, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SecretKey(JubJubScalar);
+
 impl SecretKey {
     /// This will create a new [`SecretKey`] from a scalar
     /// of the Field JubJubScalar.
@@ -85,11 +84,12 @@ pub struct PublicKeyPair {
     public_key: ExtendedPoint,
     public_key_prime: ExtendedPoint,
 }
-/// This will create a new ['PublicKeyPair'] from a ['SecretKey'].
+
 impl From<&SecretKey> for PublicKeyPair {
-    fn from(secret: &SecretKey) -> Self {
-        let public_key = GENERATOR_EXTENDED * secret.0;
-        let public_key_prime = GENERATOR_NUMS_EXTENDED * secret.0;
+    fn from(sk: &SecretKey) -> Self {
+        let public_key = GENERATOR_EXTENDED * sk.0;
+        let public_key_prime = GENERATOR_NUMS_EXTENDED * sk.0;
+
         PublicKeyPair {
             public_key,
             public_key_prime,
@@ -97,7 +97,7 @@ impl From<&SecretKey> for PublicKeyPair {
     }
 }
 
-/// An Schnorr signature, produced by signing a [`Message`] with a
+/// An Schnorr signature, produced by signing a message with a
 /// [`SecretKey`].
 #[allow(non_snake_case)]
 #[derive(Clone, Copy, Debug)]
@@ -110,15 +110,21 @@ pub struct Signature {
 impl Signature {
     /// Function to verify that two given point in a Schnorr signature
     /// have the same DLP
-    pub fn verify(&self, public_key_pair: &PublicKeyPair, message: BlsScalar) -> Result<(), Error> {
+    pub fn verify(
+        &self,
+        public_key_pair: &PublicKeyPair,
+        message: BlsScalar,
+    ) -> Result<(), Error> {
         // Compute challenge value, c = H(R||R_prime||H(m));
         let c = challenge_hash(self.R, self.R_prime, message);
 
         // Compute verification steps
         // u * G + c * public_key
-        let point_1 = (GENERATOR_EXTENDED * self.U) + (public_key_pair.public_key * c);
+        let point_1 =
+            (GENERATOR_EXTENDED * self.U) + (public_key_pair.public_key * c);
         // u * G_nums + c * public_key_prime
-        let point_2 = (GENERATOR_NUMS_EXTENDED * self.U) + (public_key_pair.public_key_prime * c);
+        let point_2 = (GENERATOR_NUMS_EXTENDED * self.U)
+            + (public_key_pair.public_key_prime * c);
 
         match point_1.eq(&self.R) && point_2.eq(&self.R_prime) {
             true => Ok(()),
