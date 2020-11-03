@@ -35,7 +35,14 @@ pub fn challenge_hash(
         h,
     ]);
 
-    JubJubScalar::from_raw(*c_hash.reduce().internal_repr())
+    // NOTE: 250 is used, instead of 251, as even numbers allow us to
+    // perform bitwise operations in circuit.
+    let c_hash = c_hash & BlsScalar::pow_of_2(250).sub(&BlsScalar::one());
+
+    // NOTE: This should never fail as we are truncating the BLS scalar
+    // to be less than the JubJub modulus.
+    Option::from(JubJubScalar::from_bytes(&c_hash.to_bytes()))
+        .expect("Failed to truncate BlsScalar")
 }
 
 #[derive(Default, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
