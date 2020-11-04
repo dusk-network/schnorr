@@ -21,9 +21,9 @@ pub fn challenge_hash(R: ExtendedPoint, message: BlsScalar) -> JubJubScalar {
 
     let c_hash = sponge_hash(&[R_scalar[0], R_scalar[1], h]);
 
-    // NOTE: 250 is used, instead of 251, as even numbers allow us to
-    // perform bitwise operations in circuit.
-    let c_hash = c_hash & BlsScalar::pow_of_2(250).sub(&BlsScalar::one());
+    // NOTE: 251 is used, instead of 252, as truncating to even numbers allow us
+    // to align with the perform bitwise operations in circuit.
+    let c_hash = c_hash & BlsScalar::pow_of_2(251).sub(&BlsScalar::one());
 
     // NOTE: This should never fail as we are truncating the BLS scalar
     // to be less than the JubJub modulus.
