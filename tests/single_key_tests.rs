@@ -5,17 +5,17 @@
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
 use dusk_plonk::bls12_381::Scalar as BlsScalar;
-use schnorr::{PublicKeyPair, SecretKey};
+use schnorr::single_key::{PublicKey, SecretKey};
 
 #[test]
 // TestSignVerify
 fn sign_verify() {
     let sk = SecretKey::new(&mut rand::thread_rng());
     let message = BlsScalar::random(&mut rand::thread_rng());
-    let pk_pair = PublicKeyPair::from(&sk);
+    let pk = PublicKey::from(&sk);
 
     let sig = sk.sign(&mut rand::thread_rng(), message);
-    let b = sig.verify(&pk_pair, message);
+    let b = sig.verify(&pk, message);
 
     assert!(b.is_ok());
 }
@@ -30,8 +30,8 @@ fn test_wrong_keys() {
     let sig = sk.sign(&mut rand::thread_rng(), message);
 
     // Derive random public key
-    let pk_pair = PublicKeyPair::from(&wrong_sk);
-    let b = sig.verify(&pk_pair, message);
+    let pk = PublicKey::from(&wrong_sk);
+    let b = sig.verify(&pk, message);
 
     assert!(b.is_err());
 }

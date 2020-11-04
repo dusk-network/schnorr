@@ -4,8 +4,5 @@
 //
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
-mod error;
-mod key_variants;
-
-pub use key_variants::double_key;
-pub use key_variants::single_key;
+pub mod double_key;
+pub mod single_key;
