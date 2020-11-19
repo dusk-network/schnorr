@@ -4,18 +4,23 @@
 //
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
-use thiserror::Error;
+#[cfg(feature = "std")]
+use std::fmt;
 
-#[derive(Error, Debug)]
+#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 /// Standard error for the interface
 pub enum Error {
     /// Invalid secret key
-    #[error("Invalid seed provided to generate Secret key")]
     InvalidSeed,
     /// Invalid data as an output
-    #[error("Invalid data given for signature")]
     InvalidData,
     /// Invalid signature
-    #[error("Invalid signature for verification")]
     InvalidSignature,
+}
+
+#[cfg(feature = "std")]
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Schnorr Signature Error: {:?}", &self)
+    }
 }
