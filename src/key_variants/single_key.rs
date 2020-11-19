@@ -5,17 +5,15 @@
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
 use crate::error::Error;
-use dusk_plonk::bls12_381::Scalar as BlsScalar;
-use dusk_plonk::jubjub::{
-    ExtendedPoint, Fr as JubJubScalar, GENERATOR_EXTENDED,
-};
+use dusk_bls12_381::BlsScalar;
+use dusk_jubjub::{JubJubExtended, JubJubScalar, GENERATOR_EXTENDED};
 use poseidon252::sponge::sponge::sponge_hash;
 use rand::Rng;
 use rand_core::{CryptoRng, RngCore};
 
 /// Method to create a challenge hash for signature scheme
 #[allow(non_snake_case)]
-pub fn challenge_hash(R: ExtendedPoint, message: BlsScalar) -> JubJubScalar {
+pub fn challenge_hash(R: JubJubExtended, message: BlsScalar) -> JubJubScalar {
     let h = sponge_hash(&[message]);
     let R_scalar = R.to_hash_inputs();
 
@@ -71,7 +69,7 @@ impl SecretKey {
 }
 
 #[derive(Debug, Default, Copy, Clone, PartialEq)]
-pub struct PublicKey(ExtendedPoint);
+pub struct PublicKey(JubJubExtended);
 
 impl From<&SecretKey> for PublicKey {
     fn from(sk: &SecretKey) -> Self {
@@ -87,7 +85,7 @@ impl From<&SecretKey> for PublicKey {
 #[derive(Clone, Copy, Debug)]
 pub struct Signature {
     U: JubJubScalar,
-    R: ExtendedPoint,
+    R: JubJubExtended,
 }
 
 impl Signature {

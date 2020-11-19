@@ -4,7 +4,7 @@
 //
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
-use dusk_plonk::bls12_381::Scalar as BlsScalar;
+use dusk_bls12_381::BlsScalar;
 use schnorr::single_key::{PublicKey, SecretKey};
 
 #[test]

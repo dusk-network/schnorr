@@ -5,10 +5,9 @@
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
 use crate::error::Error;
-use dusk_plonk::bls12_381::Scalar as BlsScalar;
-use dusk_plonk::jubjub::{
-    ExtendedPoint, Fr as JubJubScalar, GENERATOR_EXTENDED,
-    GENERATOR_NUMS_EXTENDED,
+use dusk_bls12_381::BlsScalar;
+use dusk_jubjub::{
+    JubJubExtended, JubJubScalar, GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED,
 };
 use poseidon252::sponge::sponge::sponge_hash;
 use rand::Rng;
@@ -17,8 +16,8 @@ use rand_core::{CryptoRng, RngCore};
 /// Method to create a challenge hash for signature scheme
 #[allow(non_snake_case)]
 pub fn challenge_hash(
-    R: ExtendedPoint,
-    R_prime: ExtendedPoint,
+    R: JubJubExtended,
+    R_prime: JubJubExtended,
     message: BlsScalar,
 ) -> JubJubScalar {
     let h = sponge_hash(&[message]);
@@ -86,8 +85,8 @@ impl SecretKey {
 
 #[derive(Debug, Default, Copy, Clone, PartialEq)]
 pub struct PublicKeyPair {
-    public_key: ExtendedPoint,
-    public_key_prime: ExtendedPoint,
+    public_key: JubJubExtended,
+    public_key_prime: JubJubExtended,
 }
 
 impl From<&SecretKey> for PublicKeyPair {
@@ -108,8 +107,8 @@ impl From<&SecretKey> for PublicKeyPair {
 #[derive(Clone, Copy, Debug)]
 pub struct Signature {
     U: JubJubScalar,
-    R: ExtendedPoint,
-    R_prime: ExtendedPoint,
+    R: JubJubExtended,
+    R_prime: JubJubExtended,
 }
 
 impl Signature {
