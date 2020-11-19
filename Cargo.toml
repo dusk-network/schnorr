@@ -7,8 +7,14 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-poseidon252 = { git = "https://github.com/dusk-network/Poseidon252" , tag = "v0.10.0"}
-rand = "0.7.0"
+poseidon252 = { git = "https://github.com/dusk-network/Poseidon252", tag = "v0.14.0", optional = true}
+rand = {version = "0.7.0", default-features = false}
 thiserror = "1.0"
-dusk-plonk = {version = "0.3.1", features = ["trace-print"]}
+dusk-bls12_381 = {version = "0.3", default-features = false}
+dusk-jubjub = {version = "0.5", default-features = false}
 rand_core = "0.5.1"
+
+[features]
+default = ["std"]
+std = ["rand/default", "dusk-bls12_381/default", "dusk-jubjub/default", "poseidon252/default"]
+
