@@ -4,15 +4,17 @@
 //
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
+#![allow(non_snake_case)]
 use crate::error::Error;
 use dusk_bls12_381::BlsScalar;
 use dusk_jubjub::{JubJubExtended, JubJubScalar, GENERATOR_EXTENDED};
+#[cfg(feature = "std")]
 use poseidon252::sponge::sponge::sponge_hash;
 use rand::Rng;
 use rand_core::{CryptoRng, RngCore};
 
+#[cfg(feature = "std")]
 /// Method to create a challenge hash for signature scheme
-#[allow(non_snake_case)]
 pub fn challenge_hash(R: JubJubExtended, message: BlsScalar) -> JubJubScalar {
     let h = sponge_hash(&[message]);
     let R_scalar = R.to_hash_inputs();
@@ -44,9 +46,9 @@ impl SecretKey {
         SecretKey(fr)
     }
 
+    #[cfg(feature = "std")]
     // Signs a chosen message with a given secret key
     // using the dusk variant of the Schnorr signature scheme.
-    #[allow(non_snake_case)]
     pub fn sign<R>(&self, rng: &mut R, message: BlsScalar) -> Signature
     where
         R: RngCore + CryptoRng,
@@ -81,7 +83,6 @@ impl From<&SecretKey> for PublicKey {
 
 /// An Schnorr signature, produced by signing a message with a
 /// [`SecretKey`].
-#[allow(non_snake_case)]
 #[derive(Clone, Copy, Debug)]
 pub struct Signature {
     U: JubJubScalar,
@@ -89,6 +90,7 @@ pub struct Signature {
 }
 
 impl Signature {
+    #[cfg(feature = "std")]
     /// Function to verify that a given point in a Schnorr signature
     /// have the same DLP
     pub fn verify(
