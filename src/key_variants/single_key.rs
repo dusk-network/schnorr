@@ -6,6 +6,10 @@
 
 #![allow(non_snake_case)]
 use crate::error::Error;
+#[cfg(feature = "canon")]
+use canonical::Canon;
+#[cfg(feature = "canon")]
+use canonical_derive::Canon;
 use dusk_bls12_381::BlsScalar;
 use dusk_jubjub::{JubJubExtended, JubJubScalar, GENERATOR_EXTENDED};
 #[cfg(feature = "std")]
@@ -32,6 +36,7 @@ pub fn challenge_hash(R: JubJubExtended, message: BlsScalar) -> JubJubScalar {
 }
 
 #[derive(Default, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[cfg_attr(feature = "canon", derive(Canon))]
 pub struct SecretKey(JubJubScalar);
 
 impl SecretKey {
@@ -71,6 +76,7 @@ impl SecretKey {
 }
 
 #[derive(Debug, Default, Copy, Clone, PartialEq)]
+#[cfg_attr(feature = "canon", derive(Canon))]
 pub struct PublicKey(JubJubExtended);
 
 impl From<&SecretKey> for PublicKey {
@@ -84,6 +90,7 @@ impl From<&SecretKey> for PublicKey {
 /// An Schnorr signature, produced by signing a message with a
 /// [`SecretKey`].
 #[derive(Clone, Copy, Debug)]
+#[cfg_attr(feature = "canon", derive(Canon))]
 pub struct Signature {
     U: JubJubScalar,
     R: JubJubExtended,
