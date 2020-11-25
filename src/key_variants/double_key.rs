@@ -6,11 +6,13 @@
 
 #![allow(non_snake_case)]
 
+#[allow(unused_imports)]
 use crate::error::Error;
 #[cfg(feature = "canon")]
 use canonical::Canon;
 #[cfg(feature = "canon")]
 use canonical_derive::Canon;
+#[allow(unused_imports)]
 use dusk_bls12_381::BlsScalar;
 use dusk_jubjub::{
     JubJubExtended, JubJubScalar, GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED,
@@ -18,7 +20,9 @@ use dusk_jubjub::{
 #[cfg(feature = "std")]
 use poseidon252::sponge::sponge::sponge_hash;
 use rand::Rng;
-use rand_core::{CryptoRng, RngCore};
+use rand_core::CryptoRng;
+#[cfg(feature = "std")]
+use rand_core::RngCore;
 
 /// Method to create a challenge hash for signature scheme
 #[cfg(feature = "std")]

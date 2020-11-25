@@ -36,3 +36,15 @@ fn test_wrong_keys() {
 
     assert!(b.is_err());
 }
+
+#[test]
+fn to_from_bytes() {
+    let sk = SecretKey::new(&mut rand::thread_rng());
+    assert_eq!(sk, SecretKey::from_bytes(&sk.to_bytes()).unwrap());
+    let message = BlsScalar::random(&mut rand::thread_rng());
+    let pk = PublicKey::from(&sk);
+    assert_eq!(pk, PublicKey::from_bytes(&pk.to_bytes()).unwrap());
+    let sig = sk.sign(&mut rand::thread_rng(), message);
+    use schnorr::single_key::Signature;
+    assert_eq!(sig, Signature::from_bytes(&sig.to_bytes()).unwrap());
+}

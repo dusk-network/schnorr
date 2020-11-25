@@ -4,19 +4,24 @@
 //
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
-#![allow(non_snake_case)]
 use crate::error::Error;
 #[cfg(feature = "canon")]
 use canonical::Canon;
 #[cfg(feature = "canon")]
 use canonical_derive::Canon;
+#[cfg(feature = "std")]
 use dusk_bls12_381::BlsScalar;
-use dusk_jubjub::{JubJubExtended, JubJubScalar, GENERATOR_EXTENDED};
+use dusk_jubjub::{
+    JubJubAffine, JubJubExtended, JubJubScalar, GENERATOR_EXTENDED,
+};
 #[cfg(feature = "std")]
 use poseidon252::sponge::sponge::sponge_hash;
 use rand::Rng;
-use rand_core::{CryptoRng, RngCore};
+use rand_core::CryptoRng;
+#[cfg(feature = "std")]
+use rand_core::RngCore;
 
+#[allow(non_snake_case)]
 #[cfg(feature = "std")]
 /// Method to create a challenge hash for signature scheme
 pub fn challenge_hash(R: JubJubExtended, message: BlsScalar) -> JubJubScalar {
@@ -35,6 +40,7 @@ pub fn challenge_hash(R: JubJubExtended, message: BlsScalar) -> JubJubScalar {
         .expect("Failed to truncate BlsScalar")
 }
 
+#[allow(non_snake_case)]
 #[derive(Default, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 #[cfg_attr(feature = "canon", derive(Canon))]
 pub struct SecretKey(JubJubScalar);
@@ -51,6 +57,20 @@ impl SecretKey {
         SecretKey(fr)
     }
 
+    pub fn to_bytes(&self) -> [u8; 32] {
+        let mut bytes = [0u8; 32];
+        bytes.copy_from_slice(&self.0.to_bytes());
+        bytes
+    }
+
+    pub fn from_bytes(bytes: &[u8; 32]) -> Result<Self, Error> {
+        match Option::from(JubJubScalar::from_bytes(bytes)) {
+            Some(scalar) => Ok(SecretKey(scalar)),
+            _ => Err(Error::SerialisationError),
+        }
+    }
+
+    #[allow(non_snake_case)]
     #[cfg(feature = "std")]
     // Signs a chosen message with a given secret key
     // using the dusk variant of the Schnorr signature scheme.
@@ -87,9 +107,23 @@ impl From<&SecretKey> for PublicKey {
     }
 }
 
+impl PublicKey {
+    pub fn to_bytes(&self) -> [u8; 32] {
+        JubJubAffine::from(self.0).to_bytes()
+    }
+
+    pub fn from_bytes(bytes: &[u8; 32]) -> Result<Self, Error> {
+        match Option::<JubJubAffine>::from(JubJubAffine::from_bytes(*bytes)) {
+            Some(point) => Ok(PublicKey(JubJubExtended::from(point))),
+            _ => Err(Error::SerialisationError),
+        }
+    }
+}
+
 /// An Schnorr signature, produced by signing a message with a
 /// [`SecretKey`].
-#[derive(Clone, Copy, Debug)]
+#[allow(non_snake_case)]
+#[derive(PartialEq, Clone, Copy, Debug)]
 #[cfg_attr(feature = "canon", derive(Canon))]
 pub struct Signature {
     U: JubJubScalar,
@@ -97,6 +131,34 @@ pub struct Signature {
 }
 
 impl Signature {
+    pub fn to_bytes(&self) -> [u8; 64] {
+        let mut arr = [0u8; 64];
+        arr[0..32].copy_from_slice(&self.U.to_bytes()[..]);
+        arr[32..64].copy_from_slice(&JubJubAffine::from(self.R).to_bytes()[..]);
+        arr
+    }
+
+    pub fn from_bytes(bytes: &[u8; 64]) -> Result<Self, Error> {
+        let mut bytes_scalar = [0u8; 32];
+        let mut bytes_point = [0u8; 32];
+        // Read U
+        bytes_scalar.copy_from_slice(&bytes[0..32]);
+        // Read R
+        bytes_point.copy_from_slice(&bytes[32..64]);
+        match (
+            Option::<JubJubScalar>::from(JubJubScalar::from_bytes(
+                &bytes_scalar,
+            )),
+            Option::<JubJubAffine>::from(JubJubAffine::from_bytes(bytes_point)),
+        ) {
+            (Some(scalar), Some(point)) => Ok(Signature {
+                U: scalar,
+                R: JubJubExtended::from(point),
+            }),
+            _ => Err(Error::SerialisationError),
+        }
+    }
+
     #[cfg(feature = "std")]
     /// Function to verify that a given point in a Schnorr signature
     /// have the same DLP
