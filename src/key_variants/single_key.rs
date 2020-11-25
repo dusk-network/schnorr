@@ -4,12 +4,12 @@
 //
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
-#![allow(non_snake_case)]
 use crate::error::Error;
 #[cfg(feature = "canon")]
 use canonical::Canon;
 #[cfg(feature = "canon")]
 use canonical_derive::Canon;
+#[cfg(feature = "std")]
 use dusk_bls12_381::BlsScalar;
 use dusk_jubjub::{
     JubJubAffine, JubJubExtended, JubJubScalar, GENERATOR_EXTENDED,
@@ -17,8 +17,11 @@ use dusk_jubjub::{
 #[cfg(feature = "std")]
 use poseidon252::sponge::sponge::sponge_hash;
 use rand::Rng;
-use rand_core::{CryptoRng, RngCore};
+use rand_core::CryptoRng;
+#[cfg(feature = "std")]
+use rand_core::RngCore;
 
+#[allow(non_snake_case)]
 #[cfg(feature = "std")]
 /// Method to create a challenge hash for signature scheme
 pub fn challenge_hash(R: JubJubExtended, message: BlsScalar) -> JubJubScalar {
@@ -37,6 +40,7 @@ pub fn challenge_hash(R: JubJubExtended, message: BlsScalar) -> JubJubScalar {
         .expect("Failed to truncate BlsScalar")
 }
 
+#[allow(non_snake_case)]
 #[derive(Default, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 #[cfg_attr(feature = "canon", derive(Canon))]
 pub struct SecretKey(JubJubScalar);
@@ -55,7 +59,7 @@ impl SecretKey {
 
     pub fn to_bytes(&self) -> [u8; 32] {
         let mut bytes = [0u8; 32];
-        bytes.copy_from_slice(&self.0.to_bytes()[..]);
+        bytes.copy_from_slice(&self.0.to_bytes());
         bytes
     }
 
@@ -66,6 +70,7 @@ impl SecretKey {
         }
     }
 
+    #[allow(non_snake_case)]
     #[cfg(feature = "std")]
     // Signs a chosen message with a given secret key
     // using the dusk variant of the Schnorr signature scheme.
@@ -117,6 +122,7 @@ impl PublicKey {
 
 /// An Schnorr signature, produced by signing a message with a
 /// [`SecretKey`].
+#[allow(non_snake_case)]
 #[derive(PartialEq, Clone, Copy, Debug)]
 #[cfg_attr(feature = "canon", derive(Canon))]
 pub struct Signature {
