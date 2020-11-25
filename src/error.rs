@@ -16,6 +16,8 @@ pub enum Error {
     InvalidData,
     /// Invalid signature
     InvalidSignature,
+    /// Serialisation error
+    SerialisationError
 }
 
 #[cfg(feature = "std")]
