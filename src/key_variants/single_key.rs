@@ -45,8 +45,20 @@ pub fn challenge_hash(R: JubJubExtended, message: BlsScalar) -> JubJubScalar {
 #[cfg_attr(feature = "canon", derive(Canon))]
 pub struct SecretKey(JubJubScalar);
 
+impl From<JubJubScalar> for SecretKey {
+    fn from(_scalar: JubJubScalar) -> SecretKey {
+        SecretKey(_scalar)
+    }
+}
+
+impl From<&JubJubScalar> for SecretKey {
+    fn from(_scalar: &JubJubScalar) -> SecretKey {
+        SecretKey(*_scalar)
+    }
+}
+
 impl SecretKey {
-    /// This will create a new [`SecretKey`] from a scalar
+    /// This will create a random [`SecretKey`] from a scalar
     /// of the Field JubJubScalar.
     pub fn new<T>(rand: &mut T) -> SecretKey
     where
@@ -104,6 +116,18 @@ impl From<&SecretKey> for PublicKey {
         let public_key = GENERATOR_EXTENDED * sk.0;
 
         PublicKey(public_key)
+    }
+}
+
+impl From<JubJubExtended> for PublicKey {
+    fn from(_point: JubJubExtended) -> PublicKey {
+        PublicKey(_point)
+    }
+}
+
+impl From<&JubJubExtended> for PublicKey {
+    fn from(_point: &JubJubExtended) -> PublicKey {
+        PublicKey(*_point)
     }
 }
 
