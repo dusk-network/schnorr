@@ -1,6 +1,6 @@
 [package]
 name = "schnorr"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Luke Pearson <luke@dusk.network>"]
 edition = "2018"
 
