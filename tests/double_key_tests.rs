@@ -4,7 +4,6 @@
 //
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
-#![cfg(feature = "std")]
 use dusk_bls12_381::BlsScalar;
 use schnorr::double_key::{PublicKeyPair, SecretKey};
 

@@ -17,25 +17,20 @@ use dusk_bls12_381::BlsScalar;
 use dusk_jubjub::{
     JubJubExtended, JubJubScalar, GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED,
 };
-#[cfg(feature = "std")]
-use poseidon252::sponge::sponge::sponge_hash;
-use rand::Rng;
-use rand_core::CryptoRng;
-#[cfg(feature = "std")]
-use rand_core::RngCore;
+use poseidon252::sponge::hash;
+use rand_core::{CryptoRng, RngCore};
 
 /// Method to create a challenge hash for signature scheme
-#[cfg(feature = "std")]
 pub fn challenge_hash(
     R: JubJubExtended,
     R_prime: JubJubExtended,
     message: BlsScalar,
 ) -> JubJubScalar {
-    let h = sponge_hash(&[message]);
+    let h = hash(&[message]);
     let R_scalar = R.to_hash_inputs();
     let R_prime_scalar = R_prime.to_hash_inputs();
 
-    let c_hash = sponge_hash(&[
+    let c_hash = hash(&[
         R_scalar[0],
         R_scalar[1],
         R_prime_scalar[0],
@@ -80,7 +75,7 @@ impl SecretKey {
     /// of the Field JubJubScalar.
     pub fn new<T>(rand: &mut T) -> SecretKey
     where
-        T: Rng + CryptoRng,
+        T: RngCore + CryptoRng,
     {
         let fr = JubJubScalar::random(rand);
 
@@ -89,7 +84,6 @@ impl SecretKey {
 
     // Signs a chosen message with a given secret key
     // using the dusk variant of the Schnorr signature scheme.
-    #[cfg(feature = "std")]
     pub fn sign<R>(&self, rng: &mut R, message: BlsScalar) -> Signature
     where
         R: RngCore + CryptoRng,
@@ -161,7 +155,6 @@ impl Signature {
 
     /// Function to verify that two given point in a Schnorr signature
     /// have the same DLP
-    #[cfg(feature = "std")]
     pub fn verify(
         &self,
         public_key_pair: &PublicKeyPair,

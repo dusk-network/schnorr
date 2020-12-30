@@ -9,26 +9,20 @@ use crate::error::Error;
 use canonical::Canon;
 #[cfg(feature = "canon")]
 use canonical_derive::Canon;
-#[cfg(feature = "std")]
 use dusk_bls12_381::BlsScalar;
 use dusk_jubjub::{
     JubJubAffine, JubJubExtended, JubJubScalar, GENERATOR_EXTENDED,
 };
-#[cfg(feature = "std")]
-use poseidon252::sponge::sponge::sponge_hash;
-use rand::Rng;
-use rand_core::CryptoRng;
-#[cfg(feature = "std")]
-use rand_core::RngCore;
+use poseidon252::sponge::hash;
+use rand_core::{CryptoRng, RngCore};
 
 #[allow(non_snake_case)]
-#[cfg(feature = "std")]
 /// Method to create a challenge hash for signature scheme
 pub fn challenge_hash(R: JubJubExtended, message: BlsScalar) -> JubJubScalar {
-    let h = sponge_hash(&[message]);
+    let h = hash(&[message]);
     let R_scalar = R.to_hash_inputs();
 
-    let c_hash = sponge_hash(&[R_scalar[0], R_scalar[1], h]);
+    let c_hash = hash(&[R_scalar[0], R_scalar[1], h]);
 
     // NOTE: 251 is used, instead of 252, as truncating to even numbers allow us
     // to align with the perform bitwise operations in circuit.
@@ -68,7 +62,7 @@ impl SecretKey {
     /// of the Field JubJubScalar.
     pub fn new<T>(rand: &mut T) -> SecretKey
     where
-        T: Rng + CryptoRng,
+        T: RngCore + CryptoRng,
     {
         let fr = JubJubScalar::random(rand);
 
@@ -89,7 +83,6 @@ impl SecretKey {
     }
 
     #[allow(non_snake_case)]
-    #[cfg(feature = "std")]
     // Signs a chosen message with a given secret key
     // using the dusk variant of the Schnorr signature scheme.
     pub fn sign<R>(&self, rng: &mut R, message: BlsScalar) -> Signature
@@ -205,7 +198,6 @@ impl Signature {
         }
     }
 
-    #[cfg(feature = "std")]
     /// Function to verify that a given point in a Schnorr signature
     /// have the same DLP
     pub fn verify(

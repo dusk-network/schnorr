@@ -4,6 +4,8 @@
 //
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
+#![cfg_attr(not(feature = "std"), no_std)]
+
 mod error;
 mod key_variants;
 
