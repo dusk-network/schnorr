@@ -9,26 +9,20 @@ use crate::error::Error;
 use canonical::Canon;
 #[cfg(feature = "canon")]
 use canonical_derive::Canon;
-#[cfg(feature = "std")]
 use dusk_bls12_381::BlsScalar;
 use dusk_jubjub::{
     JubJubAffine, JubJubExtended, JubJubScalar, GENERATOR_EXTENDED,
 };
-#[cfg(feature = "std")]
-use poseidon252::sponge::sponge::sponge_hash;
-use rand::Rng;
-use rand_core::CryptoRng;
-#[cfg(feature = "std")]
-use rand_core::RngCore;
+use poseidon252::sponge::hash;
+use rand_core::{CryptoRng, RngCore};
 
 #[allow(non_snake_case)]
-#[cfg(feature = "std")]
 /// Method to create a challenge hash for signature scheme
 pub fn challenge_hash(R: JubJubExtended, message: BlsScalar) -> JubJubScalar {
-    let h = sponge_hash(&[message]);
+    let h = hash(&[message]);
     let R_scalar = R.to_hash_inputs();
 
-    let c_hash = sponge_hash(&[R_scalar[0], R_scalar[1], h]);
+    let c_hash = hash(&[R_scalar[0], R_scalar[1], h]);
 
     // NOTE: 251 is used, instead of 252, as truncating to even numbers allow us
     // to align with the perform bitwise operations in circuit.
@@ -46,14 +40,20 @@ pub fn challenge_hash(R: JubJubExtended, message: BlsScalar) -> JubJubScalar {
 pub struct SecretKey(JubJubScalar);
 
 impl From<JubJubScalar> for SecretKey {
-    fn from(_scalar: JubJubScalar) -> SecretKey {
-        SecretKey(_scalar)
+    fn from(s: JubJubScalar) -> SecretKey {
+        SecretKey(s)
     }
 }
 
 impl From<&JubJubScalar> for SecretKey {
-    fn from(_scalar: &JubJubScalar) -> SecretKey {
-        SecretKey(*_scalar)
+    fn from(s: &JubJubScalar) -> SecretKey {
+        SecretKey(*s)
+    }
+}
+
+impl AsRef<JubJubScalar> for SecretKey {
+    fn as_ref(&self) -> &JubJubScalar {
+        &self.0
     }
 }
 
@@ -62,7 +62,7 @@ impl SecretKey {
     /// of the Field JubJubScalar.
     pub fn new<T>(rand: &mut T) -> SecretKey
     where
-        T: Rng + CryptoRng,
+        T: RngCore + CryptoRng,
     {
         let fr = JubJubScalar::random(rand);
 
@@ -83,7 +83,6 @@ impl SecretKey {
     }
 
     #[allow(non_snake_case)]
-    #[cfg(feature = "std")]
     // Signs a chosen message with a given secret key
     // using the dusk variant of the Schnorr signature scheme.
     pub fn sign<R>(&self, rng: &mut R, message: BlsScalar) -> Signature
@@ -120,14 +119,20 @@ impl From<&SecretKey> for PublicKey {
 }
 
 impl From<JubJubExtended> for PublicKey {
-    fn from(_point: JubJubExtended) -> PublicKey {
-        PublicKey(_point)
+    fn from(p: JubJubExtended) -> PublicKey {
+        PublicKey(p)
     }
 }
 
 impl From<&JubJubExtended> for PublicKey {
-    fn from(_point: &JubJubExtended) -> PublicKey {
-        PublicKey(*_point)
+    fn from(p: &JubJubExtended) -> PublicKey {
+        PublicKey(*p)
+    }
+}
+
+impl AsRef<JubJubExtended> for PublicKey {
+    fn as_ref(&self) -> &JubJubExtended {
+        &self.0
     }
 }
 
@@ -155,6 +160,16 @@ pub struct Signature {
 }
 
 impl Signature {
+    #[allow(non_snake_case)]
+    pub fn U(&self) -> &JubJubScalar {
+        &self.U
+    }
+
+    #[allow(non_snake_case)]
+    pub fn R(&self) -> &JubJubExtended {
+        &self.R
+    }
+
     pub fn to_bytes(&self) -> [u8; 64] {
         let mut arr = [0u8; 64];
         arr[0..32].copy_from_slice(&self.U.to_bytes()[..]);
@@ -183,7 +198,6 @@ impl Signature {
         }
     }
 
-    #[cfg(feature = "std")]
     /// Function to verify that a given point in a Schnorr signature
     /// have the same DLP
     pub fn verify(

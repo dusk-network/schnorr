@@ -1,23 +1,30 @@
 [package]
 name = "schnorr"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Luke Pearson <luke@dusk.network>"]
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-poseidon252 = { git = "https://github.com/dusk-network/Poseidon252", tag = "v0.14.0", optional = true}
-rand = {version = "0.7.0", default-features = false}
-thiserror = "1.0"
+rand_core = "0.5"
+poseidon252 = {git="https://github.com/dusk-network/Poseidon252", tag="v0.15.0", default-features=false}
 dusk-bls12_381 = {version = "0.3", default-features = false}
 dusk-jubjub = {version = "0.5", default-features = false}
-rand_core = "0.5.1"
 canonical = {version = "0.4", optional = true}
 canonical_derive = {version = "0.4", optional = true}
 
+[dev-dependencies]
+rand = "0.7"
+
 [features]
 default = ["std"]
-std = ["rand/default", "dusk-bls12_381/default", "dusk-jubjub/default", "poseidon252/default"]
-canon = ["canonical", "canonical_derive", "dusk-bls12_381/canon", "dusk-jubjub/canon"]
-
+std = [
+    "dusk-bls12_381/default",
+    "dusk-jubjub/default",
+    "poseidon252/default"
+]
+canon = [
+    "canonical",
+    "canonical_derive",
+    "dusk-bls12_381/canon",
+    "dusk-jubjub/canon"
+]
