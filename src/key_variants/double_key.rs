@@ -57,6 +57,24 @@ pub fn challenge_hash(
 #[cfg_attr(feature = "canon", derive(Canon))]
 pub struct SecretKey(JubJubScalar);
 
+impl From<JubJubScalar> for SecretKey {
+    fn from(s: JubJubScalar) -> SecretKey {
+        SecretKey(s)
+    }
+}
+
+impl From<&JubJubScalar> for SecretKey {
+    fn from(s: &JubJubScalar) -> SecretKey {
+        SecretKey(*s)
+    }
+}
+
+impl AsRef<JubJubScalar> for SecretKey {
+    fn as_ref(&self) -> &JubJubScalar {
+        &self.0
+    }
+}
+
 impl SecretKey {
     /// This will create a new [`SecretKey`] from a scalar
     /// of the Field JubJubScalar.
@@ -126,6 +144,21 @@ pub struct Signature {
 }
 
 impl Signature {
+    #[allow(non_snake_case)]
+    pub fn U(&self) -> &JubJubScalar {
+        &self.U
+    }
+
+    #[allow(non_snake_case)]
+    pub fn R(&self) -> &JubJubExtended {
+        &self.R
+    }
+
+    #[allow(non_snake_case)]
+    pub fn R_prime(&self) -> &JubJubExtended {
+        &self.R_prime
+    }
+
     /// Function to verify that two given point in a Schnorr signature
     /// have the same DLP
     #[cfg(feature = "std")]

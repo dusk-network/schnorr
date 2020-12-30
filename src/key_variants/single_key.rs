@@ -46,14 +46,20 @@ pub fn challenge_hash(R: JubJubExtended, message: BlsScalar) -> JubJubScalar {
 pub struct SecretKey(JubJubScalar);
 
 impl From<JubJubScalar> for SecretKey {
-    fn from(_scalar: JubJubScalar) -> SecretKey {
-        SecretKey(_scalar)
+    fn from(s: JubJubScalar) -> SecretKey {
+        SecretKey(s)
     }
 }
 
 impl From<&JubJubScalar> for SecretKey {
-    fn from(_scalar: &JubJubScalar) -> SecretKey {
-        SecretKey(*_scalar)
+    fn from(s: &JubJubScalar) -> SecretKey {
+        SecretKey(*s)
+    }
+}
+
+impl AsRef<JubJubScalar> for SecretKey {
+    fn as_ref(&self) -> &JubJubScalar {
+        &self.0
     }
 }
 
@@ -120,14 +126,20 @@ impl From<&SecretKey> for PublicKey {
 }
 
 impl From<JubJubExtended> for PublicKey {
-    fn from(_point: JubJubExtended) -> PublicKey {
-        PublicKey(_point)
+    fn from(p: JubJubExtended) -> PublicKey {
+        PublicKey(p)
     }
 }
 
 impl From<&JubJubExtended> for PublicKey {
-    fn from(_point: &JubJubExtended) -> PublicKey {
-        PublicKey(*_point)
+    fn from(p: &JubJubExtended) -> PublicKey {
+        PublicKey(*p)
+    }
+}
+
+impl AsRef<JubJubExtended> for PublicKey {
+    fn as_ref(&self) -> &JubJubExtended {
+        &self.0
     }
 }
 
@@ -155,6 +167,16 @@ pub struct Signature {
 }
 
 impl Signature {
+    #[allow(non_snake_case)]
+    pub fn U(&self) -> &JubJubScalar {
+        &self.U
+    }
+
+    #[allow(non_snake_case)]
+    pub fn R(&self) -> &JubJubExtended {
+        &self.R
+    }
+
     pub fn to_bytes(&self) -> [u8; 64] {
         let mut arr = [0u8; 64];
         arr[0..32].copy_from_slice(&self.U.to_bytes()[..]);
