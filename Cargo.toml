@@ -1,6 +1,6 @@
 [package]
 name = "schnorr"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Luke Pearson <luke@dusk.network>"]
 edition = "2018"
 
@@ -9,18 +9,21 @@ rand_core = "0.5"
 poseidon252 = {git="https://github.com/dusk-network/Poseidon252", tag="v0.15.0", default-features=false}
 dusk-bls12_381 = {version = "0.3", default-features = false}
 dusk-jubjub = {version = "0.5", default-features = false}
+dusk-plonk = {version = "0.3", optional = true}
 canonical = {version = "0.4", optional = true}
 canonical_derive = {version = "0.4", optional = true}
 
 [dev-dependencies]
 rand = "0.7"
+anyhow = "1.0"
 
 [features]
 default = ["std"]
 std = [
     "dusk-bls12_381/default",
     "dusk-jubjub/default",
-    "poseidon252/default"
+    "poseidon252/default",
+    "dusk-plonk"
 ]
 canon = [
     "canonical",

@@ -126,6 +126,16 @@ impl From<&SecretKey> for PublicKeyPair {
     }
 }
 
+impl PublicKeyPair {
+    pub fn PK(&self) -> &JubJubExtended {
+        &self.public_key
+    }
+
+    pub fn PK_prime(&self) -> &JubJubExtended {
+        &self.public_key_prime
+    }
+}
+
 /// An Schnorr signature, produced by signing a message with a
 /// [`SecretKey`].
 
@@ -139,7 +149,7 @@ pub struct Signature {
 
 impl Signature {
     #[allow(non_snake_case)]
-    pub fn U(&self) -> &JubJubScalar {
+    pub fn u(&self) -> &JubJubScalar {
         &self.U
     }
 

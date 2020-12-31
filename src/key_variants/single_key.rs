@@ -161,7 +161,7 @@ pub struct Signature {
 
 impl Signature {
     #[allow(non_snake_case)]
-    pub fn U(&self) -> &JubJubScalar {
+    pub fn u(&self) -> &JubJubScalar {
         &self.U
     }
 
