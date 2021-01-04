@@ -4,7 +4,7 @@
 //
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
-use crate::{double_key, single_key, zk};
+use crate::{double_key, gadgets, single_key};
 
 use anyhow::Result;
 use dusk_plonk::constraint_system::ecc::Point;
@@ -45,7 +45,7 @@ impl Circuit<'_> for SingleKeyCircuit {
         let PK = Point::from_private_affine(composer, self.pk.as_ref().into());
         let message = composer.add_input(self.message);
 
-        zk::single_key_verify(composer, R, u, PK, message);
+        gadgets::single_key_verify(composer, R, u, PK, message);
 
         let s = composer.circuit_size();
         let pk = self.pk.as_ref().into();
@@ -110,7 +110,9 @@ impl Circuit<'_> for DoubleKeyCircuit {
             Point::from_private_affine(composer, self.pk.PK_prime().into());
         let message = composer.add_input(self.message);
 
-        zk::double_key_verify(composer, R, R_prime, u, PK, PK_prime, message);
+        gadgets::double_key_verify(
+            composer, R, R_prime, u, PK, PK_prime, message,
+        );
 
         let s = composer.circuit_size();
         let pk = self.pk.PK().into();

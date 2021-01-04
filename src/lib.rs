@@ -10,6 +10,6 @@ mod error;
 mod key_variants;
 
 #[cfg(feature = "std")]
-pub mod zk;
+pub mod gadgets;
 
 pub use key_variants::{double_key, single_key};
