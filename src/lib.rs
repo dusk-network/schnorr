@@ -9,5 +9,7 @@
 mod error;
 mod key_variants;
 
-pub use key_variants::double_key;
-pub use key_variants::single_key;
+#[cfg(feature = "std")]
+pub mod gadgets;
+
+pub use key_variants::{double_key, single_key};
