@@ -35,9 +35,15 @@ pub fn challenge_hash(R: JubJubExtended, message: BlsScalar) -> JubJubScalar {
 }
 
 #[allow(non_snake_case)]
-#[derive(Default, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Default, Clone, Copy, Debug)]
 #[cfg_attr(feature = "canon", derive(Canon))]
 pub struct SecretKey(JubJubScalar);
+
+impl PartialEq for SecretKey {
+    fn eq(&self, other: &SecretKey) -> bool {
+        self.0 == other.0
+    }
+}
 
 impl From<JubJubScalar> for SecretKey {
     fn from(s: JubJubScalar) -> SecretKey {
@@ -106,9 +112,15 @@ impl SecretKey {
     }
 }
 
-#[derive(Debug, Default, Copy, Clone, PartialEq)]
+#[derive(Debug, Default, Copy, Clone)]
 #[cfg_attr(feature = "canon", derive(Canon))]
 pub struct PublicKey(JubJubExtended);
+
+impl PartialEq for PublicKey {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0
+    }
+}
 
 impl From<&SecretKey> for PublicKey {
     fn from(sk: &SecretKey) -> Self {
@@ -152,11 +164,17 @@ impl PublicKey {
 /// An Schnorr signature, produced by signing a message with a
 /// [`SecretKey`].
 #[allow(non_snake_case)]
-#[derive(PartialEq, Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug)]
 #[cfg_attr(feature = "canon", derive(Canon))]
 pub struct Signature {
     U: JubJubScalar,
     R: JubJubExtended,
+}
+
+impl PartialEq for Signature {
+    fn eq(&self, other: &Signature) -> bool {
+        self.U == other.U && self.R == other.R
+    }
 }
 
 impl Signature {
@@ -216,5 +234,21 @@ impl Signature {
             true => Ok(()),
             false => Err(Error::InvalidSignature),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn signature_works() {
+        let secret = SecretKey::from(JubJubScalar::from(77u64));
+        let msg = BlsScalar::zero();
+
+        let sig = secret.sign(&mut rand::thread_rng(), msg);
+        assert!(sig
+            .verify(&PublicKey::from(&secret), BlsScalar::one())
+            .is_err());
     }
 }
