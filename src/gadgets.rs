@@ -25,9 +25,8 @@ pub fn single_key_verify(
     let h = sponge_hash_gadget(composer, &[message]);
     let c_hash = sponge_hash_gadget(composer, &[*R.x(), *R.y(), h]);
 
-    let m = BlsScalar::pow_of_2(251).sub(&BlsScalar::one());
-    let m = composer.add_witness_to_circuit_description(m);
-    let c = composer.and_gate(c_hash, m, 250);
+    let m = composer.add_witness_to_circuit_description(BlsScalar::zero());
+    let c = composer.xor_gate(c_hash, m, 250);
 
     let p1_l = fixed_base::scalar_mul(composer, u, GENERATOR_EXTENDED);
     let p1_r = variable_base_scalar_mul(composer, c, PK);
@@ -57,9 +56,8 @@ pub fn double_key_verify(
         &[*R.x(), *R.y(), *R_prime.x(), *R_prime.y(), h],
     );
 
-    let m = BlsScalar::pow_of_2(251).sub(&BlsScalar::one());
-    let m = composer.add_witness_to_circuit_description(m);
-    let c = composer.and_gate(c_hash, m, 250);
+    let m = composer.add_witness_to_circuit_description(BlsScalar::zero());
+    let c = composer.xor_gate(c_hash, m, 250);
 
     let p1_l = fixed_base::scalar_mul(composer, u, GENERATOR_EXTENDED);
     let p1_r = variable_base_scalar_mul(composer, c, PK);
