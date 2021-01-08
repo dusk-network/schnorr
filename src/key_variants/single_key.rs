@@ -22,16 +22,9 @@ pub fn challenge_hash(R: JubJubExtended, message: BlsScalar) -> JubJubScalar {
     let h = hash(&[message]);
     let R_scalar = R.to_hash_inputs();
 
-    let c_hash = hash(&[R_scalar[0], R_scalar[1], h]);
+    let c = hash(&[R_scalar[0], R_scalar[1], h]);
 
-    // NOTE: 251 is used, instead of 252, as truncating to even numbers allow us
-    // to align with the perform bitwise operations in circuit.
-    let c_hash = c_hash & BlsScalar::pow_of_2(251).sub(&BlsScalar::one());
-
-    // NOTE: This should never fail as we are truncating the BLS scalar
-    // to be less than the JubJub modulus.
-    Option::from(JubJubScalar::from_bytes(&c_hash.to_bytes()))
-        .expect("Failed to truncate BlsScalar")
+    super::truncate_bls_to_jubjub(c)
 }
 
 #[allow(non_snake_case)]

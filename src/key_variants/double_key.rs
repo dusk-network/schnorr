@@ -30,7 +30,7 @@ pub fn challenge_hash(
     let R_scalar = R.to_hash_inputs();
     let R_prime_scalar = R_prime.to_hash_inputs();
 
-    let c_hash = hash(&[
+    let c = hash(&[
         R_scalar[0],
         R_scalar[1],
         R_prime_scalar[0],
@@ -38,14 +38,7 @@ pub fn challenge_hash(
         h,
     ]);
 
-    // NOTE: 251 is used, instead of 252, as truncating to even numbers allow us
-    // to align with the perform bitwise operations in circuit.
-    let c_hash = c_hash & BlsScalar::pow_of_2(251).sub(&BlsScalar::one());
-
-    // NOTE: This should never fail as we are truncating the BLS scalar
-    // to be less than the JubJub modulus.
-    Option::from(JubJubScalar::from_bytes(&c_hash.to_bytes()))
-        .expect("Failed to truncate BlsScalar")
+    super::truncate_bls_to_jubjub(c)
 }
 
 #[derive(Default, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
