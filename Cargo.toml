@@ -5,16 +5,16 @@ authors = ["Luke Pearson <luke@dusk.network>"]
 edition = "2018"
 
 [dependencies]
-rand_core = "0.5"
-poseidon252 = {git="https://github.com/dusk-network/Poseidon252", tag="v0.15.0", default-features=false}
-dusk-bls12_381 = {version = "0.3", default-features = false}
-dusk-jubjub = {version = "0.5", default-features = false}
-dusk-plonk = {version = "0.3", optional = true}
+rand_core = "0.6"
+dusk-bls12_381 = {git="https://github.com/dusk-network/bls12_381", branch="vlopes11/g1affine-raw-bytes", default-features=false}
+dusk-jubjub = {git="https://github.com/dusk-network/jubjub", branch="vlopes11/g1affine-unchecked-bytes", default-features=false}
+poseidon252 = {git="https://github.com/dusk-network/Poseidon252", branch="vlopes11/bump-plonk", default-features=false}
+dusk-plonk = {git="https://github.com/dusk-network/plonk", branch="vlopes11/332-proverkey-from-unchecked", optional=true, default-features=false}
 canonical = {version = "0.4", optional = true}
 canonical_derive = {version = "0.4", optional = true}
 
 [dev-dependencies]
-rand = "0.7"
+rand = "0.8"
 anyhow = "1.0"
 
 [features]
