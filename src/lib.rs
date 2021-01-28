@@ -6,10 +6,10 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-mod error;
 mod key_variants;
 
 #[cfg(feature = "std")]
 pub mod gadgets;
 
-pub use key_variants::{double_key, single_key};
+pub use key_variants::double_key::{Proof, PublicKeyPair};
+pub use key_variants::single_key::Signature;

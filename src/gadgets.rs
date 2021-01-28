@@ -172,7 +172,7 @@ mod tests {
         let mut pi = proof_circuit.get_pi_positions().clone();
         let (_, pk, _, _) = gen_double(&mut rng);
         match &mut pi[0] {
-            PublicInput::AffinePoint(p, _, _) => *p = pk.PK().into(),
+            PublicInput::AffinePoint(p, _, _) => *p = (pk.0).0.as_ref().into(),
             _ => panic!("Unexpected PI!"),
         }
 
@@ -200,7 +200,7 @@ mod tests {
         let mut pi = proof_circuit.get_pi_positions().clone();
         let (_, pk, _, _) = gen_double(&mut rng);
         match &mut pi[1] {
-            PublicInput::AffinePoint(p, _, _) => *p = pk.PK_prime().into(),
+            PublicInput::AffinePoint(p, _, _) => *p = (pk.0).1.as_ref().into(),
             _ => panic!("Unexpected PI!"),
         }
 

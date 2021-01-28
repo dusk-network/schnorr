@@ -6,29 +6,23 @@
 
 #![allow(non_snake_case)]
 
-#[allow(unused_imports)]
-use crate::error::Error;
 #[cfg(feature = "canon")]
 use canonical::Canon;
 #[cfg(feature = "canon")]
 use canonical_derive::Canon;
 #[allow(unused_imports)]
 use dusk_bls12_381::BlsScalar;
-use dusk_jubjub::{
-    JubJubExtended, JubJubScalar, GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED,
-};
+use dusk_bytes::{DeserializableSlice, Error as BytesError, Serializable};
+use dusk_jubjub::{JubJubScalar, GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED};
+use dusk_pki::{PublicKey, SecretKey};
 use poseidon252::sponge::hash;
 use rand_core::{CryptoRng, RngCore};
 
 /// Method to create a challenge hash for signature scheme
-pub fn challenge_hash(
-    R: JubJubExtended,
-    R_prime: JubJubExtended,
-    message: BlsScalar,
-) -> JubJubScalar {
+fn challenge_hash(R: PublicKeyPair, message: BlsScalar) -> JubJubScalar {
     let h = hash(&[message]);
-    let R_scalar = R.to_hash_inputs();
-    let R_prime_scalar = R_prime.to_hash_inputs();
+    let R_scalar = (R.0).0.as_ref().to_hash_inputs();
+    let R_prime_scalar = (R.0).1.as_ref().to_hash_inputs();
 
     let c = hash(&[
         R_scalar[0],
@@ -41,43 +35,69 @@ pub fn challenge_hash(
     super::truncate_bls_to_jubjub(c)
 }
 
-#[derive(Default, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug)]
 #[cfg_attr(feature = "canon", derive(Canon))]
-pub struct SecretKey(JubJubScalar);
 
-impl From<JubJubScalar> for SecretKey {
-    fn from(s: JubJubScalar) -> SecretKey {
-        SecretKey(s)
+/// Structure repesenting a pair of [`PublicKey`] generated from a [`SecretKey`]
+pub struct PublicKeyPair(pub(crate) (PublicKey, PublicKey));
+
+impl From<&SecretKey> for PublicKeyPair {
+    fn from(sk: &SecretKey) -> Self {
+        let public_key = PublicKey::from(sk);
+        let public_key_prime =
+            PublicKey::from(GENERATOR_NUMS_EXTENDED * sk.as_ref());
+
+        PublicKeyPair((public_key, public_key_prime))
     }
 }
 
-impl From<&JubJubScalar> for SecretKey {
-    fn from(s: &JubJubScalar) -> SecretKey {
-        SecretKey(*s)
+impl From<SecretKey> for PublicKeyPair {
+    fn from(sk: SecretKey) -> Self {
+        (&sk).into()
     }
 }
 
-impl AsRef<JubJubScalar> for SecretKey {
-    fn as_ref(&self) -> &JubJubScalar {
-        &self.0
+impl Serializable<64> for PublicKeyPair {
+    type Error = BytesError;
+
+    fn to_bytes(&self) -> [u8; Self::SIZE] {
+        let mut buf = [0u8; Self::SIZE];
+        buf[..32].copy_from_slice(&(self.0).0.to_bytes()[..]);
+        buf[32..].copy_from_slice(&(self.0).0.to_bytes()[..]);
+        buf
+    }
+
+    fn from_bytes(bytes: &[u8; Self::SIZE]) -> Result<Self, Self::Error> {
+        Ok(PublicKeyPair((
+            PublicKey::from_slice(&bytes[..32])?,
+            PublicKey::from_slice(&bytes[32..])?,
+        )))
     }
 }
 
-impl SecretKey {
-    /// This will create a new [`SecretKey`] from a scalar
-    /// of the Field JubJubScalar.
-    pub fn new<T>(rand: &mut T) -> SecretKey
-    where
-        T: RngCore + CryptoRng,
-    {
-        let fr = JubJubScalar::random(rand);
+#[derive(Clone, Copy, Debug)]
+#[cfg_attr(feature = "canon", derive(Canon))]
+pub struct Proof {
+    U: JubJubScalar,
+    R: PublicKeyPair,
+}
 
-        SecretKey(fr)
+impl Proof {
+    #[allow(non_snake_case)]
+    pub fn u(&self) -> &JubJubScalar {
+        &self.U
     }
 
+    #[allow(non_snake_case)]
+    pub fn R(&self) -> &PublicKeyPair {
+        &self.R
+    }
+
+    /// An Schnorr signature, produced by signing a message with a
+    /// [`SecretKey`].
     // Signs a chosen message with a given secret key
     // using the dusk variant of the Schnorr signature scheme.
-    pub fn sign<R>(&self, rng: &mut R, message: BlsScalar) -> Signature
+    pub fn new<R>(sk: &SecretKey, rng: &mut R, message: BlsScalar) -> Self
     where
         R: RngCore + CryptoRng,
     {
@@ -89,71 +109,15 @@ impl SecretKey {
         // R_prime = r * G_NUM
         let R = GENERATOR_EXTENDED * r;
         let R_prime = GENERATOR_NUMS_EXTENDED * r;
-
+        let pair =
+            PublicKeyPair((PublicKey::from(R), PublicKey::from(R_prime)));
         // Compute challenge value, c = H(R||R_prime||H(m));
-        let c = challenge_hash(R, R_prime, message);
+        let c = challenge_hash(pair, message);
 
         // Compute scalar signature, U = r - c * sk,
-        let U = r - (c * self.0);
+        let U = r - (c * sk.as_ref());
 
-        Signature { U, R, R_prime }
-    }
-}
-
-#[derive(Debug, Default, Copy, Clone, PartialEq)]
-#[cfg_attr(feature = "canon", derive(Canon))]
-pub struct PublicKeyPair {
-    public_key: JubJubExtended,
-    public_key_prime: JubJubExtended,
-}
-
-impl From<&SecretKey> for PublicKeyPair {
-    fn from(sk: &SecretKey) -> Self {
-        let public_key = GENERATOR_EXTENDED * sk.0;
-        let public_key_prime = GENERATOR_NUMS_EXTENDED * sk.0;
-
-        PublicKeyPair {
-            public_key,
-            public_key_prime,
-        }
-    }
-}
-
-impl PublicKeyPair {
-    pub fn PK(&self) -> &JubJubExtended {
-        &self.public_key
-    }
-
-    pub fn PK_prime(&self) -> &JubJubExtended {
-        &self.public_key_prime
-    }
-}
-
-/// An Schnorr signature, produced by signing a message with a
-/// [`SecretKey`].
-
-#[derive(Clone, Copy, Debug)]
-#[cfg_attr(feature = "canon", derive(Canon))]
-pub struct Signature {
-    U: JubJubScalar,
-    R: JubJubExtended,
-    R_prime: JubJubExtended,
-}
-
-impl Signature {
-    #[allow(non_snake_case)]
-    pub fn u(&self) -> &JubJubScalar {
-        &self.U
-    }
-
-    #[allow(non_snake_case)]
-    pub fn R(&self) -> &JubJubExtended {
-        &self.R
-    }
-
-    #[allow(non_snake_case)]
-    pub fn R_prime(&self) -> &JubJubExtended {
-        &self.R_prime
+        Self { U, R: pair }
     }
 
     /// Function to verify that two given point in a Schnorr signature
@@ -162,21 +126,37 @@ impl Signature {
         &self,
         public_key_pair: &PublicKeyPair,
         message: BlsScalar,
-    ) -> Result<(), Error> {
+    ) -> bool {
         // Compute challenge value, c = H(R||R_prime||H(m));
-        let c = challenge_hash(self.R, self.R_prime, message);
+        let c = challenge_hash(self.R, message);
 
         // Compute verification steps
         // u * G + c * public_key
-        let point_1 =
-            (GENERATOR_EXTENDED * self.U) + (public_key_pair.public_key * c);
+        let point_1 = (GENERATOR_EXTENDED * self.U)
+            + ((public_key_pair.0).0.as_ref() * c);
         // u * G_nums + c * public_key_prime
         let point_2 = (GENERATOR_NUMS_EXTENDED * self.U)
-            + (public_key_pair.public_key_prime * c);
+            + ((public_key_pair.0).1.as_ref() * c);
 
-        match point_1.eq(&self.R) && point_2.eq(&self.R_prime) {
-            true => Ok(()),
-            false => Err(Error::InvalidSignature),
-        }
+        point_1.eq(&(self.R.0).0.as_ref()) && point_2.eq(&(self.R.0).1.as_ref())
+    }
+}
+
+impl Serializable<96> for Proof {
+    type Error = BytesError;
+
+    fn to_bytes(&self) -> [u8; Self::SIZE] {
+        let mut buf = [0u8; Self::SIZE];
+        buf[..32].copy_from_slice(&self.U.to_bytes()[..]);
+        buf[32..].copy_from_slice(&self.R.to_bytes()[..]);
+        buf
+    }
+
+    #[allow(non_snake_case)]
+    fn from_bytes(bytes: &[u8; Self::SIZE]) -> Result<Self, Self::Error> {
+        let U = JubJubScalar::from_slice(&bytes[..32])?;
+        let R = PublicKeyPair::from_slice(&bytes[32..])?;
+
+        Ok(Self { U, R })
     }
 }
