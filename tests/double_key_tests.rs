@@ -5,33 +5,30 @@
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
 use dusk_bls12_381::BlsScalar;
-use schnorr::double_key::{PublicKeyPair, SecretKey};
+use dusk_pki::SecretKey;
+use schnorr::{Proof, PublicKeyPair};
 
 #[test]
-// TestSignVerify
-fn sign_verify() {
-    let sk = SecretKey::new(&mut rand::thread_rng());
+fn proof_verify() {
+    let sk = SecretKey::random(&mut rand::thread_rng());
     let message = BlsScalar::random(&mut rand::thread_rng());
-    let pk_pair = PublicKeyPair::from(&sk);
+    let pk_pair: PublicKeyPair = sk.into();
 
-    let sig = sk.sign(&mut rand::thread_rng(), message);
-    let b = sig.verify(&pk_pair, message);
+    let proof = Proof::new(&sk, &mut rand::thread_rng(), message);
 
-    assert!(b.is_ok());
+    assert!(proof.verify(&pk_pair, message));
 }
 
 #[test]
-// Test to see failure with random Public Key
 fn test_wrong_keys() {
-    let sk = SecretKey::new(&mut rand::thread_rng());
-    let wrong_sk = SecretKey::new(&mut rand::thread_rng());
+    let sk = SecretKey::random(&mut rand::thread_rng());
+    let wrong_sk = SecretKey::random(&mut rand::thread_rng());
     let message = BlsScalar::random(&mut rand::thread_rng());
 
-    let sig = sk.sign(&mut rand::thread_rng(), message);
+    let proof = Proof::new(&sk, &mut rand::thread_rng(), message);
 
     // Derive random public key
-    let pk_pair = PublicKeyPair::from(&wrong_sk);
-    let b = sig.verify(&pk_pair, message);
+    let pk_pair: PublicKeyPair = wrong_sk.into();
 
-    assert!(b.is_err());
+    assert!(!proof.verify(&pk_pair, message));
 }
