@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2021-01-29
+
+### Added
+
+- `PublicKeyPair` attributes R and R_prime exposed as methods
+
+### Changed
+
+- `PublicKeyPair::R` renamed to `PublicKeyPair::public`
+- JubJubScalars renamed from `U` to `u`, as in notation standards
+
 ## [0.3.0] - 2021-01-28
 
 ### Added
