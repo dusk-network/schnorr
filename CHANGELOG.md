@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `PublicKeyPair` attributes R and R_prime exposed as methods
-- `Proof::keys` added to fetch `PublicKeyPair::public`
+- `Proof::keys` added to fetch `PublicKeyPair`
 
 ### Changed
 
