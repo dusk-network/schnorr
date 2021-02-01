@@ -9,7 +9,7 @@ use dusk_plonk::constraint_system::ecc::scalar_mul::variable_base::variable_base
 use dusk_plonk::constraint_system::ecc::Point;
 use dusk_plonk::jubjub::{GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED};
 use dusk_plonk::prelude::*;
-use poseidon252::sponge::sponge::sponge_hash_gadget;
+use poseidon252::sponge;
 
 /// Given `R`, assert the signature `u` is correct for `PK` over `message`.
 ///
@@ -22,8 +22,8 @@ pub fn single_key_verify(
     PK: Point,
     message: Variable,
 ) {
-    let h = sponge_hash_gadget(composer, &[message]);
-    let c_hash = sponge_hash_gadget(composer, &[*R.x(), *R.y(), h]);
+    let h = sponge::gadget(composer, &[message]);
+    let c_hash = sponge::gadget(composer, &[*R.x(), *R.y(), h]);
 
     let m = composer.add_witness_to_circuit_description(BlsScalar::zero());
     let c = composer.xor_gate(c_hash, m, 250);
@@ -50,8 +50,8 @@ pub fn double_key_verify(
     PK_prime: Point,
     message: Variable,
 ) {
-    let h = sponge_hash_gadget(composer, &[message]);
-    let c_hash = sponge_hash_gadget(
+    let h = sponge::gadget(composer, &[message]);
+    let c_hash = sponge::gadget(
         composer,
         &[*R.x(), *R.y(), *R_prime.x(), *R_prime.y(), h],
     );
