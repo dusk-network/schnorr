@@ -91,7 +91,7 @@ impl Serializable<64> for PublicKeyPair {
 #[cfg_attr(feature = "canon", derive(Canon))]
 pub struct Proof {
     u: JubJubScalar,
-    public: PublicKeyPair,
+    keys: PublicKeyPair,
 }
 
 impl Proof {
@@ -99,8 +99,8 @@ impl Proof {
         &self.u
     }
 
-    pub fn public(&self) -> &PublicKeyPair {
-        &self.public
+    pub fn keys(&self) -> &PublicKeyPair {
+        &self.keys
     }
 
     /// An Schnorr signature, produced by signing a message with a
@@ -119,15 +119,15 @@ impl Proof {
         // R_prime = r * G_NUM
         let R = GENERATOR_EXTENDED * r;
         let R_prime = GENERATOR_NUMS_EXTENDED * r;
-        let public =
+        let keys =
             PublicKeyPair((PublicKey::from(R), PublicKey::from(R_prime)));
         // Compute challenge value, c = H(R||R_prime||H(m));
-        let c = challenge_hash(public, message);
+        let c = challenge_hash(keys, message);
 
         // Compute scalar signature, U = r - c * sk,
         let u = r - (c * sk.as_ref());
 
-        Self { u, public }
+        Self { u, keys }
     }
 
     /// Function to verify that two given point in a Schnorr signature
@@ -138,7 +138,7 @@ impl Proof {
         message: BlsScalar,
     ) -> bool {
         // Compute challenge value, c = H(R||R_prime||H(m));
-        let c = challenge_hash(self.public, message);
+        let c = challenge_hash(self.keys, message);
 
         // Compute verification steps
         // u * G + c * public_key
@@ -148,8 +148,8 @@ impl Proof {
         let point_2 = (GENERATOR_NUMS_EXTENDED * self.u)
             + ((public_key_pair.0).1.as_ref() * c);
 
-        point_1.eq(self.public.R().as_ref())
-            && point_2.eq(self.public.R_prime().as_ref())
+        point_1.eq(self.keys.R().as_ref())
+            && point_2.eq(self.keys.R_prime().as_ref())
     }
 }
 
@@ -159,14 +159,14 @@ impl Serializable<96> for Proof {
     fn to_bytes(&self) -> [u8; Self::SIZE] {
         let mut buf = [0u8; Self::SIZE];
         buf[..32].copy_from_slice(&self.u.to_bytes()[..]);
-        buf[32..].copy_from_slice(&self.public.to_bytes()[..]);
+        buf[32..].copy_from_slice(&self.keys.to_bytes()[..]);
         buf
     }
 
     fn from_bytes(bytes: &[u8; Self::SIZE]) -> Result<Self, Self::Error> {
         let u = JubJubScalar::from_slice(&bytes[..32])?;
-        let public = PublicKeyPair::from_slice(&bytes[32..])?;
+        let keys = PublicKeyPair::from_slice(&bytes[32..])?;
 
-        Ok(Self { u, public })
+        Ok(Self { u, keys })
     }
 }
