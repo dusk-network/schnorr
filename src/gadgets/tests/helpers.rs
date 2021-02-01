@@ -102,11 +102,11 @@ impl Circuit<'_> for DoubleKeyCircuit {
     fn gadget(&mut self, composer: &mut StandardComposer) -> Result<()> {
         let R = Point::from_private_affine(
             composer,
-            (self.proof.R().0).0.as_ref().into(),
+            self.proof.keys().R().as_ref().into(),
         );
         let R_prime = Point::from_private_affine(
             composer,
-            (self.proof.R().0).1.as_ref().into(),
+            self.proof.keys().R_prime().as_ref().into(),
         );
         let u = composer.add_input(self.proof.u().clone().into());
         let PK = Point::from_private_affine(
