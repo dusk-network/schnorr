@@ -34,14 +34,13 @@ fn challenge_hash(R: JubJubExtended, message: BlsScalar) -> JubJubScalar {
 #[derive(PartialEq, Clone, Copy, Debug)]
 #[cfg_attr(feature = "canon", derive(Canon))]
 pub struct Signature {
-    U: JubJubScalar,
+    u: JubJubScalar,
     R: JubJubExtended,
 }
 
 impl Signature {
-    #[allow(non_snake_case)]
     pub fn u(&self) -> &JubJubScalar {
-        &self.U
+        &self.u
     }
 
     #[allow(non_snake_case)]
@@ -49,8 +48,8 @@ impl Signature {
         &self.R
     }
 
-    // Signs a chosen message with a given secret key
-    // using the dusk variant of the Schnorr signature scheme.
+    /// Signs a chosen message with a given secret key
+    /// using the dusk variant of the Schnorr signature scheme.
     #[allow(non_snake_case)]
     pub fn new<R>(sk: &SecretKey, rng: &mut R, message: BlsScalar) -> Self
     where
@@ -67,9 +66,9 @@ impl Signature {
         let c = challenge_hash(R, message);
 
         // Compute scalar signature, U = r - c * sk,
-        let U = r - (c * sk.as_ref());
+        let u = r - (c * sk.as_ref());
 
-        Signature { U, R }
+        Signature { u, R }
     }
 
     /// Function to verify that a given point in a Schnorr signature
@@ -80,7 +79,7 @@ impl Signature {
 
         // Compute verification steps
         // u * G + c * public_key
-        let point_1 = (GENERATOR_EXTENDED * self.U) + (public_key.as_ref() * c);
+        let point_1 = (GENERATOR_EXTENDED * self.u) + (public_key.as_ref() * c);
 
         point_1.eq(&self.R)
     }
@@ -91,16 +90,16 @@ impl Serializable<64> for Signature {
 
     fn to_bytes(&self) -> [u8; Self::SIZE] {
         let mut buf = [0u8; Self::SIZE];
-        buf[..32].copy_from_slice(&self.U.to_bytes()[..]);
+        buf[..32].copy_from_slice(&self.u.to_bytes()[..]);
         buf[32..].copy_from_slice(&JubJubAffine::from(self.R).to_bytes()[..]);
         buf
     }
 
     #[allow(non_snake_case)]
     fn from_bytes(bytes: &[u8; Self::SIZE]) -> Result<Self, Self::Error> {
-        let U = JubJubScalar::from_slice(&bytes[..32])?;
+        let u = JubJubScalar::from_slice(&bytes[..32])?;
         let R = JubJubExtended::from(JubJubAffine::from_slice(&bytes[32..])?);
 
-        Ok(Self { U, R })
+        Ok(Self { u, R })
     }
 }

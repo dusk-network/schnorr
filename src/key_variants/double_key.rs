@@ -41,6 +41,18 @@ fn challenge_hash(R: PublicKeyPair, message: BlsScalar) -> JubJubScalar {
 /// Structure repesenting a pair of [`PublicKey`] generated from a [`SecretKey`]
 pub struct PublicKeyPair(pub(crate) (PublicKey, PublicKey));
 
+impl PublicKeyPair {
+    /// R ecc generator point
+    pub fn R(&self) -> &PublicKey {
+        &self.0 .0
+    }
+
+    /// R ecc generator nums point
+    pub fn R_prime(&self) -> &PublicKey {
+        &self.0 .1
+    }
+}
+
 impl From<&SecretKey> for PublicKeyPair {
     fn from(sk: &SecretKey) -> Self {
         let public_key = PublicKey::from(sk);
@@ -78,19 +90,17 @@ impl Serializable<64> for PublicKeyPair {
 #[derive(Clone, Copy, Debug)]
 #[cfg_attr(feature = "canon", derive(Canon))]
 pub struct Proof {
-    U: JubJubScalar,
-    R: PublicKeyPair,
+    u: JubJubScalar,
+    keys: PublicKeyPair,
 }
 
 impl Proof {
-    #[allow(non_snake_case)]
     pub fn u(&self) -> &JubJubScalar {
-        &self.U
+        &self.u
     }
 
-    #[allow(non_snake_case)]
-    pub fn R(&self) -> &PublicKeyPair {
-        &self.R
+    pub fn keys(&self) -> &PublicKeyPair {
+        &self.keys
     }
 
     /// An Schnorr signature, produced by signing a message with a
@@ -109,15 +119,15 @@ impl Proof {
         // R_prime = r * G_NUM
         let R = GENERATOR_EXTENDED * r;
         let R_prime = GENERATOR_NUMS_EXTENDED * r;
-        let pair =
+        let keys =
             PublicKeyPair((PublicKey::from(R), PublicKey::from(R_prime)));
         // Compute challenge value, c = H(R||R_prime||H(m));
-        let c = challenge_hash(pair, message);
+        let c = challenge_hash(keys, message);
 
         // Compute scalar signature, U = r - c * sk,
-        let U = r - (c * sk.as_ref());
+        let u = r - (c * sk.as_ref());
 
-        Self { U, R: pair }
+        Self { u, keys }
     }
 
     /// Function to verify that two given point in a Schnorr signature
@@ -128,17 +138,18 @@ impl Proof {
         message: BlsScalar,
     ) -> bool {
         // Compute challenge value, c = H(R||R_prime||H(m));
-        let c = challenge_hash(self.R, message);
+        let c = challenge_hash(self.keys, message);
 
         // Compute verification steps
         // u * G + c * public_key
-        let point_1 = (GENERATOR_EXTENDED * self.U)
+        let point_1 = (GENERATOR_EXTENDED * self.u)
             + ((public_key_pair.0).0.as_ref() * c);
         // u * G_nums + c * public_key_prime
-        let point_2 = (GENERATOR_NUMS_EXTENDED * self.U)
+        let point_2 = (GENERATOR_NUMS_EXTENDED * self.u)
             + ((public_key_pair.0).1.as_ref() * c);
 
-        point_1.eq(&(self.R.0).0.as_ref()) && point_2.eq(&(self.R.0).1.as_ref())
+        point_1.eq(self.keys.R().as_ref())
+            && point_2.eq(self.keys.R_prime().as_ref())
     }
 }
 
@@ -147,16 +158,15 @@ impl Serializable<96> for Proof {
 
     fn to_bytes(&self) -> [u8; Self::SIZE] {
         let mut buf = [0u8; Self::SIZE];
-        buf[..32].copy_from_slice(&self.U.to_bytes()[..]);
-        buf[32..].copy_from_slice(&self.R.to_bytes()[..]);
+        buf[..32].copy_from_slice(&self.u.to_bytes()[..]);
+        buf[32..].copy_from_slice(&self.keys.to_bytes()[..]);
         buf
     }
 
-    #[allow(non_snake_case)]
     fn from_bytes(bytes: &[u8; Self::SIZE]) -> Result<Self, Self::Error> {
-        let U = JubJubScalar::from_slice(&bytes[..32])?;
-        let R = PublicKeyPair::from_slice(&bytes[32..])?;
+        let u = JubJubScalar::from_slice(&bytes[..32])?;
+        let keys = PublicKeyPair::from_slice(&bytes[32..])?;
 
-        Ok(Self { U, R })
+        Ok(Self { u, keys })
     }
 }
