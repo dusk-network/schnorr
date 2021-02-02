@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - JubJubScalars renamed from `U` to `u`, as in notation standards
+- Bump `poseidon252` to `v0.17.0`
+- Bump `dusk-pki` to `v0.5.1`
 
 ## [0.3.0] - 2021-01-28
 
