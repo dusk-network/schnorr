@@ -9,7 +9,7 @@ use dusk_plonk::constraint_system::ecc::scalar_mul::variable_base::variable_base
 use dusk_plonk::constraint_system::ecc::Point;
 use dusk_plonk::jubjub::{GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED};
 use dusk_plonk::prelude::*;
-use poseidon252::sponge;
+use dusk_poseidon::sponge;
 
 /// Given `R`, assert the signature `u` is correct for `PK` over `message`.
 ///
