@@ -15,7 +15,7 @@ use dusk_bls12_381::BlsScalar;
 use dusk_bytes::{DeserializableSlice, Error as BytesError, Serializable};
 use dusk_jubjub::{JubJubScalar, GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED};
 use dusk_pki::{PublicKey, SecretKey};
-use poseidon252::sponge::hash;
+use dusk_poseidon::sponge::hash;
 use rand_core::{CryptoRng, RngCore};
 
 /// Method to create a challenge hash for signature scheme

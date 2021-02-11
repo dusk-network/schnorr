@@ -14,7 +14,7 @@ use dusk_jubjub::{
     JubJubAffine, JubJubExtended, JubJubScalar, GENERATOR_EXTENDED,
 };
 use dusk_pki::{PublicKey, SecretKey};
-use poseidon252::sponge::hash;
+use dusk_poseidon::sponge::hash;
 use rand_core::{CryptoRng, RngCore};
 
 #[allow(non_snake_case)]
