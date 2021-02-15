@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.2] - 2021-02-15
+
+### Changed
+
+- Update `dusk-pki` to pull from crates.io
+
 ## [0.5.1] - 2021-02-11
 
 ### Changed
