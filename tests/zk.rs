@@ -4,8 +4,6 @@
 //
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
-#![feature(once_cell)]
-
 #[cfg(feature = "std")]
 mod zk {
     use anyhow::Result;
@@ -15,10 +13,65 @@ mod zk {
     use dusk_plonk::constraint_system::ecc::Point;
     use dusk_plonk::prelude::Error as PlonkError;
     use dusk_plonk::prelude::*;
+    use lazy_static;
     use rand::rngs::StdRng;
     use rand::SeedableRng;
     use schnorr::{gadgets, Proof, PublicKeyPair, Signature};
-    use std::lazy::SyncLazy;
+
+    // Static definitions
+    lazy_static::lazy_static! {
+
+        pub static ref PP: PublicParameters = {
+            let mut rng = StdRng::seed_from_u64(2321u64);
+
+            PublicParameters::setup(1 << 13, &mut rng)
+                .expect("Failed to generate PP")
+        };
+
+        pub static ref SINGLE: (
+            ProverKey,
+            VerifierKey,
+            Vec<usize>,
+            &'static [u8],
+        ) ={
+            let mut rng = StdRng::seed_from_u64(2321u64);
+
+            let (sk, pk, message, signature) = gen_single(&mut rng);
+            let mut circuit = SingleKeyCircuit::new(signature, sk, pk, message);
+
+            let (pk, vk, pi_pos) = circuit.compile(&*PP).unwrap();
+            let label = b"single-key-label";
+
+            (pk, vk, pi_pos, label)
+        };
+
+        pub static ref DOUBLE: (
+            ProverKey,
+            VerifierKey,
+            Vec<usize>,
+            &'static [u8],
+        ) = {
+            let mut rng = StdRng::seed_from_u64(2321u64);
+
+            let (sk, pk, message, signature) = gen_double(&mut rng);
+            let mut circuit = DoubleKeyCircuit::new(signature, sk, pk, message);
+
+            let (pk, vk, pi_pos) = circuit.compile(&*PP).unwrap();
+            let label = b"double-key-label";
+
+            (pk, vk, pi_pos, label)
+        };
+
+        pub static ref SINGLE_PK: ProverKey = SINGLE.0.clone();
+        pub static ref SINGLE_VK: VerifierKey = SINGLE.1.clone();
+        pub static ref SINGLE_PI: Vec<usize> = SINGLE.2.clone();
+        pub static ref SINGLE_LB: &'static [u8] = b"double-key-label";
+
+        pub static ref DOUBLE_PK: ProverKey = DOUBLE.0.clone();
+        pub static ref DOUBLE_VK: VerifierKey = DOUBLE.1.clone();
+        pub static ref DOUBLE_PI: Vec<usize> = DOUBLE.2.clone();
+        pub static ref DOUBLE_LB: &'static [u8] = b"double-key-label";
+    }
 
     #[test]
     fn single_key_verify() {
@@ -29,7 +82,7 @@ mod zk {
             SingleKeyCircuit::new(signature, sk, pk, message);
 
         let proof = proof_circuit
-            .gen_proof(&*PP, &*SINGLE_PK, SINGLE_LB)
+            .gen_proof(&*PP, &*SINGLE_PK, &SINGLE_LB)
             .unwrap();
         let pk: JubJubAffine = pk.as_ref().into();
         let pi: Vec<PublicInputValue> = vec![pk.into()];
@@ -40,7 +93,7 @@ mod zk {
             &proof,
             &pi,
             &*SINGLE_PI,
-            SINGLE_LB,
+            &SINGLE_LB,
         )
         .expect("Failed to verify proof");
     }
@@ -54,7 +107,7 @@ mod zk {
             SingleKeyCircuit::new(signature, sk, pk, message);
 
         let proof = proof_circuit
-            .gen_proof(&*PP, &*SINGLE_PK, SINGLE_LB)
+            .gen_proof(&*PP, &*SINGLE_PK, &SINGLE_LB)
             .unwrap();
 
         let (_, pk, _, _) = gen_single(&mut rng);
@@ -67,7 +120,7 @@ mod zk {
             &proof,
             &pi,
             &*SINGLE_PI,
-            SINGLE_LB,
+            &SINGLE_LB,
         );
         assert!(result.is_err());
     }
@@ -81,7 +134,7 @@ mod zk {
             DoubleKeyCircuit::new(signature, sk, pk, message);
 
         let proof = proof_circuit
-            .gen_proof(&*PP, &*DOUBLE_PK, DOUBLE_LB)
+            .gen_proof(&*PP, &*DOUBLE_PK, &DOUBLE_LB)
             .unwrap();
 
         let pk_prime: JubJubAffine = pk.R_prime().as_ref().into();
@@ -95,7 +148,7 @@ mod zk {
             &proof,
             &pi,
             &*DOUBLE_PI,
-            DOUBLE_LB,
+            &DOUBLE_LB,
         )
         .expect("Failed to verify proof");
     }
@@ -109,7 +162,7 @@ mod zk {
             DoubleKeyCircuit::new(signature, sk, pk, message);
 
         let proof = proof_circuit
-            .gen_proof(&*PP, &*DOUBLE_PK, DOUBLE_LB)
+            .gen_proof(&*PP, &*DOUBLE_PK, &DOUBLE_LB)
             .unwrap();
 
         let pk_prime: JubJubAffine = pk.R_prime().as_ref().into();
@@ -124,7 +177,7 @@ mod zk {
             &proof,
             &pi,
             &*DOUBLE_PI,
-            DOUBLE_LB,
+            &DOUBLE_LB,
         );
         assert!(result.is_err());
     }
@@ -138,7 +191,7 @@ mod zk {
             DoubleKeyCircuit::new(signature, sk, pk, message);
 
         let proof = proof_circuit
-            .gen_proof(&*PP, &*DOUBLE_PK, DOUBLE_LB)
+            .gen_proof(&*PP, &*DOUBLE_PK, &DOUBLE_LB)
             .unwrap();
 
         let pk_p: JubJubAffine = pk.R().as_ref().into();
@@ -154,69 +207,10 @@ mod zk {
             &proof,
             &pi,
             &*DOUBLE_PI,
-            DOUBLE_LB,
+            &DOUBLE_LB,
         );
         assert!(result.is_err());
     }
-
-    /// Static definitions
-
-    pub static PP: SyncLazy<PublicParameters> = SyncLazy::new(|| {
-        let mut rng = StdRng::seed_from_u64(2321u64);
-
-        PublicParameters::setup(1 << 13, &mut rng)
-            .expect("Failed to generate PP")
-    });
-
-    static SINGLE: SyncLazy<(
-        ProverKey,
-        VerifierKey,
-        Vec<usize>,
-        &'static [u8],
-    )> = SyncLazy::new(|| {
-        let mut rng = StdRng::seed_from_u64(2321u64);
-
-        let (sk, pk, message, signature) = gen_single(&mut rng);
-        let mut circuit = SingleKeyCircuit::new(signature, sk, pk, message);
-
-        let (pk, vk, pi_pos) = circuit.compile(&*PP).unwrap();
-        let label = b"single-key-label";
-
-        (pk, vk, pi_pos, label)
-    });
-
-    static DOUBLE: SyncLazy<(
-        ProverKey,
-        VerifierKey,
-        Vec<usize>,
-        &'static [u8],
-    )> = SyncLazy::new(|| {
-        let mut rng = StdRng::seed_from_u64(2321u64);
-
-        let (sk, pk, message, signature) = gen_double(&mut rng);
-        let mut circuit = DoubleKeyCircuit::new(signature, sk, pk, message);
-
-        let (pk, vk, pi_pos) = circuit.compile(&*PP).unwrap();
-        let label = b"double-key-label";
-
-        (pk, vk, pi_pos, label)
-    });
-
-    pub static SINGLE_PK: SyncLazy<ProverKey> =
-        SyncLazy::new(|| SINGLE.0.clone());
-    pub static SINGLE_VK: SyncLazy<VerifierKey> =
-        SyncLazy::new(|| SINGLE.1.clone());
-    pub static SINGLE_PI: SyncLazy<Vec<usize>> =
-        SyncLazy::new(|| SINGLE.2.clone());
-    pub static SINGLE_LB: &'static [u8] = b"double-key-label";
-
-    pub static DOUBLE_PK: SyncLazy<ProverKey> =
-        SyncLazy::new(|| DOUBLE.0.clone());
-    pub static DOUBLE_VK: SyncLazy<VerifierKey> =
-        SyncLazy::new(|| DOUBLE.1.clone());
-    pub static DOUBLE_PI: SyncLazy<Vec<usize>> =
-        SyncLazy::new(|| DOUBLE.2.clone());
-    pub static DOUBLE_LB: &'static [u8] = b"double-key-label";
 
     #[derive(Debug, Clone)]
     pub struct SingleKeyCircuit {
