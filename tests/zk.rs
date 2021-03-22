@@ -10,6 +10,7 @@ mod zk {
     use dusk_jubjub::JubJubAffine;
     use dusk_pki::{PublicKey, SecretKey};
     use dusk_plonk::circuit;
+    use dusk_plonk::circuit::VerifierData;
     use dusk_plonk::constraint_system::ecc::Point;
     use dusk_plonk::prelude::Error as PlonkError;
     use dusk_plonk::prelude::*;
@@ -30,46 +31,34 @@ mod zk {
 
         pub static ref SINGLE: (
             ProverKey,
-            VerifierKey,
-            Vec<usize>,
-            &'static [u8],
+            VerifierData,
         ) ={
             let mut rng = StdRng::seed_from_u64(2321u64);
 
             let (sk, pk, message, signature) = gen_single(&mut rng);
             let mut circuit = SingleKeyCircuit::new(signature, sk, pk, message);
 
-            let (pk, vk, pi_pos) = circuit.compile(&*PP).unwrap();
-            let label = b"single-key-label";
-
-            (pk, vk, pi_pos, label)
+            circuit.compile(&*PP).unwrap()
         };
 
         pub static ref DOUBLE: (
             ProverKey,
-            VerifierKey,
-            Vec<usize>,
-            &'static [u8],
+            VerifierData,
         ) = {
             let mut rng = StdRng::seed_from_u64(2321u64);
 
             let (sk, pk, message, signature) = gen_double(&mut rng);
             let mut circuit = DoubleKeyCircuit::new(signature, sk, pk, message);
 
-            let (pk, vk, pi_pos) = circuit.compile(&*PP).unwrap();
-            let label = b"double-key-label";
-
-            (pk, vk, pi_pos, label)
+            circuit.compile(&*PP).unwrap()
         };
 
         pub static ref SINGLE_PK: ProverKey = SINGLE.0.clone();
-        pub static ref SINGLE_VK: VerifierKey = SINGLE.1.clone();
-        pub static ref SINGLE_PI: Vec<usize> = SINGLE.2.clone();
-        pub static ref SINGLE_LB: &'static [u8] = b"double-key-label";
+        pub static ref SINGLE_VD: VerifierData = SINGLE.1.clone();
+        pub static ref SINGLE_LB: &'static [u8] = b"single-key-label";
 
         pub static ref DOUBLE_PK: ProverKey = DOUBLE.0.clone();
-        pub static ref DOUBLE_VK: VerifierKey = DOUBLE.1.clone();
-        pub static ref DOUBLE_PI: Vec<usize> = DOUBLE.2.clone();
+        pub static ref DOUBLE_VD: VerifierData = DOUBLE.1.clone();
         pub static ref DOUBLE_LB: &'static [u8] = b"double-key-label";
     }
 
@@ -89,10 +78,10 @@ mod zk {
 
         circuit::verify_proof(
             &*PP,
-            &*SINGLE_VK,
+            SINGLE_VD.key(),
             &proof,
             &pi,
-            &*SINGLE_PI,
+            SINGLE_VD.pi_pos(),
             &SINGLE_LB,
         )
         .expect("Failed to verify proof");
@@ -116,10 +105,10 @@ mod zk {
 
         let result = circuit::verify_proof(
             &*PP,
-            &*SINGLE_VK,
+            SINGLE_VD.key(),
             &proof,
             &pi,
-            &*SINGLE_PI,
+            SINGLE_VD.pi_pos(),
             &SINGLE_LB,
         );
         assert!(result.is_err());
@@ -144,10 +133,10 @@ mod zk {
 
         circuit::verify_proof(
             &*PP,
-            &*DOUBLE_VK,
+            DOUBLE_VD.key(),
             &proof,
             &pi,
-            &*DOUBLE_PI,
+            DOUBLE_VD.pi_pos(),
             &DOUBLE_LB,
         )
         .expect("Failed to verify proof");
@@ -173,10 +162,10 @@ mod zk {
 
         let result = circuit::verify_proof(
             &*PP,
-            &*DOUBLE_VK,
+            DOUBLE_VD.key(),
             &proof,
             &pi,
-            &*DOUBLE_PI,
+            DOUBLE_VD.pi_pos(),
             &DOUBLE_LB,
         );
         assert!(result.is_err());
@@ -203,10 +192,10 @@ mod zk {
 
         let result = circuit::verify_proof(
             &*PP,
-            &*DOUBLE_VK,
+            DOUBLE_VD.key(),
             &proof,
             &pi,
-            &*DOUBLE_PI,
+            DOUBLE_VD.pi_pos(),
             &DOUBLE_LB,
         );
         assert!(result.is_err());
