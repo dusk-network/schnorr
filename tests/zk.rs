@@ -11,8 +11,7 @@ mod zk {
     use dusk_pki::{PublicKey, SecretKey};
     use dusk_plonk::circuit;
     use dusk_plonk::circuit::VerifierData;
-    use dusk_plonk::constraint_system::ecc::Point;
-    use dusk_plonk::prelude::Error as PlonkError;
+    use dusk_plonk::error::Error as PlonkError;
     use dusk_plonk::prelude::*;
     use lazy_static;
     use rand::rngs::StdRng;
@@ -233,11 +232,9 @@ mod zk {
             &mut self,
             composer: &mut StandardComposer,
         ) -> Result<(), PlonkError> {
-            let R =
-                Point::from_private_affine(composer, self.signature.R().into());
+            let R = composer.add_affine(self.signature.R().into());
             let u = composer.add_input(self.signature.u().clone().into());
-            let PK =
-                Point::from_private_affine(composer, self.pk.as_ref().into());
+            let PK = composer.add_affine(self.pk.as_ref().into());
             let message = composer.add_input(self.message);
 
             gadgets::single_key_verify(composer, R, u, PK, message);
@@ -285,23 +282,13 @@ mod zk {
             &mut self,
             composer: &mut StandardComposer,
         ) -> Result<(), PlonkError> {
-            let R = Point::from_private_affine(
-                composer,
-                self.proof.keys().R().as_ref().into(),
-            );
-            let R_prime = Point::from_private_affine(
-                composer,
-                self.proof.keys().R_prime().as_ref().into(),
-            );
+            let R = composer.add_affine(self.proof.keys().R().as_ref().into());
+            let R_prime = composer
+                .add_affine(self.proof.keys().R_prime().as_ref().into());
             let u = composer.add_input(self.proof.u().clone().into());
-            let PK = Point::from_private_affine(
-                composer,
-                self.pkp.R().as_ref().into(),
-            );
-            let PK_prime = Point::from_private_affine(
-                composer,
-                self.pkp.R_prime().as_ref().into(),
-            );
+            let PK = composer.add_affine(self.pkp.R().as_ref().into());
+            let PK_prime =
+                composer.add_affine(self.pkp.R_prime().as_ref().into());
             let message = composer.add_input(self.message);
 
             gadgets::double_key_verify(
