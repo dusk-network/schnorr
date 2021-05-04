@@ -4,8 +4,6 @@
 //
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
-use dusk_plonk::constraint_system::ecc::scalar_mul::fixed_base;
-use dusk_plonk::constraint_system::ecc::scalar_mul::variable_base::variable_base_scalar_mul;
 use dusk_plonk::constraint_system::ecc::Point;
 use dusk_plonk::jubjub::{GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED};
 use dusk_plonk::prelude::*;
@@ -28,9 +26,9 @@ pub fn single_key_verify(
     let m = composer.add_witness_to_circuit_description(BlsScalar::zero());
     let c = composer.xor_gate(c_hash, m, 250);
 
-    let p1_l = fixed_base::scalar_mul(composer, u, GENERATOR_EXTENDED);
-    let p1_r = variable_base_scalar_mul(composer, c, PK);
-    let p1 = p1_l.point().add(composer, *p1_r.point());
+    let p1_l = composer.fixed_base_scalar_mul(u, GENERATOR_EXTENDED);
+    let p1_r = composer.variable_base_scalar_mul(c, PK);
+    let p1 = composer.point_addition_gate(p1_l, p1_r);
 
     composer.assert_equal_point(p1, R);
 }
@@ -59,13 +57,13 @@ pub fn double_key_verify(
     let m = composer.add_witness_to_circuit_description(BlsScalar::zero());
     let c = composer.xor_gate(c_hash, m, 250);
 
-    let p1_l = fixed_base::scalar_mul(composer, u, GENERATOR_EXTENDED);
-    let p1_r = variable_base_scalar_mul(composer, c, PK);
-    let p1 = p1_l.point().add(composer, *p1_r.point());
+    let p1_l = composer.fixed_base_scalar_mul(u, GENERATOR_EXTENDED);
+    let p1_r = composer.variable_base_scalar_mul(c, PK);
+    let p1 = composer.point_addition_gate(p1_l, p1_r);
 
-    let p2_l = fixed_base::scalar_mul(composer, u, GENERATOR_NUMS_EXTENDED);
-    let p2_r = variable_base_scalar_mul(composer, c, PK_prime);
-    let p2 = p2_l.point().add(composer, *p2_r.point());
+    let p2_l = composer.fixed_base_scalar_mul(u, GENERATOR_NUMS_EXTENDED);
+    let p2_r = composer.variable_base_scalar_mul(c, PK_prime);
+    let p2 = composer.point_addition_gate(p2_l, p2_r);
 
     composer.assert_equal_point(p1, R);
     composer.assert_equal_point(p2, R_prime);

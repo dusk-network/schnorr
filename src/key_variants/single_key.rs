@@ -5,8 +5,6 @@
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
 #[cfg(feature = "canon")]
-use canonical::Canon;
-#[cfg(feature = "canon")]
 use canonical_derive::Canon;
 use dusk_bls12_381::BlsScalar;
 use dusk_bytes::{DeserializableSlice, Error as BytesError, Serializable};
