@@ -6,12 +6,12 @@
 
 #[cfg(feature = "canon")]
 use canonical_derive::Canon;
-use dusk_bls12_381::BlsScalar;
 use dusk_bytes::{DeserializableSlice, Error as BytesError, Serializable};
-use dusk_jubjub::{
+use dusk_pki::{PublicKey, SecretKey};
+use dusk_plonk::bls12_381::BlsScalar;
+use dusk_plonk::jubjub::{
     JubJubAffine, JubJubExtended, JubJubScalar, GENERATOR_EXTENDED,
 };
-use dusk_pki::{PublicKey, SecretKey};
 use dusk_poseidon::sponge::hash;
 use rand_core::{CryptoRng, RngCore};
 
