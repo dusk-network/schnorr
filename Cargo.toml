@@ -3,9 +3,20 @@ name = "schnorr"
 version = "0.6.0"
 authors = [
   "Luke Pearson <luke@dusk.network>", "zer0 <matteo@dusk.network>",
-  "Victor Lopez <victor@dusk.network>"
+  "Victor Lopez <victor@dusk.network>", "CPerezz <carlos@dusk.network>"
 ]
 edition = "2018"
+readme = "README.md"
+repository = "https://github.com/dusk-network/schnorr"
+keywords = ["cryptography", "schnorr", "zk-snarks", "zero-knowledge", "signatures"]
+categories =["algorithms", "cryptography", "mathematics"]
+description = "A pure-Rust implementation of Schnorr signatures with a PLONK circuit module additionally"
+exclude = [
+    ".gitignore",
+    "Cargo.lock",
+    ".github/"
+]
+license = "MPL-2.0"
 
 [dependencies]
 rand_core = "0.6"
