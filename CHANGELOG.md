@@ -17,6 +17,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove `dusk-bls12_381` and import it from `dusk-plonk` [#41](https://github.com/dusk-network/schnorr/issues/41)
 - Remove `dusk-jubjub` and import it from `dusk-plonk` [#41](https://github.com/dusk-network/schnorr/issues/41)
 
+### Removed
+- Remove `dusk-jubjub` from dependencies [#50](https://github.com/dusk-network/schnorr/issues/50)
+- Remove `dusk-bls12_381` from dependencies [#50](https://github.com/dusk-network/schnorr/issues/50)
+- Remove `anyhow` from dependencies [#50](https://github.com/dusk-network/schnorr/issues/50)
+- Change default crate featureset to be `alloc`. [#50](https://github.com/dusk-network/schnorr/issues/50)
+  
+
 ## [0.6.0] - 2021-04-06
 
 ### Changed
