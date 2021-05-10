@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update `dusk-plonk` from `0.6` to `0.8` [#41](https://github.com/dusk-network/schnorr/issues/41)
 - Update `dusk-poseidon` from `0.18` to `0.21.0-rc` [#41](https://github.com/dusk-network/schnorr/issues/41)
 - Update `dusk-pki` from `0.6` to `0.7` [#41](https://github.com/dusk-network/schnorr/issues/41)
-
+- Change crate name from `schnorr` to `dusk-schnorr` [#41](https://github.com/dusk-network/schnorr/issues/41)
 ### Removed
 - Remove `dusk-bls12_381` and import it from `dusk-plonk` [#41](https://github.com/dusk-network/schnorr/issues/41)
 - Remove `dusk-jubjub` and import it from `dusk-plonk` [#41](https://github.com/dusk-network/schnorr/issues/41)

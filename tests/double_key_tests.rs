@@ -6,7 +6,7 @@
 
 use dusk_pki::SecretKey;
 use dusk_plonk::bls12_381::BlsScalar;
-use schnorr::{Proof, PublicKeyPair};
+use dusk_schnorr::{Proof, PublicKeyPair};
 
 #[test]
 fn proof_verify() {

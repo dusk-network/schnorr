@@ -11,7 +11,7 @@ mod zk {
     use lazy_static;
     use rand::rngs::StdRng;
     use rand::SeedableRng;
-    use schnorr::{gadgets, Proof, PublicKeyPair, Signature};
+    use dusk_schnorr::{gadgets, Proof, PublicKeyPair, Signature};
 
     // Static definitions
     lazy_static::lazy_static! {
