@@ -4,8 +4,8 @@
 //
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
-use dusk_bls12_381::BlsScalar;
-use dusk_jubjub::JubJubScalar;
+use dusk_plonk::bls12_381::BlsScalar;
+use dusk_plonk::jubjub::JubJubScalar;
 
 pub mod double_key;
 pub mod single_key;

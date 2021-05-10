@@ -4,13 +4,8 @@
 //
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
-#[cfg(feature = "std")]
 mod zk {
-    use anyhow::Result;
-    use dusk_jubjub::JubJubAffine;
     use dusk_pki::{PublicKey, SecretKey};
-    use dusk_plonk::circuit;
-    use dusk_plonk::circuit::VerifierData;
     use dusk_plonk::error::Error as PlonkError;
     use dusk_plonk::prelude::*;
     use lazy_static;
