@@ -25,7 +25,7 @@ default = ["alloc"]
 alloc = []
 std = [
   "alloc",
-  "dusk-poseidon/default",
+  "dusk-poseidon/std",
   "dusk-plonk/std"
 ]
 canon = [
