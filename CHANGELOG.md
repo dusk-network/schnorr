@@ -10,10 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Update `canonical` from `0.5` to `0.6` [#41](https://github.com/dusk-network/schnorr/issues/41)
 - Update `dusk-plonk` from `0.6` to `0.8` [#41](https://github.com/dusk-network/schnorr/issues/41)
-- Update `dusk-bls12_381` from `0.6` to `0.8` [#41](https://github.com/dusk-network/schnorr/issues/41)
-- Update `dusk-jubjub` from `0.8` to `0.10` [#41](https://github.com/dusk-network/schnorr/issues/41)
-- Update `dusk-poseidon` from `0.18` to `0.21` [#41](https://github.com/dusk-network/schnorr/issues/41)
-- - Update `dusk-pki` from `0.6` to `0.7` [#41](https://github.com/dusk-network/schnorr/issues/41)
+- Update `dusk-poseidon` from `0.18` to `0.21.0-rc` [#41](https://github.com/dusk-network/schnorr/issues/41)
+- Update `dusk-pki` from `0.6` to `0.7` [#41](https://github.com/dusk-network/schnorr/issues/41)
+
+### Removed
+- Remove `dusk-bls12_381` and import it from `dusk-plonk` [#41](https://github.com/dusk-network/schnorr/issues/41)
+- Remove `dusk-jubjub` and import it from `dusk-plonk` [#41](https://github.com/dusk-network/schnorr/issues/41)
 
 ## [0.6.0] - 2021-04-06
 
