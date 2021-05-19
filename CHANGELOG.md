@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Add `default-features=false` to `rand_core` [#52](https://github.com/dusk-network/schnorr/issues/52)
+
 ### Changed
 - Update `canonical` from `0.5` to `0.6` [#41](https://github.com/dusk-network/schnorr/issues/41)
 - Update `dusk-plonk` from `0.6` to `0.8` [#41](https://github.com/dusk-network/schnorr/issues/41)

@@ -19,7 +19,7 @@ exclude = [
 license = "MPL-2.0"
 
 [dependencies]
-rand_core = "0.6"
+rand_core = { version = "0.6", default-features = false }
 dusk-bytes = "0.1"
 dusk-poseidon = {version="0.21.0-rc", default-features=false}
 dusk-pki = {version="0.7.0-rc", default-features=false}
@@ -37,7 +37,8 @@ alloc = []
 std = [
   "alloc",
   "dusk-poseidon/std",
-  "dusk-plonk/std"
+  "dusk-plonk/std",
+  "rand_core/std"
 ]
 canon = [
   "canonical",

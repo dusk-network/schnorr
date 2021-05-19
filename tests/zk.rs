@@ -8,10 +8,10 @@ mod zk {
     use dusk_pki::{PublicKey, SecretKey};
     use dusk_plonk::error::Error as PlonkError;
     use dusk_plonk::prelude::*;
+    use dusk_schnorr::{gadgets, Proof, PublicKeyPair, Signature};
     use lazy_static;
     use rand::rngs::StdRng;
     use rand::SeedableRng;
-    use dusk_schnorr::{gadgets, Proof, PublicKeyPair, Signature};
 
     // Static definitions
     lazy_static::lazy_static! {
