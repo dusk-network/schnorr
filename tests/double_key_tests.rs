@@ -4,8 +4,8 @@
 //
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
+use dusk_bls12_381::BlsScalar;
 use dusk_pki::SecretKey;
-use dusk_plonk::bls12_381::BlsScalar;
 use dusk_schnorr::{Proof, PublicKeyPair};
 
 #[test]
