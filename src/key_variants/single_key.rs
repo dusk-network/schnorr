@@ -18,10 +18,9 @@ use rand_core::{CryptoRng, RngCore};
 #[allow(non_snake_case)]
 /// Method to create a challenge hash for signature scheme
 fn challenge_hash(R: JubJubExtended, message: BlsScalar) -> JubJubScalar {
-    let h = hash(&[message]);
     let R_scalar = R.to_hash_inputs();
 
-    let c = hash(&[R_scalar[0], R_scalar[1], h]);
+    let c = hash(&[R_scalar[0], R_scalar[1], message]);
 
     super::truncate_bls_to_jubjub(c)
 }

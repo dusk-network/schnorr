@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - Remove `dusk-bls12_381` and import it from `dusk-plonk` [#41](https://github.com/dusk-network/schnorr/issues/41)
 - Remove `dusk-jubjub` and import it from `dusk-plonk` [#41](https://github.com/dusk-network/schnorr/issues/41)
+- Remove one hashing level for `message` in signature processing [#55](https://github.com/dusk-network/schnorr/issues/55)
 
 ### Removed
 - Remove `dusk-jubjub` from dependencies [#50](https://github.com/dusk-network/schnorr/issues/50)

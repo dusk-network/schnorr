@@ -19,7 +19,6 @@ use rand_core::{CryptoRng, RngCore};
 
 /// Method to create a challenge hash for signature scheme
 fn challenge_hash(R: PublicKeyPair, message: BlsScalar) -> JubJubScalar {
-    let h = hash(&[message]);
     let R_scalar = (R.0).0.as_ref().to_hash_inputs();
     let R_prime_scalar = (R.0).1.as_ref().to_hash_inputs();
 
@@ -28,7 +27,7 @@ fn challenge_hash(R: PublicKeyPair, message: BlsScalar) -> JubJubScalar {
         R_scalar[1],
         R_prime_scalar[0],
         R_prime_scalar[1],
-        h,
+        message,
     ]);
 
     super::truncate_bls_to_jubjub(c)

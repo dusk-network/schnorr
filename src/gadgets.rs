@@ -20,8 +20,7 @@ pub fn single_key_verify(
     PK: Point,
     message: Variable,
 ) {
-    let h = sponge::gadget(composer, &[message]);
-    let c_hash = sponge::gadget(composer, &[*R.x(), *R.y(), h]);
+    let c_hash = sponge::gadget(composer, &[*R.x(), *R.y(), message]);
 
     let m = composer.add_witness_to_circuit_description(BlsScalar::zero());
     let c = composer.xor_gate(c_hash, m, 250);
@@ -48,10 +47,9 @@ pub fn double_key_verify(
     PK_prime: Point,
     message: Variable,
 ) {
-    let h = sponge::gadget(composer, &[message]);
     let c_hash = sponge::gadget(
         composer,
-        &[*R.x(), *R.y(), *R_prime.x(), *R_prime.y(), h],
+        &[*R.x(), *R.y(), *R_prime.x(), *R_prime.y(), message],
     );
 
     let m = composer.add_witness_to_circuit_description(BlsScalar::zero());
