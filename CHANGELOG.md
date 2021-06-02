@@ -7,7 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Add `default-features=false` to `rand_core` [#52](https://github.com/dusk-network/schnorr/issues/52)
+
 ### Changed
+- Update `canonical` from `0.5` to `0.6` [#41](https://github.com/dusk-network/schnorr/issues/41)
+- Update `dusk-plonk` from `0.6` to `0.8` [#41](https://github.com/dusk-network/schnorr/issues/41)
+- Update `dusk-poseidon` from `0.18` to `0.21.0-rc` [#41](https://github.com/dusk-network/schnorr/issues/41)
+- Update `dusk-pki` from `0.6` to `0.7` [#41](https://github.com/dusk-network/schnorr/issues/41)
+- Change crate name from `schnorr` to `dusk-schnorr` [#41](https://github.com/dusk-network/schnorr/issues/41)
+- Change default crate featureset to be `alloc`. [#50](https://github.com/dusk-network/schnorr/issues/50)
+### Removed
+- Remove one hashing level for `message` in signature processing [#55](https://github.com/dusk-network/schnorr/issues/55)
+- Remove `anyhow` from dependencies [#50](https://github.com/dusk-network/schnorr/issues/50)
+
+  
 
 ## [0.6.0] - 2021-04-06
 

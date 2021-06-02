@@ -7,7 +7,7 @@
 use dusk_bls12_381::BlsScalar;
 use dusk_bytes::Serializable;
 use dusk_pki::{PublicKey, SecretKey};
-use schnorr::Signature;
+use dusk_schnorr::Signature;
 
 #[test]
 // TestSignVerify

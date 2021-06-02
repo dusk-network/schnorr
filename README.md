@@ -1,4 +1,8 @@
-# Schnorr
+# dusk-schnorr
+![Build Status](https://github.com/dusk-network/schnorr/workflows/Continuous%20integration/badge.svg)
+[![Repository](https://img.shields.io/badge/github-schnorr-blueviolet?logo=github)](https://github.com/dusk-network/schnorr)
+[![Documentation](https://img.shields.io/badge/docs-schnorr-blue?logo=rust)](https://docs.rs/schnorr/)
+
 Implementation of the Schnorr for JubJub curve
 group using Poseidon as the hash function.
 Implementation designed by the [dusk](https://dusk.network)
