@@ -8,7 +8,6 @@ use dusk_pki::{PublicKey, SecretKey};
 use dusk_plonk::error::Error as PlonkError;
 use dusk_plonk::prelude::*;
 use dusk_schnorr::{gadgets, Proof, PublicKeyPair, Signature};
-use lazy_static;
 use rand::rngs::StdRng;
 use rand::SeedableRng;
 
@@ -222,7 +221,7 @@ impl Circuit for SingleKeyCircuit {
         composer: &mut StandardComposer,
     ) -> Result<(), PlonkError> {
         let R = composer.add_affine(self.signature.R().into());
-        let u = composer.add_input(self.signature.u().clone().into());
+        let u = composer.add_input((*self.signature.u()).into());
         let PK = composer.add_affine(self.pk.as_ref().into());
         let message = composer.add_input(self.message);
 
@@ -274,7 +273,7 @@ impl Circuit for DoubleKeyCircuit {
         let R = composer.add_affine(self.proof.keys().R().as_ref().into());
         let R_prime =
             composer.add_affine(self.proof.keys().R_prime().as_ref().into());
-        let u = composer.add_input(self.proof.u().clone().into());
+        let u = composer.add_input((*self.proof.u()).into());
         let PK = composer.add_affine(self.pkp.R().as_ref().into());
         let PK_prime = composer.add_affine(self.pkp.R_prime().as_ref().into());
         let message = composer.add_input(self.message);

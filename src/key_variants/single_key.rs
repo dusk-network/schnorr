@@ -12,7 +12,7 @@ use dusk_jubjub::{
     JubJubAffine, JubJubExtended, JubJubScalar, GENERATOR_EXTENDED,
 };
 use dusk_pki::{PublicKey, SecretKey};
-use dusk_poseidon::sponge::hash;
+use dusk_poseidon::sponge::truncated;
 use rand_core::{CryptoRng, RngCore};
 
 #[allow(non_snake_case)]
@@ -20,9 +20,7 @@ use rand_core::{CryptoRng, RngCore};
 fn challenge_hash(R: JubJubExtended, message: BlsScalar) -> JubJubScalar {
     let R_scalar = R.to_hash_inputs();
 
-    let c = hash(&[R_scalar[0], R_scalar[1], message]);
-
-    super::truncate_bls_to_jubjub(c)
+    truncated::hash(&[R_scalar[0], R_scalar[1], message])
 }
 
 /// An Schnorr signature, produced by signing a message with a
