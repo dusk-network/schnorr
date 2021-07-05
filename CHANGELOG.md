@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.2] - 2021-07-05
+
+### Changed
+- Update poseidon and pki to non-rc versions [#59](https://github.com/dusk-network/schnorr/issues/59)
 
 ## [0.7.0] - 2021-06-02
 
@@ -20,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update `dusk-pki` from `0.6` to `0.7` [#41](https://github.com/dusk-network/schnorr/issues/41)
 - Change crate name from `schnorr` to `dusk-schnorr` [#41](https://github.com/dusk-network/schnorr/issues/41)
 - Change default crate featureset to be `alloc`. [#50](https://github.com/dusk-network/schnorr/issues/50)
+
 ### Removed
 - Remove one hashing level for `message` in signature processing [#55](https://github.com/dusk-network/schnorr/issues/55)
 - Remove `anyhow` from dependencies [#50](https://github.com/dusk-network/schnorr/issues/50)
