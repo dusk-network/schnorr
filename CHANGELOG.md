@@ -9,8 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Update `dusk-poseidon` from `0.21` to `0.22.0-rc` [#59](https://github.com/dusk-network/schnorr/issues/59)
-- Update `dusk-pki` from `0.7` to `0.8.0-rc` [#59](https://github.com/dusk-network/schnorr/issues/59)
+- Update `dusk-pki` from `0.8` to `0.9` [#62](https://github.com/dusk-network/schnorr/issues/62)
+- Update `dusk-plonk` from `0.8` to `0.9` [#62](https://github.com/dusk-network/schnorr/issues/62)
+- Update `dusk-poseidon` from `0.22` to `0.23` [#62](https://github.com/dusk-network/schnorr/issues/62)
+
+## [0.8.0-rc]
+
+### Changed
+
+- Update `dusk-poseidon` from `0.21` to `0.22.0-rc` [#59](https://github.com/dusk-netwo
+rk/schnorr/issues/59)
+- Update `dusk-pki` from `0.7` to `0.8.0-rc` [#59](https://github.com/dusk-network/schn
+orr/issues/59)
+
 ## [0.7.0] - 2021-06-02
 
 ### Added

@@ -6,21 +6,20 @@
 
 #[cfg(feature = "canon")]
 use canonical_derive::Canon;
-use dusk_bls12_381::BlsScalar;
 use dusk_bytes::{DeserializableSlice, Error as BytesError, Serializable};
-use dusk_jubjub::{
-    JubJubAffine, JubJubExtended, JubJubScalar, GENERATOR_EXTENDED,
-};
+use dusk_jubjub::GENERATOR_EXTENDED;
 use dusk_pki::{PublicKey, SecretKey};
-use dusk_poseidon::sponge::truncated;
+use dusk_poseidon::sponge;
 use rand_core::{CryptoRng, RngCore};
+
+use dusk_plonk::prelude::*;
 
 #[allow(non_snake_case)]
 /// Method to create a challenge hash for signature scheme
 fn challenge_hash(R: JubJubExtended, message: BlsScalar) -> JubJubScalar {
     let R_scalar = R.to_hash_inputs();
 
-    truncated::hash(&[R_scalar[0], R_scalar[1], message])
+    sponge::truncated::hash(&[R_scalar[0], R_scalar[1], message])
 }
 
 /// An Schnorr signature, produced by signing a message with a
@@ -77,6 +76,17 @@ impl Signature {
         let point_1 = (GENERATOR_EXTENDED * self.u) + (public_key.as_ref() * c);
 
         point_1.eq(&self.R)
+    }
+
+    #[cfg(feature = "alloc")]
+    pub fn to_witness(
+        &self,
+        composer: &mut TurboComposer,
+    ) -> (Witness, WitnessPoint) {
+        let u = composer.append_witness(self.u);
+        let r = composer.append_point(self.R);
+
+        (u, r)
     }
 }
 

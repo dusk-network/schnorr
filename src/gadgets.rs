@@ -5,64 +5,60 @@
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
 use dusk_jubjub::{GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED};
-use dusk_plonk::constraint_system::ecc::Point;
+use dusk_poseidon::sponge::truncated;
+
 use dusk_plonk::prelude::*;
-use dusk_poseidon::sponge;
 
-/// Given `R`, assert the signature `u` is correct for `PK` over `message`.
-///
-/// `R` is expected to be generated from [`crate::single_key::SecretKey::sign`]
-#[allow(non_snake_case)]
+/// Assert the correctness of the schnorr signature without using the secret key
+/// as witness.
 pub fn single_key_verify(
-    composer: &mut StandardComposer,
-    R: Point,
-    u: Variable,
-    PK: Point,
-    message: Variable,
+    composer: &mut TurboComposer,
+    u: Witness,
+    r: WitnessPoint,
+    k: WitnessPoint,
+    m: Witness,
 ) {
-    let c_hash = sponge::gadget(composer, &[*R.x(), *R.y(), message]);
+    let r_x = *r.x();
+    let r_y = *r.y();
 
-    let m = composer.add_witness_to_circuit_description(BlsScalar::zero());
-    let c = composer.xor_gate(c_hash, m, 250);
+    let c = [r_x, r_y, m];
+    let c = truncated::gadget(composer, &c);
 
-    let p1_l = composer.fixed_base_scalar_mul(u, GENERATOR_EXTENDED);
-    let p1_r = composer.variable_base_scalar_mul(c, PK);
-    let p1 = composer.point_addition_gate(p1_l, p1_r);
+    let s_a = composer.component_mul_generator(u, GENERATOR_EXTENDED);
+    let s_b = composer.component_mul_point(c, k);
+    let s = composer.component_add_point(s_a, s_b);
 
-    composer.assert_equal_point(p1, R);
+    composer.assert_equal_point(r, s);
 }
 
-/// Given `(R, R_prime)`, assert the signature `u` is correct for the pair `(PK,
-/// PK_prime)` over `message`.
-///
-/// `(R, R_prime, u)` is expected to be generated from
-/// [`crate::double_key::SecretKey::sign`]
-#[allow(non_snake_case)]
+/// Assert the correctness of the schnorr proof without using the secret key as
+/// witness.
 pub fn double_key_verify(
-    composer: &mut StandardComposer,
-    R: Point,
-    R_prime: Point,
-    u: Variable,
-    PK: Point,
-    PK_prime: Point,
-    message: Variable,
+    composer: &mut TurboComposer,
+    u: Witness,
+    r: WitnessPoint,
+    r_p: WitnessPoint,
+    k: WitnessPoint,
+    k_p: WitnessPoint,
+    m: Witness,
 ) {
-    let c_hash = sponge::gadget(
-        composer,
-        &[*R.x(), *R.y(), *R_prime.x(), *R_prime.y(), message],
-    );
+    let r_x = *r.x();
+    let r_y = *r.y();
 
-    let m = composer.add_witness_to_circuit_description(BlsScalar::zero());
-    let c = composer.xor_gate(c_hash, m, 250);
+    let r_p_x = *r_p.x();
+    let r_p_y = *r_p.y();
 
-    let p1_l = composer.fixed_base_scalar_mul(u, GENERATOR_EXTENDED);
-    let p1_r = composer.variable_base_scalar_mul(c, PK);
-    let p1 = composer.point_addition_gate(p1_l, p1_r);
+    let c = [r_x, r_y, r_p_x, r_p_y, m];
+    let c = truncated::gadget(composer, &c);
 
-    let p2_l = composer.fixed_base_scalar_mul(u, GENERATOR_NUMS_EXTENDED);
-    let p2_r = composer.variable_base_scalar_mul(c, PK_prime);
-    let p2 = composer.point_addition_gate(p2_l, p2_r);
+    let s_a = composer.component_mul_generator(u, GENERATOR_EXTENDED);
+    let s_b = composer.component_mul_point(c, k);
+    let s = composer.component_add_point(s_a, s_b);
 
-    composer.assert_equal_point(p1, R);
-    composer.assert_equal_point(p2, R_prime);
+    let s_p_a = composer.component_mul_generator(u, GENERATOR_NUMS_EXTENDED);
+    let s_p_b = composer.component_mul_point(c, k_p);
+    let s_p = composer.component_add_point(s_p_a, s_p_b);
+
+    composer.assert_equal_point(r, s);
+    composer.assert_equal_point(r_p, s_p);
 }
