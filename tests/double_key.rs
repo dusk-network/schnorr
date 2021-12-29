@@ -7,25 +7,31 @@
 use dusk_bls12_381::BlsScalar;
 use dusk_pki::SecretKey;
 use dusk_schnorr::{Proof, PublicKeyPair};
+use rand::rngs::StdRng;
+use rand::SeedableRng;
 
 #[test]
 fn proof_verify() {
-    let sk = SecretKey::random(&mut rand::thread_rng());
-    let message = BlsScalar::random(&mut rand::thread_rng());
+    let rng = &mut StdRng::seed_from_u64(2321u64);
+
+    let sk = SecretKey::random(rng);
+    let message = BlsScalar::random(rng);
     let pk_pair: PublicKeyPair = sk.into();
 
-    let proof = Proof::new(&sk, &mut rand::thread_rng(), message);
+    let proof = Proof::new(&sk, rng, message);
 
     assert!(proof.verify(&pk_pair, message));
 }
 
 #[test]
 fn test_wrong_keys() {
-    let sk = SecretKey::random(&mut rand::thread_rng());
-    let wrong_sk = SecretKey::random(&mut rand::thread_rng());
-    let message = BlsScalar::random(&mut rand::thread_rng());
+    let rng = &mut StdRng::seed_from_u64(2321u64);
 
-    let proof = Proof::new(&sk, &mut rand::thread_rng(), message);
+    let sk = SecretKey::random(rng);
+    let wrong_sk = SecretKey::random(rng);
+    let message = BlsScalar::random(rng);
+
+    let proof = Proof::new(&sk, rng, message);
 
     // Derive random public key
     let pk_pair: PublicKeyPair = wrong_sk.into();
