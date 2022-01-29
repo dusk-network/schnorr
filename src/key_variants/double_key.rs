@@ -70,7 +70,7 @@ impl Serializable<64> for PublicKeyPair {
     fn to_bytes(&self) -> [u8; Self::SIZE] {
         let mut buf = [0u8; Self::SIZE];
         buf[..32].copy_from_slice(&(self.0).0.to_bytes()[..]);
-        buf[32..].copy_from_slice(&(self.0).0.to_bytes()[..]);
+        buf[32..].copy_from_slice(&(self.0).1.to_bytes()[..]);
         buf
     }
 
