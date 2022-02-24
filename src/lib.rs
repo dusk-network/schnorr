@@ -6,8 +6,10 @@
 
 #![no_std]
 
-pub mod gadgets;
 mod key_variants;
+
+#[cfg(feature = "alloc")]
+pub mod gadgets;
 
 pub use key_variants::double_key::{Proof, PublicKeyPair};
 pub use key_variants::single_key::Signature;

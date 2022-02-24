@@ -8,12 +8,13 @@
 
 #[cfg(feature = "canon")]
 use canonical_derive::Canon;
-use dusk_bls12_381::BlsScalar;
 use dusk_bytes::{DeserializableSlice, Error as BytesError, Serializable};
-use dusk_jubjub::{JubJubScalar, GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED};
+use dusk_jubjub::{GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED};
 use dusk_pki::{PublicKey, SecretKey};
 use dusk_poseidon::sponge::truncated;
 use rand_core::{CryptoRng, RngCore};
+
+use dusk_plonk::prelude::*;
 
 /// Method to create a challenge hash for signature scheme
 fn challenge_hash(R: PublicKeyPair, message: BlsScalar) -> JubJubScalar {
@@ -69,7 +70,7 @@ impl Serializable<64> for PublicKeyPair {
     fn to_bytes(&self) -> [u8; Self::SIZE] {
         let mut buf = [0u8; Self::SIZE];
         buf[..32].copy_from_slice(&(self.0).0.to_bytes()[..]);
-        buf[32..].copy_from_slice(&(self.0).0.to_bytes()[..]);
+        buf[32..].copy_from_slice(&(self.0).1.to_bytes()[..]);
         buf
     }
 
@@ -144,6 +145,18 @@ impl Proof {
 
         point_1.eq(self.keys.R().as_ref())
             && point_2.eq(self.keys.R_prime().as_ref())
+    }
+
+    #[cfg(feature = "alloc")]
+    pub fn to_witness(
+        &self,
+        composer: &mut TurboComposer,
+    ) -> (Witness, WitnessPoint, WitnessPoint) {
+        let u = composer.append_witness(self.u);
+        let r = composer.append_point(self.keys.R().as_ref());
+        let r_p = composer.append_point(self.keys.R_prime().as_ref());
+
+        (u, r, r_p)
     }
 }
 
