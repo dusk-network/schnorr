@@ -9,36 +9,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Update `dusk-pki` from `0.8` to `0.9` [#62](https://github.com/dusk-network/schnorr/issues/62)
-- Update `dusk-plonk` from `0.8` to `0.9` [#62](https://github.com/dusk-network/schnorr/issues/62)
-- Update `dusk-poseidon` from `0.22` to `0.23` [#62](https://github.com/dusk-network/schnorr/issues/62)
+- Update dusk-poseidon from `0.23.0-rc` to `0.25.0-rc`
+- Update dusk-pki from `0.9.0-rc` to `0.10.0-rc`
+- Update dusk-plonk from `0.9` to `0.10`
+- Update dusk-bls12_381 from `0.8` to `0.9`
+- Update dusk-jubjub from `0.10` to `0.11`
+- Update canonical from `0.6` to `0.7`
+- Update canonical_derive from `0.6` to `0.7`
+
+## Fixed
+
+- Fix KeyPair serialization
 
 ## [0.8.0-rc]
 
 ### Changed
 
-- Update `dusk-poseidon` from `0.21` to `0.22.0-rc` [#59](https://github.com/dusk-netwo
-rk/schnorr/issues/59)
-- Update `dusk-pki` from `0.7` to `0.8.0-rc` [#59](https://github.com/dusk-network/schn
-orr/issues/59)
+- Update `dusk-poseidon` from `0.21` to `0.22.0-rc` [#59](https://github.com/dusk-network/schnorr/issues/59)
+- Update `dusk-pki` from `0.7` to `0.8.0-rc` [#59](https://github.com/dusk-network/schnorr/issues/59)
 
 ## [0.7.0] - 2021-06-02
 
 ### Added
+
 - Add `default-features=false` to `rand_core` [#52](https://github.com/dusk-network/schnorr/issues/52)
 
 ### Changed
+
 - Update `canonical` from `0.5` to `0.6` [#41](https://github.com/dusk-network/schnorr/issues/41)
 - Update `dusk-plonk` from `0.6` to `0.8` [#41](https://github.com/dusk-network/schnorr/issues/41)
 - Update `dusk-poseidon` from `0.18` to `0.21.0-rc` [#41](https://github.com/dusk-network/schnorr/issues/41)
 - Update `dusk-pki` from `0.6` to `0.7` [#41](https://github.com/dusk-network/schnorr/issues/41)
 - Change crate name from `schnorr` to `dusk-schnorr` [#41](https://github.com/dusk-network/schnorr/issues/41)
 - Change default crate featureset to be `alloc`. [#50](https://github.com/dusk-network/schnorr/issues/50)
+
 ### Removed
+
 - Remove one hashing level for `message` in signature processing [#55](https://github.com/dusk-network/schnorr/issues/55)
 - Remove `anyhow` from dependencies [#50](https://github.com/dusk-network/schnorr/issues/50)
-
-  
 
 ## [0.6.0] - 2021-04-06
 
