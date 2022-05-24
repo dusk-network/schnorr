@@ -30,8 +30,13 @@ canonical = { version = "0.7", optional = true }
 canonical_derive = { version = "0.7", optional = true }
 
 [dev-dependencies]
+criterion = "0.3"
 rand = "0.8"
 lazy_static = "1.4"
+
+[[bench]]
+name = "schnorr"
+harness = false
 
 [features]
 default = ["std"]
