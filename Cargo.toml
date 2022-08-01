@@ -28,6 +28,7 @@ dusk-bls12_381 = { version = "0.10", default-features = false }
 dusk-jubjub = { version = "0.12.0-rc", default-features = false }
 canonical = { version = "0.7", optional = true }
 canonical_derive = { version = "0.7", optional = true }
+rkyv = { version = "0.7", optional = true }
 
 [dev-dependencies]
 criterion = "0.3"
@@ -52,6 +53,11 @@ canon = [
   "canonical_derive",
   "dusk-pki/canon",
   "dusk-plonk/canon"
+]
+rkyv-impl = [
+  "dusk-pki/rkyv-impl",
+  "dusk-jubjub/rkyv-impl",
+  "rkyv"
 ]
 
 [[test]]

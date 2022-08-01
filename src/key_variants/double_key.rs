@@ -14,6 +14,9 @@ use dusk_pki::{PublicKey, SecretKey};
 use dusk_poseidon::sponge::truncated;
 use rand_core::{CryptoRng, RngCore};
 
+#[cfg(feature = "rkyv-impl")]
+use rkyv::{Archive, Deserialize, Serialize};
+
 use dusk_plonk::prelude::*;
 
 /// Method to create a challenge hash for signature scheme
@@ -30,10 +33,10 @@ fn challenge_hash(R: PublicKeyPair, message: BlsScalar) -> JubJubScalar {
     ])
 }
 
+/// Structure repesenting a pair of [`PublicKey`] generated from a [`SecretKey`]
 #[derive(Clone, Copy, Debug)]
 #[cfg_attr(feature = "canon", derive(Canon))]
-
-/// Structure repesenting a pair of [`PublicKey`] generated from a [`SecretKey`]
+#[cfg_attr(feature = "rkyv-impl", derive(Archive, Deserialize, Serialize))]
 pub struct PublicKeyPair(pub(crate) (PublicKey, PublicKey));
 
 impl PublicKeyPair {
@@ -84,6 +87,7 @@ impl Serializable<64> for PublicKeyPair {
 
 #[derive(Clone, Copy, Debug)]
 #[cfg_attr(feature = "canon", derive(Canon))]
+#[cfg_attr(feature = "rkyv-impl", derive(Archive, Deserialize, Serialize))]
 pub struct Proof {
     u: JubJubScalar,
     keys: PublicKeyPair,

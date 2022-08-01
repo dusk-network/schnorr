@@ -14,6 +14,9 @@ use rand_core::{CryptoRng, RngCore};
 
 use dusk_plonk::prelude::*;
 
+#[cfg(feature = "rkyv-impl")]
+use rkyv::{Archive, Deserialize, Serialize};
+
 #[allow(non_snake_case)]
 /// Method to create a challenge hash for signature scheme
 fn challenge_hash(R: JubJubExtended, message: BlsScalar) -> JubJubScalar {
@@ -27,6 +30,7 @@ fn challenge_hash(R: JubJubExtended, message: BlsScalar) -> JubJubScalar {
 #[allow(non_snake_case)]
 #[derive(PartialEq, Clone, Copy, Debug)]
 #[cfg_attr(feature = "canon", derive(Canon))]
+#[cfg_attr(feature = "rkyv-impl", derive(Archive, Deserialize, Serialize))]
 pub struct Signature {
     u: JubJubScalar,
     R: JubJubExtended,

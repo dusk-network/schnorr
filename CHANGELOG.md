@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add `rkyv` implementations behind feature [#69](https://github.com/dusk-network/schnorr/issues/69)
+
 ### Changed
 
 - Update dusk-poseidon from `0.23.0-rc` to `0.26`
