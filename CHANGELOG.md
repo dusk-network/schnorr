@@ -9,11 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Update dusk-poseidon from `0.23.0-rc` to `0.25.0-rc`
-- Update dusk-pki from `0.9.0-rc` to `0.10.0-rc`
-- Update dusk-plonk from `0.9` to `0.10`
-- Update dusk-bls12_381 from `0.8` to `0.9`
-- Update dusk-jubjub from `0.10` to `0.11`
+- Update dusk-poseidon from `0.23.0-rc` to `0.26`
+- Update dusk-pki from `0.9.0-rc` to `0.11`
+- Update dusk-plonk from `0.9` to `0.12`
+- Update dusk-bls12_381 from `0.8` to `0.10`
+- Update dusk-jubjub from `0.10` to `0.12`
 - Update canonical from `0.6` to `0.7`
 - Update canonical_derive from `0.6` to `0.7`
 

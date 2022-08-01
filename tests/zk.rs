@@ -104,7 +104,7 @@ fn single_key() {
         .expect("Failed to compile circuit");
 
     let proof = TestSingleKey::new(signature, k, message)
-        .prove(&PP, &pk, label)
+        .prove(&PP, &pk, label, rng)
         .expect("Failed to prove");
 
     TestSingleKey::verify(&PP, &vd, &proof, &[], label)
@@ -200,7 +200,7 @@ fn double_key() {
         .expect("Failed to compile circuit");
 
     let proof = TestDoubleKey::new(proof, k, k_p, message)
-        .prove(&PP, &pk, label)
+        .prove(&PP, &pk, label, rng)
         .expect("Failed to prove");
 
     TestDoubleKey::verify(&PP, &vd, &proof, &[], label)
