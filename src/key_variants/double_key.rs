@@ -36,7 +36,11 @@ fn challenge_hash(R: PublicKeyPair, message: BlsScalar) -> JubJubScalar {
 /// Structure repesenting a pair of [`PublicKey`] generated from a [`SecretKey`]
 #[derive(Clone, Copy, Debug)]
 #[cfg_attr(feature = "canon", derive(Canon))]
-#[cfg_attr(feature = "rkyv-impl", derive(Archive, Deserialize, Serialize))]
+#[cfg_attr(
+    feature = "rkyv-impl",
+    derive(Archive, Deserialize, Serialize),
+    archive_attr(derive(bytecheck::CheckBytes))
+)]
 pub struct PublicKeyPair(pub(crate) (PublicKey, PublicKey));
 
 impl PublicKeyPair {
@@ -87,7 +91,11 @@ impl Serializable<64> for PublicKeyPair {
 
 #[derive(Clone, Copy, Debug)]
 #[cfg_attr(feature = "canon", derive(Canon))]
-#[cfg_attr(feature = "rkyv-impl", derive(Archive, Deserialize, Serialize))]
+#[cfg_attr(
+    feature = "rkyv-impl",
+    derive(Archive, Deserialize, Serialize),
+    archive_attr(derive(bytecheck::CheckBytes))
+)]
 pub struct Proof {
     u: JubJubScalar,
     keys: PublicKeyPair,

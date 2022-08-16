@@ -30,7 +30,11 @@ fn challenge_hash(R: JubJubExtended, message: BlsScalar) -> JubJubScalar {
 #[allow(non_snake_case)]
 #[derive(PartialEq, Clone, Copy, Debug)]
 #[cfg_attr(feature = "canon", derive(Canon))]
-#[cfg_attr(feature = "rkyv-impl", derive(Archive, Deserialize, Serialize))]
+#[cfg_attr(
+    feature = "rkyv-impl",
+    derive(Archive, Deserialize, Serialize),
+    archive_attr(derive(bytecheck::CheckBytes))
+)]
 pub struct Signature {
     u: JubJubScalar,
     R: JubJubExtended,
