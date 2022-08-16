@@ -24,11 +24,12 @@ dusk-bytes = "0.1"
 dusk-poseidon = { version ="0.26.0-rc", default-features = false }
 dusk-pki = { version = "0.11.0-rc", default-features = false}
 dusk-plonk = { version = "0.12.0-rc", default-features = false }
-dusk-bls12_381 = { version = "0.10", default-features = false }
+dusk-bls12_381 = { version = "0.11.0-rc", default-features = false }
 dusk-jubjub = { version = "0.12.0-rc", default-features = false }
 canonical = { version = "0.7", optional = true }
 canonical_derive = { version = "0.7", optional = true }
 rkyv = { version = "0.7", optional = true }
+bytecheck = { version = "0.6", optional = true }
 
 [dev-dependencies]
 criterion = "0.3"
@@ -57,7 +58,8 @@ canon = [
 rkyv-impl = [
   "dusk-pki/rkyv-impl",
   "dusk-jubjub/rkyv-impl",
-  "rkyv"
+  "rkyv",
+  "bytecheck",
 ]
 
 [[test]]
