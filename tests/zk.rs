@@ -64,28 +64,18 @@ fn single_key() {
     }
 
     impl Circuit for TestSingleKey {
-        const CIRCUIT_ID: [u8; 32] = [0xff; 32];
-
-        fn gadget(
-            &mut self,
-            composer: &mut TurboComposer,
+        fn circuit<C: Composer>(
+            &self,
+            composer: &mut C,
         ) -> Result<(), PlonkError> {
             let (u, r) = self.signature.to_witness(composer);
 
             let k = composer.append_point(self.k);
             let m = composer.append_witness(self.message);
 
-            gadgets::single_key_verify(composer, u, r, k, m);
+            gadgets::single_key_verify(composer, u, r, k, m)?;
 
             Ok(())
-        }
-
-        fn public_inputs(&self) -> Vec<PublicInputValue> {
-            vec![]
-        }
-
-        fn padded_gates(&self) -> usize {
-            1 << 12
         }
     }
 
@@ -98,17 +88,18 @@ fn single_key() {
     let signature = Signature::new(&sk, rng, message);
 
     let k = GENERATOR_EXTENDED * sk.as_ref();
+    let (prover, verifier) = Compiler::compile(&PP, label)
+        .expect("Circuit should compile successfully");
 
-    let (pk, vd) = TestSingleKey::default()
-        .compile(&PP)
-        .expect("Failed to compile circuit");
+    let circuit = TestSingleKey::new(signature, k, message);
 
-    let proof = TestSingleKey::new(signature, k, message)
-        .prove(&PP, &pk, label, rng)
-        .expect("Failed to prove");
+    let (proof, public_inputs) = prover
+        .prove(rng, &circuit)
+        .expect("Proving the circuit should be successful");
 
-    TestSingleKey::verify(&PP, &vd, &proof, &[], label)
-        .expect("Failed to verify");
+    verifier
+        .verify(&proof, &public_inputs)
+        .expect("Verification should be successful");
 }
 
 #[test]
@@ -158,11 +149,9 @@ fn double_key() {
     }
 
     impl Circuit for TestDoubleKey {
-        const CIRCUIT_ID: [u8; 32] = [0xff; 32];
-
-        fn gadget(
-            &mut self,
-            composer: &mut TurboComposer,
+        fn circuit<C: Composer>(
+            &self,
+            composer: &mut C,
         ) -> Result<(), PlonkError> {
             let (u, r, r_p) = self.proof.to_witness(composer);
 
@@ -170,17 +159,9 @@ fn double_key() {
             let k_p = composer.append_point(self.k_p);
             let m = composer.append_witness(self.message);
 
-            gadgets::double_key_verify(composer, u, r, r_p, k, k_p, m);
+            gadgets::double_key_verify(composer, u, r, r_p, k, k_p, m)?;
 
             Ok(())
-        }
-
-        fn public_inputs(&self) -> Vec<PublicInputValue> {
-            vec![]
-        }
-
-        fn padded_gates(&self) -> usize {
-            1 << 13
         }
     }
 
@@ -195,14 +176,16 @@ fn double_key() {
     let k = GENERATOR_EXTENDED * sk.as_ref();
     let k_p = GENERATOR_NUMS_EXTENDED * sk.as_ref();
 
-    let (pk, vd) = TestDoubleKey::default()
-        .compile(&PP)
-        .expect("Failed to compile circuit");
+    let (prover, verifier) = Compiler::compile(&PP, label)
+        .expect("Circuit compilation should succeed");
 
-    let proof = TestDoubleKey::new(proof, k, k_p, message)
-        .prove(&PP, &pk, label, rng)
-        .expect("Failed to prove");
+    let circuit = TestDoubleKey::new(proof, k, k_p, message);
 
-    TestDoubleKey::verify(&PP, &vd, &proof, &[], label)
-        .expect("Failed to verify");
+    let (proof, public_inputs) = prover
+        .prove(rng, &circuit)
+        .expect("Proving the circuit should succeed");
+
+    verifier
+        .verify(&proof, &public_inputs)
+        .expect("Verifying the proof should succeed");
 }

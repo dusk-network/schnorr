@@ -87,9 +87,9 @@ impl Signature {
     }
 
     #[cfg(feature = "alloc")]
-    pub fn to_witness(
+    pub fn to_witness<C: Composer>(
         &self,
-        composer: &mut TurboComposer,
+        composer: &mut C,
     ) -> (Witness, WitnessPoint) {
         let u = composer.append_witness(self.u);
         let r = composer.append_point(self.R);
