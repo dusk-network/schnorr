@@ -28,7 +28,7 @@ fn challenge_hash(R: JubJubExtended, message: BlsScalar) -> JubJubScalar {
 /// An Schnorr signature, produced by signing a message with a
 /// [`SecretKey`].
 #[allow(non_snake_case)]
-#[derive(PartialEq, Clone, Copy, Debug)]
+#[derive(Default, PartialEq, Clone, Copy, Debug)]
 #[cfg_attr(feature = "canon", derive(Canon))]
 #[cfg_attr(
     feature = "rkyv-impl",

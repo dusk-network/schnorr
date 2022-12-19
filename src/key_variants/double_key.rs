@@ -34,7 +34,7 @@ fn challenge_hash(R: PublicKeyPair, message: BlsScalar) -> JubJubScalar {
 }
 
 /// Structure repesenting a pair of [`PublicKey`] generated from a [`SecretKey`]
-#[derive(Clone, Copy, Debug)]
+#[derive(Default, Clone, Copy, Debug)]
 #[cfg_attr(feature = "canon", derive(Canon))]
 #[cfg_attr(
     feature = "rkyv-impl",
@@ -89,7 +89,7 @@ impl Serializable<64> for PublicKeyPair {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Default, Clone, Copy, Debug)]
 #[cfg_attr(feature = "canon", derive(Canon))]
 #[cfg_attr(
     feature = "rkyv-impl",
