@@ -88,7 +88,7 @@ fn single_key() {
     let signature = Signature::new(&sk, rng, message);
 
     let k = GENERATOR_EXTENDED * sk.as_ref();
-    let (prover, verifier) = Compiler::compile(&PP, label)
+    let (prover, verifier) = Compiler::compile::<TestSingleKey>(&PP, label)
         .expect("Circuit should compile successfully");
 
     let circuit = TestSingleKey::new(signature, k, message);
@@ -176,7 +176,7 @@ fn double_key() {
     let k = GENERATOR_EXTENDED * sk.as_ref();
     let k_p = GENERATOR_NUMS_EXTENDED * sk.as_ref();
 
-    let (prover, verifier) = Compiler::compile(&PP, label)
+    let (prover, verifier) = Compiler::compile::<TestDoubleKey>(&PP, label)
         .expect("Circuit compilation should succeed");
 
     let circuit = TestDoubleKey::new(proof, k, k_p, message);
