@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Update `dusk-pki` from `0.11` to `0.12`
 - Update `dusk-poseidon` from `0.28` to `0.30`
 - Update `dusk-plonk` from `0.13` to `0.14`
 - Update `rust-toolchain` from `nightly-2022-08-08` to `nightly-2023-05-22`
