@@ -21,13 +21,11 @@ license = "MPL-2.0"
 [dependencies]
 rand_core = { version = "0.6", default-features = false }
 dusk-bytes = "0.1"
-dusk-poseidon = { version ="0.30", default-features = false }
-dusk-pki = { version = "0.12", default-features = false}
-dusk-plonk = { version = "0.14", default-features = false }
-dusk-bls12_381 = { version = "0.11", default-features = false }
-dusk-jubjub = { version = "0.12", default-features = false }
-canonical = { version = "0.7", optional = true }
-canonical_derive = { version = "0.7", optional = true }
+dusk-poseidon = { version ="0.31", default-features = false }
+dusk-pki = { version = "0.13", default-features = false}
+dusk-plonk = { version = "0.16", default-features = false }
+dusk-bls12_381 = { version = "0.12", default-features = false }
+dusk-jubjub = { version = "0.13", default-features = false }
 rkyv = { version = "0.7", optional = true, default-features = false }
 bytecheck = { version = "0.6", optional = true, default-features = false }
 
@@ -36,6 +34,7 @@ rkyv = { version = "0.7", default-features = false, features = ["size_32"] }
 criterion = "0.3"
 rand = "0.8"
 lazy_static = "1.4"
+ff = { version = "0.13", default-features = false }
 
 [[bench]]
 name = "schnorr"
@@ -48,12 +47,6 @@ std = [
   "alloc",
   "dusk-plonk/std",
   "rand_core/std"
-]
-canon = [
-  "canonical",
-  "canonical_derive",
-  "dusk-pki/canon",
-  "dusk-plonk/canon"
 ]
 rkyv-impl = [
   "dusk-pki/rkyv-impl",

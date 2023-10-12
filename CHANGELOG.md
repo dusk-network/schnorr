@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Update `dusk-bls12_381` from `0.11` to `0.12`
+- Update `dusk-jubjub` from `0.12` to `0.13`
+- Update `dusk-pki` from `0.12` to `0.13`
+- Update `dusk-poseidon` from `0.30` to `0.31`
+- Update `dusk-plonk` from `0.14` to `0.16`
+
+### Added
+
+- Add `ff` dev-dependency
+
+### Removed
+
+- Remove `canonical` and `canonical_derive` dependencies
+- Remove `canon` feature
+
 ## [0.13.0] - 2023-06-28
 
 ### Changed

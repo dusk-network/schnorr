@@ -8,6 +8,7 @@ use dusk_jubjub::{GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED};
 use dusk_pki::SecretKey;
 use dusk_plonk::error::Error as PlonkError;
 use dusk_schnorr::{gadgets, Proof, Signature};
+use ff::Field;
 use rand::rngs::StdRng;
 use rand::SeedableRng;
 
@@ -33,11 +34,11 @@ fn single_key() {
 
     impl Default for TestSingleKey {
         fn default() -> Self {
-            let rng = &mut StdRng::seed_from_u64(0xbeef);
+            let mut rng = StdRng::seed_from_u64(0xbeef);
 
-            let sk = SecretKey::random(rng);
-            let message = BlsScalar::random(rng);
-            let signature = Signature::new(&sk, rng, message);
+            let sk = SecretKey::random(&mut rng);
+            let message = BlsScalar::random(&mut rng);
+            let signature = Signature::new(&sk, &mut rng, message);
 
             let k = GENERATOR_EXTENDED * sk.as_ref();
 
@@ -81,11 +82,11 @@ fn single_key() {
 
     let label = b"dusk-network";
 
-    let rng = &mut StdRng::seed_from_u64(0xfeeb);
+    let mut rng = StdRng::seed_from_u64(0xfeeb);
 
-    let sk = SecretKey::random(rng);
-    let message = BlsScalar::random(rng);
-    let signature = Signature::new(&sk, rng, message);
+    let sk = SecretKey::random(&mut rng);
+    let message = BlsScalar::random(&mut rng);
+    let signature = Signature::new(&sk, &mut rng, message);
 
     let k = GENERATOR_EXTENDED * sk.as_ref();
     let (prover, verifier) = Compiler::compile::<TestSingleKey>(&PP, label)
@@ -94,7 +95,7 @@ fn single_key() {
     let circuit = TestSingleKey::new(signature, k, message);
 
     let (proof, public_inputs) = prover
-        .prove(rng, &circuit)
+        .prove(&mut rng, &circuit)
         .expect("Proving the circuit should be successful");
 
     verifier
@@ -114,11 +115,11 @@ fn double_key() {
 
     impl Default for TestDoubleKey {
         fn default() -> Self {
-            let rng = &mut StdRng::seed_from_u64(0xbeef);
+            let mut rng = StdRng::seed_from_u64(0xbeef);
 
-            let sk = SecretKey::random(rng);
-            let message = BlsScalar::random(rng);
-            let proof = Proof::new(&sk, rng, message);
+            let sk = SecretKey::random(&mut rng);
+            let message = BlsScalar::random(&mut rng);
+            let proof = Proof::new(&sk, &mut rng, message);
 
             let k = GENERATOR_EXTENDED * sk.as_ref();
             let k_p = GENERATOR_NUMS_EXTENDED * sk.as_ref();
@@ -167,11 +168,11 @@ fn double_key() {
 
     let label = b"dusk-network";
 
-    let rng = &mut StdRng::seed_from_u64(0xfeeb);
+    let mut rng = StdRng::seed_from_u64(0xfeeb);
 
-    let sk = SecretKey::random(rng);
-    let message = BlsScalar::random(rng);
-    let proof = Proof::new(&sk, rng, message);
+    let sk = SecretKey::random(&mut rng);
+    let message = BlsScalar::random(&mut rng);
+    let proof = Proof::new(&sk, &mut rng, message);
 
     let k = GENERATOR_EXTENDED * sk.as_ref();
     let k_p = GENERATOR_NUMS_EXTENDED * sk.as_ref();
@@ -182,7 +183,7 @@ fn double_key() {
     let circuit = TestDoubleKey::new(proof, k, k_p, message);
 
     let (proof, public_inputs) = prover
-        .prove(rng, &circuit)
+        .prove(&mut rng, &circuit)
         .expect("Proving the circuit should succeed");
 
     verifier

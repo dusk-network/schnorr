@@ -4,8 +4,6 @@
 //
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
-#[cfg(feature = "canon")]
-use canonical_derive::Canon;
 use dusk_bytes::{DeserializableSlice, Error as BytesError, Serializable};
 use dusk_jubjub::GENERATOR_EXTENDED;
 use dusk_pki::{PublicKey, SecretKey};
@@ -29,7 +27,6 @@ fn challenge_hash(R: JubJubExtended, message: BlsScalar) -> JubJubScalar {
 /// [`SecretKey`].
 #[allow(non_snake_case)]
 #[derive(Default, PartialEq, Clone, Copy, Debug)]
-#[cfg_attr(feature = "canon", derive(Canon))]
 #[cfg_attr(
     feature = "rkyv-impl",
     derive(Archive, Deserialize, Serialize),
