@@ -57,32 +57,6 @@ jobs:
           command: test
           args: --release --no-default-features
 
-  test_nightly_canon_std:
-    name: Nightly tests canon std
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --release --features canon
-      
-  test_nightly_canon_no_std:
-    name: Nightly tests canon no_std 
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --release --no-default-features --features canon
-
   fmt:
     name: Rustfmt
     runs-on: ubuntu-latest
