@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.0] - 2023-10-12
+
 ### Changed
 
 - Update `dusk-bls12_381` from `0.11` to `0.12`
@@ -77,35 +79,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Update `dusk-poseidon` from `0.21` to `0.22.0-rc` [#59](https://github.com/dusk-network/schnorr/issues/59)
-- Update `dusk-pki` from `0.7` to `0.8.0-rc` [#59](https://github.com/dusk-network/schnorr/issues/59)
+- Update `dusk-poseidon` from `0.21` to `0.22.0-rc` [#59]
+- Update `dusk-pki` from `0.7` to `0.8.0-rc` [#59]
 
 ## [0.7.0] - 2021-06-02
 
 ### Added
 
-- Add `default-features=false` to `rand_core` [#52](https://github.com/dusk-network/schnorr/issues/52)
+- Add `default-features=false` to `rand_core` [#52]
 
 ### Changed
 
-- Update `canonical` from `0.5` to `0.6` [#41](https://github.com/dusk-network/schnorr/issues/41)
-- Update `dusk-plonk` from `0.6` to `0.8` [#41](https://github.com/dusk-network/schnorr/issues/41)
-- Update `dusk-poseidon` from `0.18` to `0.21.0-rc` [#41](https://github.com/dusk-network/schnorr/issues/41)
-- Update `dusk-pki` from `0.6` to `0.7` [#41](https://github.com/dusk-network/schnorr/issues/41)
-- Change crate name from `schnorr` to `dusk-schnorr` [#41](https://github.com/dusk-network/schnorr/issues/41)
-- Change default crate featureset to be `alloc`. [#50](https://github.com/dusk-network/schnorr/issues/50)
+- Update `canonical` from `0.5` to `0.6` [#41]
+- Update `dusk-plonk` from `0.6` to `0.8` [#41]
+- Update `dusk-poseidon` from `0.18` to `0.21.0-rc` [#41]
+- Update `dusk-pki` from `0.6` to `0.7` [#41]
+- Change crate name from `schnorr` to `dusk-schnorr` [#41]
+- Change default crate featureset to be `alloc`. [#50]
 
 ### Removed
 
-- Remove one hashing level for `message` in signature processing [#55](https://github.com/dusk-network/schnorr/issues/55)
-- Remove `anyhow` from dependencies [#50](https://github.com/dusk-network/schnorr/issues/50)
+- Remove one hashing level for `message` in signature processing [#55]
+- Remove `anyhow` from dependencies [#50]
 
 ## [0.6.0] - 2021-04-06
 
 ### Changed
 
-- Update `dusk-plonk` from `0.6` to `0.7` #37
-- Update `dusk-poseidon` from `0.19` to `0.20` #37
+- Update `dusk-plonk` from `0.6` to `0.7` [#37]
+- Update `dusk-poseidon` from `0.19` to `0.20` [#37]
 
 ## [0.5.2] - 2021-02-15
 
@@ -176,3 +178,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixes
 
 - Fix byte truncation for BLS -> JubJub conversion
+
+<!-- ISSUES -->
+[#59]: https://github.com/dusk-network/schnorr/issues/59
+[#52]: https://github.com/dusk-network/schnorr/issues/52
+[#52]: https://github.com/dusk-network/schnorr/issues/52
+[#50]: https://github.com/dusk-network/schnorr/issues/50
+[#41]: https://github.com/dusk-network/schnorr/issues/41
+[#37]: https://github.com/dusk-network/schnorr/issues/37
+
+<!-- VERSIONS -->
+[Unreleased]: https://github.com/dusk-network/schnorr/compare/v0.14.0...HEAD
+[0.14.0]: https://github.com/dusk-network/schnorr/compare/v0.13.0...v0.14.0
+[0.13.0]: https://github.com/dusk-network/schnorr/compare/v0.12.1...v0.13.0
+[0.12.1]: https://github.com/dusk-network/schnorr/compare/v0.12.0...v0.12.1
+[0.12.0]: https://github.com/dusk-network/schnorr/compare/v0.11.1...v0.12.0
+[0.11.1]: https://github.com/dusk-network/schnorr/compare/v0.11.0...v0.11.1
+[0.11.0]: https://github.com/dusk-network/schnorr/compare/v0.7.0...v0.11.0
+[0.7.0]: https://github.com/dusk-network/schnorr/compare/v0.6.0...v0.7.0
+[0.6.0]: https://github.com/dusk-network/schnorr/compare/v0.5.2...v0.6.0
+[0.5.2]: https://github.com/dusk-network/schnorr/compare/v0.5.1...v0.5.2
+[0.5.1]: https://github.com/dusk-network/schnorr/compare/v0.5.0...v0.5.1
+[0.5.0]: https://github.com/dusk-network/schnorr/compare/v0.4.1...v0.5.0
+[0.4.1]: https://github.com/dusk-network/schnorr/compare/v0.4.0...v0.4.1
+[0.4.0]: https://github.com/dusk-network/schnorr/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/dusk-network/schnorr/compare/v0.2.1...v0.3.0
+[0.2.1]: https://github.com/dusk-network/schnorr/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/dusk-network/schnorr/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/dusk-network/schnorr/releases/tag/v0.1.0
