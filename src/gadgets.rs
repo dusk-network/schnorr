@@ -4,13 +4,38 @@
 //
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
+//! # Schnorr Signature Gadgets
+//!
+//! This module provides Plonk gadgets for verification of Schnorr signatures.
+
 use dusk_jubjub::{GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED};
 use dusk_poseidon::sponge::truncated;
 
 use dusk_plonk::prelude::*;
 
-/// Assert the correctness of the schnorr signature without using the secret key
-/// as witness.
+/// Verifies a single key Schnorr signature within a Plonk circuit without
+/// requiring the secret key as a witness.
+///
+/// The function performs Schnorr verification by calculating the challenge and
+/// confirming the signature equation.
+///
+/// ### Parameters
+///
+/// - `composer`: A mutable reference to the Plonk Composer.
+/// - `u`: Witness for the random nonce used during signature generation.
+/// - `r`: Witness Point representing the nonce point `r = u*G`.
+/// - `k`: Witness Point representing the public key `k = x*G`.
+/// - `m`: Witness for the message.
+///
+/// ### Returns
+///
+/// - `Result<(), Error>`: Returns an empty `Result` on successful verification
+///   or an `Error` on failure.
+///
+/// ### Errors
+///
+/// This function will return an `Error` if the signature verification within
+/// the circuit fails.
 pub fn single_key_verify<C: Composer>(
     composer: &mut C,
     u: Witness,
@@ -33,8 +58,29 @@ pub fn single_key_verify<C: Composer>(
     Ok(())
 }
 
-/// Assert the correctness of the schnorr proof without using the secret key as
-/// witness.
+/// Verifies a double key Schnorr proof within a Plonk circuit without requiring
+/// the secret key as a witness.
+///
+/// This function is an extended version of `single_key_verify`, optimized for
+/// double key pairs.
+///
+/// ### Parameters
+///
+/// - `composer`: A mutable reference to the Plonk Composer.
+/// - `u`: Witness for the random nonce used during signature generation.
+/// - `r`, `r_p`: Witness Points representing the nonce points.
+/// - `k`, `k_p`: Witness Points representing the public keys.
+/// - `m`: Witness for the message.
+///
+/// ### Returns
+///
+/// - `Result<(), Error>`: Returns an empty `Result` on successful verification
+///   or an `Error` on failure.
+///
+/// ### Errors
+///
+/// This function will return an `Error` if the signature verification within
+/// the circuit fails.
 pub fn double_key_verify<C: Composer>(
     composer: &mut C,
     u: Witness,
