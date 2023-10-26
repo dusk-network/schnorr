@@ -42,7 +42,7 @@ fn challenge_hash(R: JubJubExtended, message: BlsScalar) -> JubJubScalar {
 /// ## Feature Flags
 ///
 /// - `rkyv-impl`: Allows for archiving of `Signature`.
-/// 
+///
 /// ## Example
 ///
 /// ```

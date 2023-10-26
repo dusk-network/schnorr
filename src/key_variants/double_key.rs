@@ -30,14 +30,14 @@ use rkyv::{Archive, Deserialize, Serialize};
 use dusk_plonk::prelude::*;
 
 /// Function that creates a challenge hash for the signature scheme.
-/// 
+///
 /// ## Parameters
-/// 
+///
 /// - 'R': A [`PublicKeyPair`] that consists of `(R, R')` public keys.
 /// - `message`: A `BlsScalar` representing the message to be signed.
-/// 
+///
 /// ## Returns
-/// 
+///
 /// A `JubJubScalar` representing the challenge hash.
 fn challenge_hash(R: PublicKeyPair, message: BlsScalar) -> JubJubScalar {
     let R_scalar = (R.0).0.as_ref().to_hash_inputs();
@@ -62,7 +62,7 @@ fn challenge_hash(R: PublicKeyPair, message: BlsScalar) -> JubJubScalar {
 /// This construct allows for a double-key mechanism to enable more advanced
 /// uses then the single-key variant. For example, it is used in Phoenix for
 /// proof delegation while preventing the leakage of secret keys.
-/// 
+///
 /// ## Fields
 ///
 /// - `(R, R')`: Pair of public keys, where `R` is generated from the standard
