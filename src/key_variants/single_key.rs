@@ -4,7 +4,7 @@
 //
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
-//! # Single-key Schnorr Signature
+//! # Single-Key Schnorr Signature
 //!
 //! This module provides functionality for Schnorr-based signatures using a
 //! single key. It includes the `Signature` struct and relevant methods for
