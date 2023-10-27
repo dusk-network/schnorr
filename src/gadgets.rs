@@ -13,7 +13,7 @@ use dusk_poseidon::sponge::truncated;
 
 use dusk_plonk::prelude::*;
 
-/// Verifies a single key Schnorr signature within a Plonk circuit without
+/// Verifies a single-key Schnorr signature within a Plonk circuit without
 /// requiring the secret key as a witness.
 ///
 /// The function performs Schnorr verification by calculating the challenge and
@@ -21,7 +21,7 @@ use dusk_plonk::prelude::*;
 ///
 /// ### Parameters
 ///
-/// - `composer`: A mutable reference to the Plonk Composer.
+/// - `composer`: A mutable reference to the Plonk [`Composer`]`.
 /// - `u`: Witness for the random nonce used during signature generation.
 /// - `r`: Witness Point representing the nonce point `r = u*G`.
 /// - `k`: Witness Point representing the public key `k = x*G`.
@@ -30,12 +30,12 @@ use dusk_plonk::prelude::*;
 /// ### Returns
 ///
 /// - `Result<(), Error>`: Returns an empty `Result` on successful verification
-///   or an `Error` on failure.
+///   or an `Error` if the witness `u` is not a valid [`JubJubScalar`].
 ///
 /// ### Errors
 ///
-/// This function will return an `Error` if the signature verification within
-/// the circuit fails.
+/// This function will return an `Error` if the witness `u` is not a valid
+/// [`JubJubScalar`].
 pub fn single_key_verify<C: Composer>(
     composer: &mut C,
     u: Witness,
@@ -58,7 +58,7 @@ pub fn single_key_verify<C: Composer>(
     Ok(())
 }
 
-/// Verifies a double key Schnorr proof within a Plonk circuit without requiring
+/// Verifies a double-key Schnorr proof within a Plonk circuit without requiring
 /// the secret key as a witness.
 ///
 /// This function is an extended version of `single_key_verify`, optimized for
@@ -66,7 +66,7 @@ pub fn single_key_verify<C: Composer>(
 ///
 /// ### Parameters
 ///
-/// - `composer`: A mutable reference to the Plonk Composer.
+/// - `composer`: A mutable reference to the Plonk [`Composer`].
 /// - `u`: Witness for the random nonce used during signature generation.
 /// - `r`, `r_p`: Witness Points representing the nonce points.
 /// - `k`, `k_p`: Witness Points representing the public keys.
@@ -75,12 +75,12 @@ pub fn single_key_verify<C: Composer>(
 /// ### Returns
 ///
 /// - `Result<(), Error>`: Returns an empty `Result` on successful verification
-///   or an `Error` on failure.
+///   or an `Error` if the witness `u` is not a valid [`JubJubScalar`].
 ///
 /// ### Errors
 ///
-/// This function will return an `Error` if the signature verification within
-/// the circuit fails.
+/// This function will return an `Error` if the witness `u` is not a valid
+/// [`JubJubScalar`].
 pub fn double_key_verify<C: Composer>(
     composer: &mut C,
     u: Witness,

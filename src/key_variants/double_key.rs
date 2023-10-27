@@ -7,14 +7,14 @@
 //! # Double-Key Schnorr Signature
 //!
 //! This module implements a Schnorr signature scheme with a double-key
-//! mechanism. It is primarily used in Phoenix to allow for proof delegation to
-//! prevent the leaking of the secret key.
+//! mechanism. It is primarily used in Phoenix to allow for proof delegation
+//! without leaking the secret key.
 //!
-//! The module includes the `PublicKeyPair` and `Proof` structs. The
-//! `PublicKeyPair` struct contains the public key pairs `(R, R')`, where `R` is
-//! generated from standard generator point `G`, and the other from generator
-//! point `G_NUM`. The `Proof` struct holds the scalar `u` and a
-//! `PublicKeyPair`.
+//! The module includes the [`PublicKeyPair`] and [`Proof`] structs. The
+//! [`PublicKeyPair`] struct contains the public key pairs `(R, R')`, where `R`
+//! is generated from standard generator point `G`, and the other from generator
+//! point `G_NUM`. The [`Proof`] struct holds the scalar `u` and a
+//! [`PublicKeyPair`].
 
 #![allow(non_snake_case)]
 
@@ -138,7 +138,8 @@ impl Serializable<64> for PublicKeyPair {
 ///
 /// ## Fields
 ///
-/// - `u`: Scalar value representing part of the Schnorr signature.
+/// - `u`: A [`JubJubScalar`] scalar value representing part of the Schnorr
+///   signature.
 /// - `keys`: A [`PublicKeyPair`] encapsulating the public keys `(R, R')`.
 ///
 /// ## Example
@@ -247,8 +248,8 @@ impl Proof {
             && point_2.eq(self.keys.R_prime().as_ref())
     }
 
-    /// Converts the `Proof` into witness variables for use in a ZK
-    /// proof.
+    /// Appends the `DoubleKey` as a witness to the cricuit composed by the
+    /// `Composer`.
     ///
     /// # Feature
     ///

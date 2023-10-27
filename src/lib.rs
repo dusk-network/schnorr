@@ -13,9 +13,9 @@
 //!
 //! ## Features
 //!
-//! - **Single Key Signatures**: Provides the traditional Schnorr single-key
+//! - **Single-Key Signatures**: Provides the traditional Schnorr single-key
 //!   signature functionalities.
-//! - **Double Key Signatures**: Extends to double-key variants for specialized
+//! - **Double-Key Signatures**: Extends to double-key variants for specialized
 //!   use-cases.
 //! - **Zero-Knowledge Gadgets**: The library offers pluggable zero-knowledge
 //!   gadgets when compiled with the `alloc` feature.
@@ -28,15 +28,9 @@
 //! - `gadgets`: Provides zero-knowledge gadgets for use in circuits. Available
 //!   only when compiled with the `alloc` feature.
 //!
-//! ## Quick Start
+//! ## Examples
 //!
-//! Add to your `Cargo.toml`:
-//! ```toml
-//! [dependencies]
-//! dusk_schnorr = { version = "0.14.0" }
-//! ```
-//!
-//! ### Example: Signing and verifying a message (Single key)
+//! ### Single Key - Signing and verifying a message
 //!
 //! ```
 //! use dusk_bls12_381::BlsScalar;
@@ -59,7 +53,7 @@
 //! assert!(signature.verify(&pk, message));
 //! ```
 //!
-//! ### Example: Signing and verifying a message (Double key)
+//! ### Double Key - Signing and verifying a message
 //!
 //! ```
 //! use dusk_bls12_381::BlsScalar;

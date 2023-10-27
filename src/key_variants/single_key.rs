@@ -7,7 +7,7 @@
 //! # Single-Key Schnorr Signature
 //!
 //! This module provides functionality for Schnorr-based signatures using a
-//! single key. It includes the `Signature` struct and relevant methods for
+//! single key. It includes the [`Signature`] struct and relevant methods for
 //! signature generation and verification.
 
 use dusk_bytes::{DeserializableSlice, Error as BytesError, Serializable};
@@ -36,8 +36,8 @@ fn challenge_hash(R: JubJubExtended, message: BlsScalar) -> JubJubScalar {
 ///
 /// ## Fields
 ///
-/// - `u`: The `u` scalar representing the Schnorr signature.
-/// - `R`: The `R` point produced as part of the Schnorr signature.
+/// - `u`: A [`JubJubScalar`] scalar representing the Schnorr signature.
+/// - `R`: A [`JubJubExtended`] point produced as part of the Schnorr signature.
 ///
 /// ## Feature Flags
 ///
@@ -100,13 +100,13 @@ impl Signature {
     ///
     /// ## Parameters
     ///
-    /// - `sk`: Reference to the `SecretKey` for signing.
+    /// - `sk`: Reference to the [`SecretKey`] for signing.
     /// - `rng`: Reference to the random number generator.
-    /// - `message`: The message in `BlsScalar` to be signed.
+    /// - `message`: The message in [`BlsScalar`] to be signed.
     ///
     /// ## Returns
     ///
-    /// Returns a new `Signature` containing the `u` scalar and `R` point.
+    /// Returns a new [`Signature`] containing the `u` scalar and `R` point.
     #[allow(non_snake_case)]
     pub fn new<R>(sk: &SecretKey, rng: &mut R, message: BlsScalar) -> Self
     where
@@ -136,9 +136,9 @@ impl Signature {
     ///
     /// ## Parameters
     ///
-    /// - `public_key`: Reference to the `PublicKey` against which the signature
-    ///   is verified.
-    /// - `message`: The message in `BlsScalar` format.
+    /// - `public_key`: Reference to the [`PublicKey`] against which the
+    ///   signature is verified.
+    /// - `message`: The message in [`BlsScalar`] format.
     ///
     /// ## Returns
     ///
@@ -155,7 +155,8 @@ impl Signature {
         point_1.eq(&self.R)
     }
 
-    /// Converts the `Signature` fields to their witness equivalents.
+    /// Appends the single key as a witness to the circuit composed by the
+    /// [`Composer`].
     ///
     /// ## Parameters
     ///
