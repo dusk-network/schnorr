@@ -4,6 +4,18 @@
 //
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
+//! # Double-Key Schnorr Signature
+//!
+//! This module implements a Schnorr signature scheme with a double-key
+//! mechanism. It is primarily used in Phoenix to allow for proof delegation
+//! without leaking the secret key.
+//!
+//! The module includes the [`PublicKeyPair`] and [`Proof`] structs. The
+//! [`PublicKeyPair`] struct contains the public key pairs `(R, R')`, where `R`
+//! is generated from standard generator point `G`, and the other from generator
+//! point `G_NUM`. The [`Proof`] struct holds the scalar `u` and a
+//! [`PublicKeyPair`].
+
 #![allow(non_snake_case)]
 
 use dusk_bytes::{DeserializableSlice, Error as BytesError, Serializable};
@@ -17,7 +29,16 @@ use rkyv::{Archive, Deserialize, Serialize};
 
 use dusk_plonk::prelude::*;
 
-/// Method to create a challenge hash for signature scheme
+/// Function that creates a challenge hash for the signature scheme.
+///
+/// ## Parameters
+///
+/// - 'R': A [`PublicKeyPair`] that consists of `(R, R')` public keys.
+/// - `message`: A `BlsScalar` representing the message to be signed.
+///
+/// ## Returns
+///
+/// A `JubJubScalar` representing the challenge hash.
 fn challenge_hash(R: PublicKeyPair, message: BlsScalar) -> JubJubScalar {
     let R_scalar = (R.0).0.as_ref().to_hash_inputs();
     let R_prime_scalar = (R.0).1.as_ref().to_hash_inputs();
@@ -31,7 +52,31 @@ fn challenge_hash(R: PublicKeyPair, message: BlsScalar) -> JubJubScalar {
     ])
 }
 
-/// Structure repesenting a pair of [`PublicKey`] generated from a [`SecretKey`]
+/// Structure representing a pair of [`PublicKey`] objects generated from a
+/// [`SecretKey`].
+///
+/// The `PublicKeyPair` struct contains two types of public keys, `(R, R')`,
+/// which are generated from different bases. Specifically, `R` is generated
+/// from the standard generator point `G`, and `R'` is generated from `G_NUM`.
+///
+/// This construct allows for a double-key mechanism to enable more advanced
+/// uses then the single-key variant. For example, it is used in Phoenix for
+/// proof delegation while preventing the leakage of secret keys.
+///
+/// ## Fields
+///
+/// - `(R, R')`: Pair of public keys, where `R` is generated from the standard
+///   generator point `G` and `R'` is generated from `G_NUM`.
+///
+/// ## Example
+/// ```
+/// use dusk_pki::SecretKey;
+/// use rand::thread_rng;
+/// use dusk_schnorr::PublicKeyPair;
+///
+/// let sk = SecretKey::random(&mut thread_rng());
+/// let pk_pair = PublicKeyPair::from(&sk);
+/// ```
 #[derive(Default, Clone, Copy, Debug)]
 #[cfg_attr(
     feature = "rkyv-impl",
@@ -41,12 +86,14 @@ fn challenge_hash(R: PublicKeyPair, message: BlsScalar) -> JubJubScalar {
 pub struct PublicKeyPair(pub(crate) (PublicKey, PublicKey));
 
 impl PublicKeyPair {
-    /// R ecc generator point
+    /// Returns the `PublicKey` corresponding to the standard elliptic curve
+    /// generator point `G`.
     pub fn R(&self) -> &PublicKey {
         &self.0 .0
     }
 
-    /// R ecc generator nums point
+    /// Returns the `PublicKey` corresponding to the secondary elliptic curve
+    /// generator point `G_NUM`.
     pub fn R_prime(&self) -> &PublicKey {
         &self.0 .1
     }
@@ -86,6 +133,26 @@ impl Serializable<64> for PublicKeyPair {
     }
 }
 
+/// Structure representing a Schnorr signature proof with a double-key
+/// mechanism.
+///
+/// ## Fields
+///
+/// - `u`: A [`JubJubScalar`] scalar value representing part of the Schnorr
+///   signature.
+/// - `keys`: A [`PublicKeyPair`] encapsulating the public keys `(R, R')`.
+///
+/// ## Example
+/// ```
+/// use dusk_pki::SecretKey;
+/// use rand::thread_rng;
+/// use dusk_schnorr::{PublicKeyPair, Proof};
+/// use dusk_bls12_381::BlsScalar;
+///
+/// let sk = SecretKey::random(&mut thread_rng());
+/// let message = BlsScalar::from(10);
+/// let proof = Proof::new(&sk, &mut thread_rng(), message);
+/// ```
 #[derive(Default, Clone, Copy, Debug)]
 #[cfg_attr(
     feature = "rkyv-impl",
@@ -98,18 +165,32 @@ pub struct Proof {
 }
 
 impl Proof {
+    /// Returns the `JubJubScalar` `u` component of the Schnorr signature.
     pub fn u(&self) -> &JubJubScalar {
         &self.u
     }
 
+    /// Returns the `PublicKeyPair` that comprises the Schnorr signature.
     pub fn keys(&self) -> &PublicKeyPair {
         &self.keys
     }
 
-    /// An Schnorr signature, produced by signing a message with a
-    /// [`SecretKey`].
-    // Signs a chosen message with a given secret key
-    // using the dusk variant of the Schnorr signature scheme.
+    /// Constructs a new `Proof` instance by signing a given message with a
+    /// `SecretKey`.
+    ///
+    /// Utilizes a secure random number generator to create a unique random
+    /// scalar, and subsequently computes public key points `(R, R')` and a
+    /// scalar signature `u`.
+    ///
+    /// # Parameters
+    ///
+    /// * `sk`: Reference to a `SecretKey`.
+    /// * `rng`: Cryptographically secure random number generator.
+    /// * `message`: Message as a `BlsScalar`.
+    ///
+    /// # Returns
+    ///
+    /// A new `Proof` instance.
     pub fn new<R>(sk: &SecretKey, rng: &mut R, message: BlsScalar) -> Self
     where
         R: RngCore + CryptoRng,
@@ -133,8 +214,20 @@ impl Proof {
         Self { u, keys }
     }
 
-    /// Function to verify that two given point in a Schnorr signature
-    /// have the same DLP
+    /// Verifies that two given points in a Schnorr signature share the same
+    /// Discrete Logarithm Problem (DLP).
+    ///
+    /// It computes the challenge scalar and verifies the equality of points,
+    /// thereby ensuring the signature is valid.
+    ///
+    /// # Parameters
+    ///
+    /// * `public_key_pair`: Reference to a `PublicKeyPair`.
+    /// * `message`: Message as a `BlsScalar`.
+    ///
+    /// # Returns
+    ///
+    /// A boolean value indicating the validity of the Schnorr signature.
     pub fn verify(
         &self,
         public_key_pair: &PublicKeyPair,
@@ -154,6 +247,22 @@ impl Proof {
         point_1.eq(self.keys.R().as_ref())
             && point_2.eq(self.keys.R_prime().as_ref())
     }
+
+    /// Appends the `DoubleKey` as a witness to the cricuit composed by the
+    /// `Composer`.
+    ///
+    /// # Feature
+    ///
+    /// This function is only available when the "alloc" feature is enabled.
+    ///
+    /// # Parameters
+    ///
+    /// * `composer`: Mutable reference to a `Composer`.
+    ///
+    /// # Returns
+    ///
+    /// A tuple comprising the `Witness` of scalar `u`, and `WitnessPoint`s of
+    /// `(R, R')`.
 
     #[cfg(feature = "alloc")]
     pub fn to_witness<C: Composer>(

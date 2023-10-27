@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add lib and module level documentation [#49]
+
 ## [0.14.0] - 2023-10-12
 
 ### Changed
@@ -184,6 +188,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#52]: https://github.com/dusk-network/schnorr/issues/52
 [#52]: https://github.com/dusk-network/schnorr/issues/52
 [#50]: https://github.com/dusk-network/schnorr/issues/50
+[#49]: https://github.com/dusk-network/schnorr/issues/49
 [#41]: https://github.com/dusk-network/schnorr/issues/41
 [#37]: https://github.com/dusk-network/schnorr/issues/37
 
