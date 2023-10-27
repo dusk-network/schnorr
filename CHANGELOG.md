@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add lib and module level documentation [#49]
 
+### Changed
+
+- Rename `double_key::Proof` struct to `double_key::Signature` [#89]
+- Deprecate `Proof` public struct [#89]
+- Re-export `double_key::Proof` as `DoubleSignature` [#89]
+
 ## [0.14.0] - 2023-10-12
 
 ### Changed
@@ -184,6 +190,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix byte truncation for BLS -> JubJub conversion
 
 <!-- ISSUES -->
+[#89]: https://github.com/dusk-network/schnorr/issues/89
 [#59]: https://github.com/dusk-network/schnorr/issues/59
 [#52]: https://github.com/dusk-network/schnorr/issues/52
 [#52]: https://github.com/dusk-network/schnorr/issues/52
