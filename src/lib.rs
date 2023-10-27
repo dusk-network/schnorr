@@ -58,7 +58,7 @@
 //! ```
 //! use dusk_bls12_381::BlsScalar;
 //! use dusk_pki::SecretKey;
-//! use dusk_schnorr::{Proof, PublicKeyPair};
+//! use dusk_schnorr::{DoubleSignature, PublicKeyPair};
 //! use ff::Field;
 //! use rand::rngs::StdRng;
 //! use rand::SeedableRng;
@@ -69,9 +69,9 @@
 //! let message = BlsScalar::random(&mut rng);
 //! let pk_pair: PublicKeyPair = sk.into();
 //!
-//! let proof = Proof::new(&sk, &mut rng, message);
+//! let signature = DoubleSignature::new(&sk, &mut rng, message);
 //!
-//! assert!(proof.verify(&pk_pair, message));
+//! assert!(signature.verify(&pk_pair, message));
 //! ```
 #![no_std]
 
@@ -80,5 +80,10 @@ mod key_variants;
 #[cfg(feature = "alloc")]
 pub mod gadgets;
 
-pub use key_variants::double_key::{Proof, PublicKeyPair};
+#[deprecated(note = "Please use DoubleSignature instead")]
+pub type Proof = key_variants::double_key::Signature;
+
+pub use key_variants::double_key::{
+    PublicKeyPair, Signature as DoubleSignature,
+};
 pub use key_variants::single_key::Signature;
