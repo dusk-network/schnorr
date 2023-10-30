@@ -9,7 +9,8 @@ use criterion::{criterion_group, criterion_main, Criterion};
 use dusk_jubjub::{GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED};
 use dusk_pki::SecretKey;
 use dusk_plonk::error::Error as PlonkError;
-use dusk_schnorr::{gadgets, Proof, Signature};
+use dusk_schnorr::{gadgets, DoubleSignature, Signature};
+use ff::Field;
 use rand::rngs::StdRng;
 use rand::SeedableRng;
 
@@ -98,7 +99,7 @@ impl Circuit for TestSingleKey {
 }
 
 struct TestDoubleKey {
-    proof: Proof,
+    signature: DoubleSignature,
     k: JubJubExtended,
     k_p: JubJubExtended,
     message: BlsScalar,
@@ -110,13 +111,13 @@ impl Default for TestDoubleKey {
 
         let sk = SecretKey::random(rng);
         let message = BlsScalar::random(rng);
-        let proof = Proof::new(&sk, rng, message);
+        let signature = DoubleSignature::new(&sk, rng, message);
 
         let k = GENERATOR_EXTENDED * sk.as_ref();
         let k_p = GENERATOR_NUMS_EXTENDED * sk.as_ref();
 
         Self {
-            proof,
+            signature,
             k,
             k_p,
             message,
@@ -126,13 +127,13 @@ impl Default for TestDoubleKey {
 
 impl TestDoubleKey {
     pub fn new(
-        proof: Proof,
+        signature: DoubleSignature,
         k: JubJubExtended,
         k_p: JubJubExtended,
         message: BlsScalar,
     ) -> Self {
         Self {
-            proof,
+            signature,
             k,
             k_p,
             message,
@@ -146,7 +147,7 @@ impl Circuit for TestDoubleKey {
         &mut self,
         composer: &mut TurboComposer,
     ) -> Result<(), PlonkError> {
-        let (u, r, r_p) = self.proof.to_witness(composer);
+        let (u, r, r_p) = self.signature.to_witness(composer);
 
         let k = composer.append_point(self.k);
         let k_p = composer.append_point(self.k_p);
@@ -177,7 +178,7 @@ fn single_key_prover(input: &TestSingleKey, pk: &ProverKey) {
 }
 
 fn double_key_prover(input: &TestDoubleKey, pk: &ProverKey) {
-    TestDoubleKey::new(input.proof, input.k, input.k_p, input.message)
+    TestDoubleKey::new(input.signature, input.k, input.k_p, input.message)
         .prove(&PP, &pk, LABEL)
         .expect("Failed to prove");
 }

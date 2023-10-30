@@ -7,7 +7,7 @@
 use dusk_jubjub::{GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED};
 use dusk_pki::SecretKey;
 use dusk_plonk::error::Error as PlonkError;
-use dusk_schnorr::{gadgets, Proof, Signature};
+use dusk_schnorr::{gadgets, DoubleSignature, Signature};
 use ff::Field;
 use rand::rngs::StdRng;
 use rand::SeedableRng;
@@ -107,7 +107,7 @@ fn single_key() {
 fn double_key() {
     #[derive(Debug)]
     struct TestDoubleKey {
-        proof: Proof,
+        signature: DoubleSignature,
         k: JubJubExtended,
         k_p: JubJubExtended,
         message: BlsScalar,
@@ -119,13 +119,13 @@ fn double_key() {
 
             let sk = SecretKey::random(&mut rng);
             let message = BlsScalar::random(&mut rng);
-            let proof = Proof::new(&sk, &mut rng, message);
+            let signature = DoubleSignature::new(&sk, &mut rng, message);
 
             let k = GENERATOR_EXTENDED * sk.as_ref();
             let k_p = GENERATOR_NUMS_EXTENDED * sk.as_ref();
 
             Self {
-                proof,
+                signature,
                 k,
                 k_p,
                 message,
@@ -135,13 +135,13 @@ fn double_key() {
 
     impl TestDoubleKey {
         pub fn new(
-            proof: Proof,
+            signature: DoubleSignature,
             k: JubJubExtended,
             k_p: JubJubExtended,
             message: BlsScalar,
         ) -> Self {
             Self {
-                proof,
+                signature,
                 k,
                 k_p,
                 message,
@@ -154,7 +154,7 @@ fn double_key() {
             &self,
             composer: &mut C,
         ) -> Result<(), PlonkError> {
-            let (u, r, r_p) = self.proof.to_witness(composer);
+            let (u, r, r_p) = self.signature.to_witness(composer);
 
             let k = composer.append_point(self.k);
             let k_p = composer.append_point(self.k_p);
@@ -172,7 +172,7 @@ fn double_key() {
 
     let sk = SecretKey::random(&mut rng);
     let message = BlsScalar::random(&mut rng);
-    let proof = Proof::new(&sk, &mut rng, message);
+    let signature = DoubleSignature::new(&sk, &mut rng, message);
 
     let k = GENERATOR_EXTENDED * sk.as_ref();
     let k_p = GENERATOR_NUMS_EXTENDED * sk.as_ref();
@@ -180,7 +180,7 @@ fn double_key() {
     let (prover, verifier) = Compiler::compile::<TestDoubleKey>(&PP, label)
         .expect("Circuit compilation should succeed");
 
-    let circuit = TestDoubleKey::new(proof, k, k_p, message);
+    let circuit = TestDoubleKey::new(signature, k, k_p, message);
 
     let (proof, public_inputs) = prover
         .prove(&mut rng, &circuit)

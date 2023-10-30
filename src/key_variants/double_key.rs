@@ -10,10 +10,10 @@
 //! mechanism. It is primarily used in Phoenix to allow for proof delegation
 //! without leaking the secret key.
 //!
-//! The module includes the [`PublicKeyPair`] and [`Proof`] structs. The
+//! The module includes the [`PublicKeyPair`] and [`Signature`] structs. The
 //! [`PublicKeyPair`] struct contains the public key pairs `(R, R')`, where `R`
 //! is generated from standard generator point `G`, and the other from generator
-//! point `G_NUM`. The [`Proof`] struct holds the scalar `u` and a
+//! point `G_NUM`. The [`Signature`] struct holds the scalar `u` and a
 //! [`PublicKeyPair`].
 
 #![allow(non_snake_case)]
@@ -133,7 +133,7 @@ impl Serializable<64> for PublicKeyPair {
     }
 }
 
-/// Structure representing a Schnorr signature proof with a double-key
+/// Structure representing a Schnorr signature with a double-key
 /// mechanism.
 ///
 /// ## Fields
@@ -146,12 +146,12 @@ impl Serializable<64> for PublicKeyPair {
 /// ```
 /// use dusk_pki::SecretKey;
 /// use rand::thread_rng;
-/// use dusk_schnorr::{PublicKeyPair, Proof};
+/// use dusk_schnorr::{PublicKeyPair, DoubleSignature};
 /// use dusk_bls12_381::BlsScalar;
 ///
 /// let sk = SecretKey::random(&mut thread_rng());
 /// let message = BlsScalar::from(10);
-/// let proof = Proof::new(&sk, &mut thread_rng(), message);
+/// let signature = DoubleSignature::new(&sk, &mut thread_rng(), message);
 /// ```
 #[derive(Default, Clone, Copy, Debug)]
 #[cfg_attr(
@@ -159,12 +159,12 @@ impl Serializable<64> for PublicKeyPair {
     derive(Archive, Deserialize, Serialize),
     archive_attr(derive(bytecheck::CheckBytes))
 )]
-pub struct Proof {
+pub struct Signature {
     u: JubJubScalar,
     keys: PublicKeyPair,
 }
 
-impl Proof {
+impl Signature {
     /// Returns the `JubJubScalar` `u` component of the Schnorr signature.
     pub fn u(&self) -> &JubJubScalar {
         &self.u
@@ -175,7 +175,7 @@ impl Proof {
         &self.keys
     }
 
-    /// Constructs a new `Proof` instance by signing a given message with a
+    /// Constructs a new `Signature` instance by signing a given message with a
     /// `SecretKey`.
     ///
     /// Utilizes a secure random number generator to create a unique random
@@ -190,7 +190,7 @@ impl Proof {
     ///
     /// # Returns
     ///
-    /// A new `Proof` instance.
+    /// A new `Signature` instance.
     pub fn new<R>(sk: &SecretKey, rng: &mut R, message: BlsScalar) -> Self
     where
         R: RngCore + CryptoRng,
@@ -277,7 +277,7 @@ impl Proof {
     }
 }
 
-impl Serializable<96> for Proof {
+impl Serializable<96> for Signature {
     type Error = BytesError;
 
     fn to_bytes(&self) -> [u8; Self::SIZE] {
