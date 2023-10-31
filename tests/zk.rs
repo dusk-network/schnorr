@@ -5,9 +5,8 @@
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
 use dusk_jubjub::{GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED};
-use dusk_pki::SecretKey;
 use dusk_plonk::error::Error as PlonkError;
-use dusk_schnorr::{gadgets, DoubleSignature, Signature};
+use dusk_schnorr::{gadgets, DoubleSignature, NoteSecretKey, Signature};
 use ff::Field;
 use rand::rngs::StdRng;
 use rand::SeedableRng;
@@ -36,7 +35,7 @@ fn single_key() {
         fn default() -> Self {
             let mut rng = StdRng::seed_from_u64(0xbeef);
 
-            let sk = SecretKey::random(&mut rng);
+            let sk = NoteSecretKey::random(&mut rng);
             let message = BlsScalar::random(&mut rng);
             let signature = Signature::new(&sk, &mut rng, message);
 
@@ -84,7 +83,7 @@ fn single_key() {
 
     let mut rng = StdRng::seed_from_u64(0xfeeb);
 
-    let sk = SecretKey::random(&mut rng);
+    let sk = NoteSecretKey::random(&mut rng);
     let message = BlsScalar::random(&mut rng);
     let signature = Signature::new(&sk, &mut rng, message);
 
@@ -117,7 +116,7 @@ fn double_key() {
         fn default() -> Self {
             let mut rng = StdRng::seed_from_u64(0xbeef);
 
-            let sk = SecretKey::random(&mut rng);
+            let sk = NoteSecretKey::random(&mut rng);
             let message = BlsScalar::random(&mut rng);
             let signature = DoubleSignature::new(&sk, &mut rng, message);
 
@@ -170,7 +169,7 @@ fn double_key() {
 
     let mut rng = StdRng::seed_from_u64(0xfeeb);
 
-    let sk = SecretKey::random(&mut rng);
+    let sk = NoteSecretKey::random(&mut rng);
     let message = BlsScalar::random(&mut rng);
     let signature = DoubleSignature::new(&sk, &mut rng, message);
 

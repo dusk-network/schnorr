@@ -7,9 +7,8 @@
 use criterion::{criterion_group, criterion_main, Criterion};
 
 use dusk_jubjub::{GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED};
-use dusk_pki::SecretKey;
 use dusk_plonk::error::Error as PlonkError;
-use dusk_schnorr::{gadgets, DoubleSignature, Signature};
+use dusk_schnorr::{gadgets, DoubleSignature, NoteSecretKey, Signature};
 use ff::Field;
 use rand::rngs::StdRng;
 use rand::SeedableRng;
@@ -41,7 +40,7 @@ impl Default for TestSingleKey {
     fn default() -> Self {
         let rng = &mut StdRng::seed_from_u64(0xbeef);
 
-        let sk = SecretKey::random(rng);
+        let sk = NoteSecretKey::random(rng);
         let message = BlsScalar::random(rng);
         let signature = Signature::new(&sk, rng, message);
 
@@ -109,7 +108,7 @@ impl Default for TestDoubleKey {
     fn default() -> Self {
         let rng = &mut StdRng::seed_from_u64(0xbeef);
 
-        let sk = SecretKey::random(rng);
+        let sk = NoteSecretKey::random(rng);
         let message = BlsScalar::random(rng);
         let signature = DoubleSignature::new(&sk, rng, message);
 
