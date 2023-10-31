@@ -18,9 +18,9 @@
 
 #![allow(non_snake_case)]
 
+use crate::{NotePublicKey, NoteSecretKey};
 use dusk_bytes::{DeserializableSlice, Error as BytesError, Serializable};
 use dusk_jubjub::{GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED};
-use dusk_pki::{PublicKey, SecretKey};
 use dusk_poseidon::sponge::truncated;
 use rand_core::{CryptoRng, RngCore};
 
@@ -52,8 +52,8 @@ fn challenge_hash(R: PublicKeyPair, message: BlsScalar) -> JubJubScalar {
     ])
 }
 
-/// Structure representing a pair of [`PublicKey`] objects generated from a
-/// [`SecretKey`].
+/// Structure representing a pair of [`NotePublicKey`] objects generated from a
+/// [`NoteSecretKey`].
 ///
 /// The `PublicKeyPair` struct contains two types of public keys, `(R, R')`,
 /// which are generated from different bases. Specifically, `R` is generated
@@ -70,11 +70,10 @@ fn challenge_hash(R: PublicKeyPair, message: BlsScalar) -> JubJubScalar {
 ///
 /// ## Example
 /// ```
-/// use dusk_pki::SecretKey;
 /// use rand::thread_rng;
-/// use dusk_schnorr::PublicKeyPair;
+/// use dusk_schnorr::{NoteSecretKey, PublicKeyPair};
 ///
-/// let sk = SecretKey::random(&mut thread_rng());
+/// let sk = NoteSecretKey::random(&mut thread_rng());
 /// let pk_pair = PublicKeyPair::from(&sk);
 /// ```
 #[derive(Default, Clone, Copy, Debug)]
@@ -83,34 +82,34 @@ fn challenge_hash(R: PublicKeyPair, message: BlsScalar) -> JubJubScalar {
     derive(Archive, Deserialize, Serialize),
     archive_attr(derive(bytecheck::CheckBytes))
 )]
-pub struct PublicKeyPair(pub(crate) (PublicKey, PublicKey));
+pub struct PublicKeyPair(pub(crate) (NotePublicKey, NotePublicKey));
 
 impl PublicKeyPair {
-    /// Returns the `PublicKey` corresponding to the standard elliptic curve
+    /// Returns the `NotePublicKey` corresponding to the standard elliptic curve
     /// generator point `G`.
-    pub fn R(&self) -> &PublicKey {
+    pub fn R(&self) -> &NotePublicKey {
         &self.0 .0
     }
 
-    /// Returns the `PublicKey` corresponding to the secondary elliptic curve
-    /// generator point `G_NUM`.
-    pub fn R_prime(&self) -> &PublicKey {
+    /// Returns the `NotePublicKey` corresponding to the secondary elliptic
+    /// curve generator point `G_NUM`.
+    pub fn R_prime(&self) -> &NotePublicKey {
         &self.0 .1
     }
 }
 
-impl From<&SecretKey> for PublicKeyPair {
-    fn from(sk: &SecretKey) -> Self {
-        let public_key = PublicKey::from(sk);
+impl From<&NoteSecretKey> for PublicKeyPair {
+    fn from(sk: &NoteSecretKey) -> Self {
+        let public_key = NotePublicKey::from(sk);
         let public_key_prime =
-            PublicKey::from(GENERATOR_NUMS_EXTENDED * sk.as_ref());
+            NotePublicKey::from(GENERATOR_NUMS_EXTENDED * sk.as_ref());
 
         PublicKeyPair((public_key, public_key_prime))
     }
 }
 
-impl From<SecretKey> for PublicKeyPair {
-    fn from(sk: SecretKey) -> Self {
+impl From<NoteSecretKey> for PublicKeyPair {
+    fn from(sk: NoteSecretKey) -> Self {
         (&sk).into()
     }
 }
@@ -127,8 +126,8 @@ impl Serializable<64> for PublicKeyPair {
 
     fn from_bytes(bytes: &[u8; Self::SIZE]) -> Result<Self, Self::Error> {
         Ok(PublicKeyPair((
-            PublicKey::from_slice(&bytes[..32])?,
-            PublicKey::from_slice(&bytes[32..])?,
+            NotePublicKey::from_slice(&bytes[..32])?,
+            NotePublicKey::from_slice(&bytes[32..])?,
         )))
     }
 }
@@ -144,12 +143,11 @@ impl Serializable<64> for PublicKeyPair {
 ///
 /// ## Example
 /// ```
-/// use dusk_pki::SecretKey;
 /// use rand::thread_rng;
-/// use dusk_schnorr::{PublicKeyPair, DoubleSignature};
+/// use dusk_schnorr::{NoteSecretKey, PublicKeyPair, DoubleSignature};
 /// use dusk_bls12_381::BlsScalar;
 ///
-/// let sk = SecretKey::random(&mut thread_rng());
+/// let sk = NoteSecretKey::random(&mut thread_rng());
 /// let message = BlsScalar::from(10);
 /// let signature = DoubleSignature::new(&sk, &mut thread_rng(), message);
 /// ```
@@ -176,7 +174,7 @@ impl Signature {
     }
 
     /// Constructs a new `Signature` instance by signing a given message with a
-    /// `SecretKey`.
+    /// `NoteSecretKey`.
     ///
     /// Utilizes a secure random number generator to create a unique random
     /// scalar, and subsequently computes public key points `(R, R')` and a
@@ -184,14 +182,14 @@ impl Signature {
     ///
     /// # Parameters
     ///
-    /// * `sk`: Reference to a `SecretKey`.
+    /// * `sk`: Reference to a `NoteSecretKey`.
     /// * `rng`: Cryptographically secure random number generator.
     /// * `message`: Message as a `BlsScalar`.
     ///
     /// # Returns
     ///
     /// A new `Signature` instance.
-    pub fn new<R>(sk: &SecretKey, rng: &mut R, message: BlsScalar) -> Self
+    pub fn new<R>(sk: &NoteSecretKey, rng: &mut R, message: BlsScalar) -> Self
     where
         R: RngCore + CryptoRng,
     {
@@ -203,8 +201,10 @@ impl Signature {
         // R_prime = r * G_NUM
         let R = GENERATOR_EXTENDED * r;
         let R_prime = GENERATOR_NUMS_EXTENDED * r;
-        let keys =
-            PublicKeyPair((PublicKey::from(R), PublicKey::from(R_prime)));
+        let keys = PublicKeyPair((
+            NotePublicKey::from(R),
+            NotePublicKey::from(R_prime),
+        ));
         // Compute challenge value, c = H(R||R_prime||H(m));
         let c = challenge_hash(keys, message);
 

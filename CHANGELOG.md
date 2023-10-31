@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Move `SecretKey` & `PublicKey` from dusk_pki and renamed them to `NoteSecretKey` & `NotePublicKey` [#80]
 - Add lib and module level documentation [#49]
 
 ### Changed
@@ -190,6 +191,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix byte truncation for BLS -> JubJub conversion
 
 <!-- ISSUES -->
+[#80]: https://github.com/dusk-network/schnorr/issues/80
 [#89]: https://github.com/dusk-network/schnorr/issues/89
 [#59]: https://github.com/dusk-network/schnorr/issues/59
 [#52]: https://github.com/dusk-network/schnorr/issues/52

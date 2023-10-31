@@ -10,9 +10,9 @@
 //! single key. It includes the [`Signature`] struct and relevant methods for
 //! signature generation and verification.
 
+use crate::{NotePublicKey, NoteSecretKey};
 use dusk_bytes::{DeserializableSlice, Error as BytesError, Serializable};
 use dusk_jubjub::GENERATOR_EXTENDED;
-use dusk_pki::{PublicKey, SecretKey};
 use dusk_poseidon::sponge;
 use rand_core::{CryptoRng, RngCore};
 
@@ -30,7 +30,7 @@ fn challenge_hash(R: JubJubExtended, message: BlsScalar) -> JubJubScalar {
 }
 
 /// An Schnorr signature, produced by signing a message with a
-/// [`SecretKey`].
+/// [`NoteSecretKey`].
 ///
 /// The `Signature` struct encapsulates variables of the Schnorr scheme.
 ///
@@ -47,17 +47,16 @@ fn challenge_hash(R: JubJubExtended, message: BlsScalar) -> JubJubScalar {
 ///
 /// ```
 /// use dusk_bls12_381::BlsScalar;
-/// use dusk_pki::{PublicKey, SecretKey};
-/// use dusk_schnorr::Signature;
+/// use dusk_schnorr::{NotePublicKey, NoteSecretKey, Signature};
 /// use ff::Field;
 /// use rand::rngs::StdRng;
 /// use rand::SeedableRng;
 ///
 /// let mut rng = StdRng::seed_from_u64(1234u64);
 ///
-/// let sk = SecretKey::random(&mut rng);
+/// let sk = NoteSecretKey::random(&mut rng);
 /// let message = BlsScalar::random(&mut rng);
-/// let pk = PublicKey::from(&sk);
+/// let pk = NotePublicKey::from(&sk);
 ///
 /// // Sign the message
 /// let signature = Signature::new(&sk, &mut rng, message);
@@ -100,7 +99,7 @@ impl Signature {
     ///
     /// ## Parameters
     ///
-    /// - `sk`: Reference to the [`SecretKey`] for signing.
+    /// - `sk`: Reference to the [`NoteSecretKey`] for signing.
     /// - `rng`: Reference to the random number generator.
     /// - `message`: The message in [`BlsScalar`] to be signed.
     ///
@@ -108,7 +107,7 @@ impl Signature {
     ///
     /// Returns a new [`Signature`] containing the `u` scalar and `R` point.
     #[allow(non_snake_case)]
-    pub fn new<R>(sk: &SecretKey, rng: &mut R, message: BlsScalar) -> Self
+    pub fn new<R>(sk: &NoteSecretKey, rng: &mut R, message: BlsScalar) -> Self
     where
         R: RngCore + CryptoRng,
     {
@@ -136,7 +135,7 @@ impl Signature {
     ///
     /// ## Parameters
     ///
-    /// - `public_key`: Reference to the [`PublicKey`] against which the
+    /// - `public_key`: Reference to the [`NotePublicKey`] against which the
     ///   signature is verified.
     /// - `message`: The message in [`BlsScalar`] format.
     ///
@@ -144,7 +143,11 @@ impl Signature {
     ///
     /// Returns a boolean value indicating the verification result. `true` if
     /// verification is successful, `false` otherwise.
-    pub fn verify(&self, public_key: &PublicKey, message: BlsScalar) -> bool {
+    pub fn verify(
+        &self,
+        public_key: &NotePublicKey,
+        message: BlsScalar,
+    ) -> bool {
         // Compute challenge value, c = H(R||H(m));
         let c = challenge_hash(self.R, message);
 

@@ -34,17 +34,16 @@
 //!
 //! ```
 //! use dusk_bls12_381::BlsScalar;
-//! use dusk_pki::{PublicKey, SecretKey};
-//! use dusk_schnorr::Signature;
+//! use dusk_schnorr::{NotePublicKey, NoteSecretKey, Signature};
 //! use ff::Field;
 //! use rand::rngs::StdRng;
 //! use rand::SeedableRng;
 //!
 //! let mut rng = StdRng::seed_from_u64(1234u64);
 //!
-//! let sk = SecretKey::random(&mut rng);
+//! let sk = NoteSecretKey::random(&mut rng);
 //! let message = BlsScalar::random(&mut rng);
-//! let pk = PublicKey::from(&sk);
+//! let pk = NotePublicKey::from(&sk);
 //!
 //! // Sign the message
 //! let signature = Signature::new(&sk, &mut rng, message);
@@ -57,15 +56,14 @@
 //!
 //! ```
 //! use dusk_bls12_381::BlsScalar;
-//! use dusk_pki::SecretKey;
-//! use dusk_schnorr::{DoubleSignature, PublicKeyPair};
+//! use dusk_schnorr::{NoteSecretKey, DoubleSignature, PublicKeyPair};
 //! use ff::Field;
 //! use rand::rngs::StdRng;
 //! use rand::SeedableRng;
 //!
 //! let mut rng = StdRng::seed_from_u64(2321u64);
 //!
-//! let sk = SecretKey::random(&mut rng);
+//! let sk = NoteSecretKey::random(&mut rng);
 //! let message = BlsScalar::random(&mut rng);
 //! let pk_pair: PublicKeyPair = sk.into();
 //!
@@ -76,6 +74,7 @@
 #![no_std]
 
 mod key_variants;
+mod keys;
 
 #[cfg(feature = "alloc")]
 pub mod gadgets;
@@ -87,3 +86,5 @@ pub use key_variants::double_key::{
     PublicKeyPair, Signature as DoubleSignature,
 };
 pub use key_variants::single_key::Signature;
+pub use keys::public::NotePublicKey;
+pub use keys::secret::NoteSecretKey;
