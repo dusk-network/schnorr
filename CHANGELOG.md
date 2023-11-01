@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.15.0] - 2023-11-1
+
 ### Added
 
 - Move `SecretKey` & `PublicKey` from dusk_pki and renamed them to `NoteSecretKey` & `NotePublicKey` [#80]
@@ -202,7 +204,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#37]: https://github.com/dusk-network/schnorr/issues/37
 
 <!-- VERSIONS -->
-[Unreleased]: https://github.com/dusk-network/schnorr/compare/v0.14.0...HEAD
+[Unreleased]: https://github.com/dusk-network/schnorr/compare/v0.15.0...HEAD
+[0.15.0]: https://github.com/dusk-network/schnorr/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/dusk-network/schnorr/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/dusk-network/schnorr/compare/v0.12.1...v0.13.0
 [0.12.1]: https://github.com/dusk-network/schnorr/compare/v0.12.0...v0.12.1
