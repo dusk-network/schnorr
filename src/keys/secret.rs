@@ -102,7 +102,7 @@ impl NoteSecretKey {
         let R = GENERATOR_EXTENDED * r;
 
         // Compute challenge value, c = H(R||H(m));
-        let c = crate::key_variants::single_key::challenge_hash(&R, msg);
+        let c = crate::signatures::single_key::challenge_hash(&R, msg);
 
         // Compute scalar signature, U = r - c * sk,
         let u = r - (c * self.as_ref());
@@ -147,7 +147,7 @@ impl NoteSecretKey {
             NotePublicKey::from(R_prime),
         ));
         // Compute challenge value, c = H(R||R_prime||H(m));
-        let c = crate::key_variants::double_key::challenge_hash(&keys, message);
+        let c = crate::signatures::double_key::challenge_hash(&keys, message);
 
         // Compute scalar signature, U = r - c * sk,
         let u = r - (c * self.as_ref());
