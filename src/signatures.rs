@@ -4,11 +4,11 @@
 //
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
-//! # Key Variants
+//! # Signatures
 //!
 //! Modules for single-key and double-key Schnorr signatures.
 //!
-//! - `single_key`: Standard Schnorr signatures.
-//! - `double_key`: Advanced Schnorr with double-key mechanism.
+//! - `single_key`: Standard Schnorr signature.
+//! - `double_key`: Advanced Schnorr signature with double-key mechanism.
 pub mod double_key;
 pub mod single_key;
