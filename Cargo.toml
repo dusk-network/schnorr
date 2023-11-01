@@ -1,6 +1,6 @@
 [package]
 name = "dusk-schnorr"
-version = "0.14.0"
+version = "0.15.0"
 authors = [
   "Luke Pearson <luke@dusk.network>", "zer0 <matteo@dusk.network>",
   "Victor Lopez <victor@dusk.network>", "CPerezz <carlos@dusk.network>"
