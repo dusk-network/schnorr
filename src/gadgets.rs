@@ -9,7 +9,7 @@
 //! This module provides Plonk gadgets for verification of Schnorr signatures.
 
 use dusk_jubjub::{GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED};
-use dusk_poseidon::sponge::truncated;
+use dusk_poseidon::sponge;
 
 use dusk_plonk::prelude::*;
 
@@ -24,8 +24,8 @@ use dusk_plonk::prelude::*;
 /// - `composer`: A mutable reference to the Plonk [`Composer`]`.
 /// - `u`: Witness for the random nonce used during signature generation.
 /// - `r`: Witness Point representing the nonce point `r = u*G`.
-/// - `k`: Witness Point representing the public key `k = x*G`.
-/// - `m`: Witness for the message.
+/// - `pk`: Witness Point representing the public key `pk = sk*G`.
+/// - `msg`: Witness for the message.
 ///
 /// ### Returns
 ///
@@ -40,20 +40,20 @@ pub fn single_key_verify<C: Composer>(
     composer: &mut C,
     u: Witness,
     r: WitnessPoint,
-    k: WitnessPoint,
-    m: Witness,
+    pk: WitnessPoint,
+    msg: Witness,
 ) -> Result<(), Error> {
     let r_x = *r.x();
     let r_y = *r.y();
 
-    let c = [r_x, r_y, m];
-    let c = truncated::gadget(composer, &c);
+    let challenge = [r_x, r_y, msg];
+    let challenge_hash = sponge::truncated::gadget(composer, &challenge);
 
     let s_a = composer.component_mul_generator(u, GENERATOR_EXTENDED)?;
-    let s_b = composer.component_mul_point(c, k);
-    let s = composer.component_add_point(s_a, s_b);
+    let s_b = composer.component_mul_point(challenge_hash, pk);
+    let point = composer.component_add_point(s_a, s_b);
 
-    composer.assert_equal_point(r, s);
+    composer.assert_equal_point(r, point);
 
     Ok(())
 }
@@ -68,9 +68,11 @@ pub fn single_key_verify<C: Composer>(
 ///
 /// - `composer`: A mutable reference to the Plonk [`Composer`].
 /// - `u`: Witness for the random nonce used during signature generation.
-/// - `r`, `r_p`: Witness Points representing the nonce points.
-/// - `k`, `k_p`: Witness Points representing the public keys.
-/// - `m`: Witness for the message.
+/// - `r`: Witness Point representing the nonce points `r = u*G`
+/// - `r_p`: Witness Point representing the nonce points `r_p = u*G_prime`.
+/// - `pk`: Witness Point public key `pk = sk*G`
+/// - `pk_p`: Witness Point public key `pk_p = sk*G_prime`
+/// - `msg`: Witness for the message.
 ///
 /// ### Returns
 ///
@@ -86,9 +88,9 @@ pub fn double_key_verify<C: Composer>(
     u: Witness,
     r: WitnessPoint,
     r_p: WitnessPoint,
-    k: WitnessPoint,
-    k_p: WitnessPoint,
-    m: Witness,
+    pk: WitnessPoint,
+    pk_p: WitnessPoint,
+    msg: Witness,
 ) -> Result<(), Error> {
     let r_x = *r.x();
     let r_y = *r.y();
@@ -96,19 +98,19 @@ pub fn double_key_verify<C: Composer>(
     let r_p_x = *r_p.x();
     let r_p_y = *r_p.y();
 
-    let c = [r_x, r_y, r_p_x, r_p_y, m];
-    let c = truncated::gadget(composer, &c);
+    let challenge = [r_x, r_y, r_p_x, r_p_y, msg];
+    let challenge_hash = sponge::truncated::gadget(composer, &challenge);
 
     let s_a = composer.component_mul_generator(u, GENERATOR_EXTENDED)?;
-    let s_b = composer.component_mul_point(c, k);
-    let s = composer.component_add_point(s_a, s_b);
+    let s_b = composer.component_mul_point(challenge_hash, pk);
+    let point = composer.component_add_point(s_a, s_b);
 
     let s_p_a = composer.component_mul_generator(u, GENERATOR_NUMS_EXTENDED)?;
-    let s_p_b = composer.component_mul_point(c, k_p);
-    let s_p = composer.component_add_point(s_p_a, s_p_b);
+    let s_p_b = composer.component_mul_point(challenge_hash, pk_p);
+    let point_p = composer.component_add_point(s_p_a, s_p_b);
 
-    composer.assert_equal_point(r, s);
-    composer.assert_equal_point(r_p, s_p);
+    composer.assert_equal_point(r, point);
+    composer.assert_equal_point(r_p, point_p);
 
     Ok(())
 }

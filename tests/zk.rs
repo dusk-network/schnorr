@@ -21,76 +21,73 @@ lazy_static::lazy_static! {
     };
 }
 
+const LABEL: &[u8] = b"dusk-network";
+
+//
+// Test single_key_verify
+//
+#[derive(Debug, Default)]
+struct SingleSigCircuit {
+    signature: Signature,
+    pk: JubJubExtended,
+    message: BlsScalar,
+}
+
+impl SingleSigCircuit {
+    pub fn valid_random(rng: &mut StdRng) -> Self {
+        let sk = NoteSecretKey::random(rng);
+        let message = BlsScalar::uni_random(rng);
+        let signature = sk.sign_single(rng, message);
+
+        let pk = GENERATOR_EXTENDED * sk.as_ref();
+
+        Self {
+            signature,
+            pk,
+            message,
+        }
+    }
+
+    pub fn invalid_random(rng: &mut StdRng) -> Self {
+        let sk = NoteSecretKey::random(rng);
+        let message = BlsScalar::uni_random(rng);
+        let signature = sk.sign_single(rng, message);
+
+        let sk_wrong = NoteSecretKey::random(rng);
+        let pk = GENERATOR_EXTENDED * sk_wrong.as_ref();
+
+        Self {
+            signature,
+            pk,
+            message,
+        }
+    }
+}
+
+impl Circuit for SingleSigCircuit {
+    fn circuit<C: Composer>(&self, composer: &mut C) -> Result<(), PlonkError> {
+        let (u, r) = self.signature.to_witness(composer);
+
+        let pk = composer.append_point(self.pk);
+        let msg = composer.append_witness(self.message);
+
+        gadgets::single_key_verify(composer, u, r, pk, msg)?;
+
+        Ok(())
+    }
+}
+
 #[test]
 fn single_key() {
-    #[derive(Debug)]
-    struct TestSingleKey {
-        signature: Signature,
-        k: JubJubExtended,
-        message: BlsScalar,
-    }
-
-    impl Default for TestSingleKey {
-        fn default() -> Self {
-            let mut rng = StdRng::seed_from_u64(0xbeef);
-
-            let sk = NoteSecretKey::random(&mut rng);
-            let message = BlsScalar::uni_random(&mut rng);
-            let signature = sk.sign_single(&mut rng, message);
-
-            let k = GENERATOR_EXTENDED * sk.as_ref();
-
-            Self {
-                signature,
-                k,
-                message,
-            }
-        }
-    }
-
-    impl TestSingleKey {
-        pub fn new(
-            signature: Signature,
-            k: JubJubExtended,
-            message: BlsScalar,
-        ) -> Self {
-            Self {
-                signature,
-                k,
-                message,
-            }
-        }
-    }
-
-    impl Circuit for TestSingleKey {
-        fn circuit<C: Composer>(
-            &self,
-            composer: &mut C,
-        ) -> Result<(), PlonkError> {
-            let (u, r) = self.signature.to_witness(composer);
-
-            let k = composer.append_point(self.k);
-            let m = composer.append_witness(self.message);
-
-            gadgets::single_key_verify(composer, u, r, k, m)?;
-
-            Ok(())
-        }
-    }
-
-    let label = b"dusk-network";
-
     let mut rng = StdRng::seed_from_u64(0xfeeb);
 
-    let sk = NoteSecretKey::random(&mut rng);
-    let message = BlsScalar::uni_random(&mut rng);
-    let signature = sk.sign_single(&mut rng, message);
-
-    let k = GENERATOR_EXTENDED * sk.as_ref();
-    let (prover, verifier) = Compiler::compile::<TestSingleKey>(&PP, label)
+    // Create prover and verifier circuit description
+    let (prover, verifier) = Compiler::compile::<SingleSigCircuit>(&PP, LABEL)
         .expect("Circuit should compile successfully");
 
-    let circuit = TestSingleKey::new(signature, k, message);
+    //
+    // Check valid circuit verifies
+    let circuit = SingleSigCircuit::valid_random(&mut rng);
 
     let (proof, public_inputs) = prover
         .prove(&mut rng, &circuit)
@@ -99,86 +96,88 @@ fn single_key() {
     verifier
         .verify(&proof, &public_inputs)
         .expect("Verification should be successful");
+
+    //
+    // Check proof creation of invalid circuit not possible
+    let circuit = SingleSigCircuit::invalid_random(&mut rng);
+
+    prover
+        .prove(&mut rng, &circuit)
+        .expect_err("Proving invalid circuit shouldn't be possible");
+}
+
+//
+// Test double_key_verify
+//
+#[derive(Debug, Default)]
+struct DoubleSigCircuit {
+    signature: DoubleSignature,
+    pk: JubJubExtended,
+    pk_p: JubJubExtended,
+    message: BlsScalar,
+}
+
+impl DoubleSigCircuit {
+    pub fn valid_random(rng: &mut StdRng) -> Self {
+        let sk = NoteSecretKey::random(rng);
+        let message = BlsScalar::uni_random(rng);
+        let signature = sk.sign_double(rng, message);
+
+        let pk = GENERATOR_EXTENDED * sk.as_ref();
+        let pk_p = GENERATOR_NUMS_EXTENDED * sk.as_ref();
+
+        Self {
+            signature,
+            pk,
+            pk_p,
+            message,
+        }
+    }
+
+    pub fn invalid_random(rng: &mut StdRng) -> Self {
+        let sk = NoteSecretKey::random(rng);
+        let message = BlsScalar::uni_random(rng);
+        let signature = sk.sign_double(rng, message);
+
+        let sk_wrong = NoteSecretKey::random(rng);
+        let pk = GENERATOR_EXTENDED * sk_wrong.as_ref();
+        let pk_p = GENERATOR_NUMS_EXTENDED * sk_wrong.as_ref();
+
+        Self {
+            signature,
+            pk,
+            pk_p,
+            message,
+        }
+    }
+}
+
+impl Circuit for DoubleSigCircuit {
+    fn circuit<C: Composer>(&self, composer: &mut C) -> Result<(), PlonkError> {
+        let (u, r, r_p) = self.signature.to_witness(composer);
+
+        let pk = composer.append_point(self.pk);
+        let pk_p = composer.append_point(self.pk_p);
+        let msg = composer.append_witness(self.message);
+
+        gadgets::double_key_verify(composer, u, r, r_p, pk, pk_p, msg)
+            .expect("this is infallible");
+
+        Ok(())
+    }
 }
 
 #[test]
 fn double_key() {
-    #[derive(Debug)]
-    struct TestDoubleKey {
-        signature: DoubleSignature,
-        k: JubJubExtended,
-        k_p: JubJubExtended,
-        message: BlsScalar,
-    }
-
-    impl Default for TestDoubleKey {
-        fn default() -> Self {
-            let mut rng = StdRng::seed_from_u64(0xbeef);
-
-            let sk = NoteSecretKey::random(&mut rng);
-            let message = BlsScalar::uni_random(&mut rng);
-            let signature = sk.sign_double(&mut rng, message);
-
-            let k = GENERATOR_EXTENDED * sk.as_ref();
-            let k_p = GENERATOR_NUMS_EXTENDED * sk.as_ref();
-
-            Self {
-                signature,
-                k,
-                k_p,
-                message,
-            }
-        }
-    }
-
-    impl TestDoubleKey {
-        pub fn new(
-            signature: DoubleSignature,
-            k: JubJubExtended,
-            k_p: JubJubExtended,
-            message: BlsScalar,
-        ) -> Self {
-            Self {
-                signature,
-                k,
-                k_p,
-                message,
-            }
-        }
-    }
-
-    impl Circuit for TestDoubleKey {
-        fn circuit<C: Composer>(
-            &self,
-            composer: &mut C,
-        ) -> Result<(), PlonkError> {
-            let (u, r, r_p) = self.signature.to_witness(composer);
-
-            let k = composer.append_point(self.k);
-            let k_p = composer.append_point(self.k_p);
-            let m = composer.append_witness(self.message);
-
-            gadgets::double_key_verify(composer, u, r, r_p, k, k_p, m)?;
-
-            Ok(())
-        }
-    }
-
-    let label = b"dusk-network";
-
     let mut rng = StdRng::seed_from_u64(0xfeeb);
 
-    let sk = NoteSecretKey::random(&mut rng);
-    let message = BlsScalar::uni_random(&mut rng);
-    let signature = sk.sign_double(&mut rng, message);
-
-    let k = GENERATOR_EXTENDED * sk.as_ref();
-    let k_p = GENERATOR_NUMS_EXTENDED * sk.as_ref();
-
-    let (prover, verifier) = Compiler::compile::<TestDoubleKey>(&PP, label)
+    // Create prover and verifier circuit description
+    let (prover, verifier) = Compiler::compile::<DoubleSigCircuit>(&PP, LABEL)
         .expect("Circuit compilation should succeed");
 
-    let circuit = TestDoubleKey::new(signature, k, k_p, message);
+    //
+    // Check valid circuit verifies
+    let circuit = DoubleSigCircuit::valid_random(&mut rng);
 
     let (proof, public_inputs) = prover
         .prove(&mut rng, &circuit)
@@ -187,4 +186,12 @@ fn double_key() {
     verifier
         .verify(&proof, &public_inputs)
         .expect("Verifying the proof should succeed");
+
+    //
+    // Check proof creation of invalid circuit not possible
+    let circuit = DoubleSigCircuit::invalid_random(&mut rng);
+
+    prover
+        .prove(&mut rng, &circuit)
+        .expect_err("Proving invalid circuit shouldn't be possible");
 }

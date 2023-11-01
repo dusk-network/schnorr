@@ -53,6 +53,6 @@ rkyv-impl = [
 ]
 
 [[test]]
-name = "test-zk"
+name = "zk"
 path = "tests/zk.rs"
 required-features = ["alloc"]
