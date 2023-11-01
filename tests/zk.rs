@@ -7,7 +7,6 @@
 use dusk_jubjub::{GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED};
 use dusk_plonk::error::Error as PlonkError;
 use dusk_schnorr::{gadgets, DoubleSignature, NoteSecretKey, Signature};
-use ff::Field;
 use rand::rngs::StdRng;
 use rand::SeedableRng;
 
@@ -36,8 +35,8 @@ fn single_key() {
             let mut rng = StdRng::seed_from_u64(0xbeef);
 
             let sk = NoteSecretKey::random(&mut rng);
-            let message = BlsScalar::random(&mut rng);
-            let signature = Signature::new(&sk, &mut rng, message);
+            let message = BlsScalar::uni_random(&mut rng);
+            let signature = sk.sign_single(&mut rng, message);
 
             let k = GENERATOR_EXTENDED * sk.as_ref();
 
@@ -84,8 +83,8 @@ fn single_key() {
     let mut rng = StdRng::seed_from_u64(0xfeeb);
 
     let sk = NoteSecretKey::random(&mut rng);
-    let message = BlsScalar::random(&mut rng);
-    let signature = Signature::new(&sk, &mut rng, message);
+    let message = BlsScalar::uni_random(&mut rng);
+    let signature = sk.sign_single(&mut rng, message);
 
     let k = GENERATOR_EXTENDED * sk.as_ref();
     let (prover, verifier) = Compiler::compile::<TestSingleKey>(&PP, label)
@@ -117,8 +116,8 @@ fn double_key() {
             let mut rng = StdRng::seed_from_u64(0xbeef);
 
             let sk = NoteSecretKey::random(&mut rng);
-            let message = BlsScalar::random(&mut rng);
-            let signature = DoubleSignature::new(&sk, &mut rng, message);
+            let message = BlsScalar::uni_random(&mut rng);
+            let signature = sk.sign_double(&mut rng, message);
 
             let k = GENERATOR_EXTENDED * sk.as_ref();
             let k_p = GENERATOR_NUMS_EXTENDED * sk.as_ref();
@@ -170,8 +169,8 @@ fn double_key() {
     let mut rng = StdRng::seed_from_u64(0xfeeb);
 
     let sk = NoteSecretKey::random(&mut rng);
-    let message = BlsScalar::random(&mut rng);
-    let signature = DoubleSignature::new(&sk, &mut rng, message);
+    let message = BlsScalar::uni_random(&mut rng);
+    let signature = sk.sign_double(&mut rng, message);
 
     let k = GENERATOR_EXTENDED * sk.as_ref();
     let k_p = GENERATOR_NUMS_EXTENDED * sk.as_ref();

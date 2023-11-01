@@ -10,20 +10,22 @@
 //! single key. It includes the [`Signature`] struct and relevant methods for
 //! signature generation and verification.
 
-use crate::{NotePublicKey, NoteSecretKey};
 use dusk_bytes::{DeserializableSlice, Error as BytesError, Serializable};
 use dusk_jubjub::GENERATOR_EXTENDED;
-use dusk_poseidon::sponge;
-use rand_core::{CryptoRng, RngCore};
-
 use dusk_plonk::prelude::*;
+use dusk_poseidon::sponge;
+
+use crate::NotePublicKey;
 
 #[cfg(feature = "rkyv-impl")]
 use rkyv::{Archive, Deserialize, Serialize};
 
 #[allow(non_snake_case)]
 /// Method to create a challenge hash for signature scheme
-fn challenge_hash(R: JubJubExtended, message: BlsScalar) -> JubJubScalar {
+pub(crate) fn challenge_hash(
+    R: &JubJubExtended,
+    message: BlsScalar,
+) -> JubJubScalar {
     let R_scalar = R.to_hash_inputs();
 
     sponge::truncated::hash(&[R_scalar[0], R_scalar[1], message])
@@ -48,18 +50,17 @@ fn challenge_hash(R: JubJubExtended, message: BlsScalar) -> JubJubScalar {
 /// ```
 /// use dusk_bls12_381::BlsScalar;
 /// use dusk_schnorr::{NotePublicKey, NoteSecretKey, Signature};
-/// use ff::Field;
 /// use rand::rngs::StdRng;
 /// use rand::SeedableRng;
 ///
 /// let mut rng = StdRng::seed_from_u64(1234u64);
 ///
 /// let sk = NoteSecretKey::random(&mut rng);
-/// let message = BlsScalar::random(&mut rng);
+/// let message = BlsScalar::uni_random(&mut rng);
 /// let pk = NotePublicKey::from(&sk);
 ///
 /// // Sign the message
-/// let signature = Signature::new(&sk, &mut rng, message);
+/// let signature = sk.sign_single(&mut rng, message);
 ///
 /// // Verify the signature
 /// assert!(signature.verify(&pk, message));
@@ -88,43 +89,10 @@ impl Signature {
         &self.R
     }
 
-    /// Signs a chosen message with a given secret key
-    /// using the dusk variant of the Schnorr signature scheme.
-    ///
-    /// This function performs the following cryptographic operations:
-    /// - Generates a random nonce `r`.
-    /// - Computes `R = r * G`.
-    /// - Computes the challenge `c = H(R || H(m))`.
-    /// - Computes the signature `u = r - c * sk`.
-    ///
-    /// ## Parameters
-    ///
-    /// - `sk`: Reference to the [`NoteSecretKey`] for signing.
-    /// - `rng`: Reference to the random number generator.
-    /// - `message`: The message in [`BlsScalar`] to be signed.
-    ///
-    /// ## Returns
-    ///
-    /// Returns a new [`Signature`] containing the `u` scalar and `R` point.
+    /// Creates a new single key [`Signature`] with the given parameters
     #[allow(non_snake_case)]
-    pub fn new<R>(sk: &NoteSecretKey, rng: &mut R, message: BlsScalar) -> Self
-    where
-        R: RngCore + CryptoRng,
-    {
-        // Create random scalar value for scheme, r
-        let r = JubJubScalar::random(rng);
-
-        // Derive a points from r, to sign with the message
-        // R = r * G
-        let R = GENERATOR_EXTENDED * r;
-
-        // Compute challenge value, c = H(R||H(m));
-        let c = challenge_hash(R, message);
-
-        // Compute scalar signature, U = r - c * sk,
-        let u = r - (c * sk.as_ref());
-
-        Signature { u, R }
+    pub(crate) fn new(u: JubJubScalar, R: JubJubExtended) -> Self {
+        Self { u, R }
     }
 
     /// Verifies the Schnorr signature against a given public key and message.
@@ -149,7 +117,7 @@ impl Signature {
         message: BlsScalar,
     ) -> bool {
         // Compute challenge value, c = H(R||H(m));
-        let c = challenge_hash(self.R, message);
+        let c = challenge_hash(self.R(), message);
 
         // Compute verification steps
         // u * G + c * public_key
