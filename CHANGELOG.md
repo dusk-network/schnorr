@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Change double and single signature creation to be a method on `NoteSecretKey` [#81]
 - Rename internal `key_variants` module to `signatures` [#96]
+- Update benchmarks to latest version of plonk [#94]
+- Update test structure [#94]
 
 ## [0.15.0] - 2023-11-1
 
@@ -199,12 +201,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- ISSUES -->
 [#96]: https://github.com/dusk-network/schnorr/issues/96
+[#94]: https://github.com/dusk-network/schnorr/issues/94
 [#89]: https://github.com/dusk-network/schnorr/issues/89
 [#81]: https://github.com/dusk-network/schnorr/issues/81
 [#80]: https://github.com/dusk-network/schnorr/issues/80
 [#69]: https://github.com/dusk-network/schnorr/issues/69
 [#59]: https://github.com/dusk-network/schnorr/issues/59
-[#52]: https://github.com/dusk-network/schnorr/issues/52
+[#55]: https://github.com/dusk-network/schnorr/issues/55
 [#52]: https://github.com/dusk-network/schnorr/issues/52
 [#50]: https://github.com/dusk-network/schnorr/issues/50
 [#49]: https://github.com/dusk-network/schnorr/issues/49

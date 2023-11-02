@@ -9,7 +9,6 @@ use criterion::{criterion_group, criterion_main, Criterion};
 use dusk_jubjub::{GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED};
 use dusk_plonk::error::Error as PlonkError;
 use dusk_schnorr::{gadgets, DoubleSignature, NoteSecretKey, Signature};
-use ff::Field;
 use rand::rngs::StdRng;
 use rand::SeedableRng;
 
@@ -29,198 +28,149 @@ lazy_static::lazy_static! {
 static mut CONSTRAINTS: usize = 0;
 static LABEL: &[u8; 12] = b"dusk-network";
 
-#[derive(Debug)]
-struct TestSingleKey {
+fn bench_prover<C>(rng: &mut StdRng, prover: &Prover, circuit: &C)
+where
+    C: Circuit,
+{
+    prover
+        .prove(rng, circuit)
+        .expect("proof creation of valid circuit should succeed");
+}
+
+//** SINGLE KEY BENCHMARK *****************************
+#[derive(Debug, Default)]
+struct SingleSigCircuit {
     signature: Signature,
-    k: JubJubExtended,
+    pub_key: JubJubExtended,
     message: BlsScalar,
 }
 
-impl Default for TestSingleKey {
-    fn default() -> Self {
-        let rng = &mut StdRng::seed_from_u64(0xbeef);
-
+impl SingleSigCircuit {
+    pub fn valid(rng: &mut StdRng) -> Self {
         let sk = NoteSecretKey::random(rng);
-        let message = BlsScalar::random(rng);
-        let signature = Signature::new(&sk, rng, message);
+        let message = BlsScalar::uni_random(rng);
+        let signature = sk.sign_single(rng, message);
 
-        let k = GENERATOR_EXTENDED * sk.as_ref();
+        let pub_key = GENERATOR_EXTENDED * sk.as_ref();
 
         Self {
             signature,
-            k,
+            pub_key,
             message,
         }
     }
 }
 
-impl TestSingleKey {
-    pub fn new(
-        signature: Signature,
-        k: JubJubExtended,
-        message: BlsScalar,
-    ) -> Self {
-        Self {
-            signature,
-            k,
-            message,
-        }
-    }
-}
-
-impl Circuit for TestSingleKey {
-    const CIRCUIT_ID: [u8; 32] = [0xff; 32];
-    fn gadget(
-        &mut self,
-        composer: &mut TurboComposer,
-    ) -> Result<(), PlonkError> {
+impl Circuit for SingleSigCircuit {
+    fn circuit<C>(&self, composer: &mut C) -> Result<(), PlonkError>
+    where
+        C: Composer,
+    {
         let (u, r) = self.signature.to_witness(composer);
 
-        let k = composer.append_point(self.k);
+        let pub_key = composer.append_point(self.pub_key);
         let m = composer.append_witness(self.message);
 
-        gadgets::single_key_verify(composer, u, r, k, m);
+        let _result = gadgets::single_key_verify(composer, u, r, pub_key, m);
 
         unsafe {
-            CONSTRAINTS = composer.gates();
+            CONSTRAINTS = composer.constraints();
         }
 
         Ok(())
     }
+}
 
-    fn public_inputs(&self) -> Vec<PublicInputValue> {
-        vec![]
-    }
+fn single_key_proof_creation(c: &mut Criterion) {
+    let mut rng = &mut StdRng::seed_from_u64(0xbeef);
 
-    fn padded_gates(&self) -> usize {
-        1 << CAPACITY - 1
+    // We compile the circuit using the public parameters PP
+    let (prover, _verifier) = Compiler::compile::<SingleSigCircuit>(&PP, LABEL)
+        .expect("circuit should compile");
+
+    let circuit = SingleSigCircuit::valid(&mut rng);
+
+    // We benchmark the prover
+    unsafe {
+        let log =
+            &format!("Single Key proof creation ({} constraints)", CONSTRAINTS);
+        c.bench_function(log, |b| {
+            b.iter(|| bench_prover(&mut rng, &prover, &circuit))
+        });
     }
 }
 
-struct TestDoubleKey {
+//** DOUBLE KEY BENCHMARK *****************************
+#[derive(Debug, Default)]
+struct DoubleSigCircuit {
     signature: DoubleSignature,
-    k: JubJubExtended,
-    k_p: JubJubExtended,
+    pk: JubJubExtended,
+    pk_p: JubJubExtended,
     message: BlsScalar,
 }
 
-impl Default for TestDoubleKey {
-    fn default() -> Self {
-        let rng = &mut StdRng::seed_from_u64(0xbeef);
-
+impl DoubleSigCircuit {
+    pub fn valid(rng: &mut StdRng) -> Self {
         let sk = NoteSecretKey::random(rng);
-        let message = BlsScalar::random(rng);
-        let signature = DoubleSignature::new(&sk, rng, message);
+        let message = BlsScalar::uni_random(rng);
+        let signature = sk.sign_double(rng, message);
 
-        let k = GENERATOR_EXTENDED * sk.as_ref();
-        let k_p = GENERATOR_NUMS_EXTENDED * sk.as_ref();
+        let pk = GENERATOR_EXTENDED * sk.as_ref();
+        let pk_p = GENERATOR_NUMS_EXTENDED * sk.as_ref();
 
         Self {
             signature,
-            k,
-            k_p,
+            pk,
+            pk_p,
             message,
         }
     }
 }
 
-impl TestDoubleKey {
-    pub fn new(
-        signature: DoubleSignature,
-        k: JubJubExtended,
-        k_p: JubJubExtended,
-        message: BlsScalar,
-    ) -> Self {
-        Self {
-            signature,
-            k,
-            k_p,
-            message,
-        }
-    }
-}
-
-impl Circuit for TestDoubleKey {
-    const CIRCUIT_ID: [u8; 32] = [0xff; 32];
-    fn gadget(
-        &mut self,
-        composer: &mut TurboComposer,
-    ) -> Result<(), PlonkError> {
+impl Circuit for DoubleSigCircuit {
+    fn circuit<C>(&self, composer: &mut C) -> Result<(), PlonkError>
+    where
+        C: Composer,
+    {
         let (u, r, r_p) = self.signature.to_witness(composer);
 
-        let k = composer.append_point(self.k);
-        let k_p = composer.append_point(self.k_p);
+        let pk = composer.append_point(self.pk);
+        let pk_p = composer.append_point(self.pk_p);
         let m = composer.append_witness(self.message);
 
-        gadgets::double_key_verify(composer, u, r, r_p, k, k_p, m);
+        gadgets::double_key_verify(composer, u, r, r_p, pk, pk_p, m)
+            .expect("this is infallible");
 
         unsafe {
-            CONSTRAINTS = composer.gates();
+            CONSTRAINTS = composer.constraints();
         }
 
         Ok(())
     }
-
-    fn public_inputs(&self) -> Vec<PublicInputValue> {
-        vec![]
-    }
-
-    fn padded_gates(&self) -> usize {
-        1 << CAPACITY
-    }
 }
 
-fn single_key_prover(input: &TestSingleKey, pk: &ProverKey) {
-    TestSingleKey::new(input.signature, input.k, input.message)
-        .prove(&PP, &pk, LABEL)
-        .expect("Failed to prove");
-}
+fn double_key_proof_creation(c: &mut Criterion) {
+    let mut rng = &mut StdRng::seed_from_u64(0xbeef);
 
-fn double_key_prover(input: &TestDoubleKey, pk: &ProverKey) {
-    TestDoubleKey::new(input.signature, input.k, input.k_p, input.message)
-        .prove(&PP, &pk, LABEL)
-        .expect("Failed to prove");
-}
+    // We compile the circuit using the public parameters PP
+    let (prover, _verifier) = Compiler::compile::<DoubleSigCircuit>(&PP, LABEL)
+        .expect("circuit should compile");
 
-fn schnorr_benchmark(c: &mut Criterion) {
-    //** SINGLE KEY BENCHMARK *****************************
-
-    // We compile the circuit using the public
-    // parameters PP
-    let (pk, _vd) = TestSingleKey::default()
-        .compile(&PP)
-        .expect("Failed to compile circuit");
-
-    // We compute a testing input for the circuit
-    let input = TestSingleKey::default();
+    let circuit = DoubleSigCircuit::valid(&mut rng);
 
     // We benchmark the prover
     unsafe {
-        let log = &format!("Single Key Prover ({} constraints)", CONSTRAINTS);
-        c.bench_function(log, |b| b.iter(|| single_key_prover(&input, &pk)));
-    }
-
-    //** DOUBLE KEY BENCHMARK *****************************
-
-    // We compile the circuit using the public
-    // parameters PP
-    let (pk, _vd) = TestDoubleKey::default()
-        .compile(&PP)
-        .expect("Failed to compile circuit");
-
-    // We compute a testing input for the circuit
-    let input = TestDoubleKey::default();
-
-    // We benchmark the prover
-    unsafe {
-        let log = &format!("Double Key Prover ({} constraints)", CONSTRAINTS);
-        c.bench_function(log, |b| b.iter(|| double_key_prover(&input, &pk)));
+        let log =
+            &format!("Double Key proof creation ({} constraints)", CONSTRAINTS);
+        c.bench_function(log, |b| {
+            b.iter(|| bench_prover(&mut rng, &prover, &circuit))
+        });
     }
 }
 
 criterion_group! {
     name = schnorr;
     config = Criterion::default().sample_size(10);
-    targets = schnorr_benchmark
+    targets = single_key_proof_creation, double_key_proof_creation,
 }
 criterion_main!(schnorr);
