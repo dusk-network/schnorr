@@ -23,24 +23,22 @@
 //!
 //! ## Modules
 //!
-//! - `key_variants`: Contains implementations for both single-key and
-//!   double-key variants of Schnorr signatures.
+//! - `signatures`: Contains implementations for both single-key and double-key
+//!   variants of Schnorr signatures.
 //! - `gadgets`: Provides zero-knowledge gadgets for use in circuits. Available
 //!   only when compiled with the `alloc` feature.
 #![no_std]
 
-mod key_variants;
 mod keys;
+mod signatures;
 
 #[cfg(feature = "alloc")]
 pub mod gadgets;
 
 #[deprecated(note = "Please use DoubleSignature instead")]
-pub type Proof = key_variants::double_key::Signature;
+pub type Proof = signatures::double_key::Signature;
 
-pub use key_variants::double_key::{
-    PublicKeyPair, Signature as DoubleSignature,
-};
-pub use key_variants::single_key::Signature;
 pub use keys::public::NotePublicKey;
 pub use keys::secret::NoteSecretKey;
+pub use signatures::double_key::{PublicKeyPair, Signature as DoubleSignature};
+pub use signatures::single_key::Signature;
