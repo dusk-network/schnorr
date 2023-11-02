@@ -4,9 +4,12 @@
 //
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
+use dusk_bls12_381::BlsScalar;
 use dusk_bytes::{Error, HexDebug, Serializable};
-use dusk_jubjub::JubJubScalar;
+use dusk_jubjub::{JubJubScalar, GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED};
 use rand_core::{CryptoRng, RngCore};
+
+use crate::{DoubleSignature, NotePublicKey, PublicKeyPair, Signature};
 
 #[cfg(feature = "rkyv-impl")]
 use rkyv::{Archive, Deserialize, Serialize};
@@ -65,5 +68,90 @@ impl Serializable<32> for NoteSecretKey {
             None => return Err(Error::InvalidData),
         };
         Ok(Self(secret_key))
+    }
+}
+
+impl NoteSecretKey {
+    /// Signs a chosen message with a given secret key
+    /// using the dusk variant of the Schnorr signature scheme.
+    ///
+    /// This function performs the following cryptographic operations:
+    /// - Generates a random nonce `r`.
+    /// - Computes `R = r * G`.
+    /// - Computes the challenge `c = H(R || H(m))`.
+    /// - Computes the signature `u = r - c * sk`.
+    ///
+    /// ## Parameters
+    ///
+    /// - `rng`: Reference to the random number generator.
+    /// - `message`: The message in [`BlsScalar`] to be signed.
+    ///
+    /// ## Returns
+    ///
+    /// Returns a new [`Signature`] containing the `u` scalar and `R` point.
+    #[allow(non_snake_case)]
+    pub fn sign_single<R>(&self, rng: &mut R, msg: BlsScalar) -> Signature
+    where
+        R: RngCore + CryptoRng,
+    {
+        // Create random scalar value for scheme, r
+        let r = JubJubScalar::random(rng);
+
+        // Derive a points from r, to sign with the message
+        // R = r * G
+        let R = GENERATOR_EXTENDED * r;
+
+        // Compute challenge value, c = H(R||H(m));
+        let c = crate::key_variants::single_key::challenge_hash(&R, msg);
+
+        // Compute scalar signature, U = r - c * sk,
+        let u = r - (c * self.as_ref());
+
+        Signature::new(u, R)
+    }
+
+    /// Constructs a new `Signature` instance by signing a given message with
+    /// a `NoteSecretKey`.
+    ///
+    /// Utilizes a secure random number generator to create a unique random
+    /// scalar, and subsequently computes public key points `(R, R')` and a
+    /// scalar signature `u`.
+    ///
+    /// # Parameters
+    ///
+    /// * `rng`: Cryptographically secure random number generator.
+    /// * `message`: Message as a `BlsScalar`.
+    ///
+    /// # Returns
+    ///
+    /// A new [`DoubleSignature`] instance.
+    #[allow(non_snake_case)]
+    pub fn sign_double<R>(
+        &self,
+        rng: &mut R,
+        message: BlsScalar,
+    ) -> DoubleSignature
+    where
+        R: RngCore + CryptoRng,
+    {
+        // Create random scalar value for scheme, r
+        let r = JubJubScalar::random(rng);
+
+        // Derive two points from r, to sign with the message
+        // R = r * G
+        // R_prime = r * G_NUM
+        let R = GENERATOR_EXTENDED * r;
+        let R_prime = GENERATOR_NUMS_EXTENDED * r;
+        let keys = PublicKeyPair((
+            NotePublicKey::from(R),
+            NotePublicKey::from(R_prime),
+        ));
+        // Compute challenge value, c = H(R||R_prime||H(m));
+        let c = crate::key_variants::double_key::challenge_hash(&keys, message);
+
+        // Compute scalar signature, U = r - c * sk,
+        let u = r - (c * self.as_ref());
+
+        DoubleSignature::new(u, keys)
     }
 }

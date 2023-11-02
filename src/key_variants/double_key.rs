@@ -16,18 +16,15 @@
 //! point `G_NUM`. The [`Signature`] struct holds the scalar `u` and a
 //! [`PublicKeyPair`].
 
-#![allow(non_snake_case)]
-
-use crate::{NotePublicKey, NoteSecretKey};
 use dusk_bytes::{DeserializableSlice, Error as BytesError, Serializable};
 use dusk_jubjub::{GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED};
+use dusk_plonk::prelude::*;
 use dusk_poseidon::sponge::truncated;
-use rand_core::{CryptoRng, RngCore};
+
+use crate::{NotePublicKey, NoteSecretKey};
 
 #[cfg(feature = "rkyv-impl")]
 use rkyv::{Archive, Deserialize, Serialize};
-
-use dusk_plonk::prelude::*;
 
 /// Function that creates a challenge hash for the signature scheme.
 ///
@@ -39,9 +36,13 @@ use dusk_plonk::prelude::*;
 /// ## Returns
 ///
 /// A `JubJubScalar` representing the challenge hash.
-fn challenge_hash(R: PublicKeyPair, message: BlsScalar) -> JubJubScalar {
-    let R_scalar = (R.0).0.as_ref().to_hash_inputs();
-    let R_prime_scalar = (R.0).1.as_ref().to_hash_inputs();
+#[allow(non_snake_case)]
+pub(crate) fn challenge_hash(
+    keys: &PublicKeyPair,
+    message: BlsScalar,
+) -> JubJubScalar {
+    let R_scalar = keys.R().as_ref().to_hash_inputs();
+    let R_prime_scalar = keys.R_prime().as_ref().to_hash_inputs();
 
     truncated::hash(&[
         R_scalar[0],
@@ -87,12 +88,14 @@ pub struct PublicKeyPair(pub(crate) (NotePublicKey, NotePublicKey));
 impl PublicKeyPair {
     /// Returns the `NotePublicKey` corresponding to the standard elliptic curve
     /// generator point `G`.
+    #[allow(non_snake_case)]
     pub fn R(&self) -> &NotePublicKey {
         &self.0 .0
     }
 
     /// Returns the `NotePublicKey` corresponding to the secondary elliptic
     /// curve generator point `G_NUM`.
+    #[allow(non_snake_case)]
     pub fn R_prime(&self) -> &NotePublicKey {
         &self.0 .1
     }
@@ -143,13 +146,20 @@ impl Serializable<64> for PublicKeyPair {
 ///
 /// ## Example
 /// ```
-/// use rand::thread_rng;
+/// use rand::rngs::StdRng;
+/// use rand::SeedableRng;
 /// use dusk_schnorr::{NoteSecretKey, PublicKeyPair, DoubleSignature};
 /// use dusk_bls12_381::BlsScalar;
 ///
-/// let sk = NoteSecretKey::random(&mut thread_rng());
-/// let message = BlsScalar::from(10);
-/// let signature = DoubleSignature::new(&sk, &mut thread_rng(), message);
+/// let mut rng = StdRng::seed_from_u64(2321u64);
+///
+/// let sk = NoteSecretKey::random(&mut rng);
+/// let message = BlsScalar::uni_random(&mut rng);
+/// let pk_pair: PublicKeyPair = sk.into();
+///
+/// let signature = sk.sign_double(&mut rng, message);
+///
+/// assert!(signature.verify(&pk_pair, message));
 /// ```
 #[derive(Default, Clone, Copy, Debug)]
 #[cfg_attr(
@@ -173,44 +183,8 @@ impl Signature {
         &self.keys
     }
 
-    /// Constructs a new `Signature` instance by signing a given message with a
-    /// `NoteSecretKey`.
-    ///
-    /// Utilizes a secure random number generator to create a unique random
-    /// scalar, and subsequently computes public key points `(R, R')` and a
-    /// scalar signature `u`.
-    ///
-    /// # Parameters
-    ///
-    /// * `sk`: Reference to a `NoteSecretKey`.
-    /// * `rng`: Cryptographically secure random number generator.
-    /// * `message`: Message as a `BlsScalar`.
-    ///
-    /// # Returns
-    ///
-    /// A new `Signature` instance.
-    pub fn new<R>(sk: &NoteSecretKey, rng: &mut R, message: BlsScalar) -> Self
-    where
-        R: RngCore + CryptoRng,
-    {
-        // Create random scalar value for scheme, r
-        let r = JubJubScalar::random(rng);
-
-        // Derive two points from r, to sign with the message
-        // R = r * G
-        // R_prime = r * G_NUM
-        let R = GENERATOR_EXTENDED * r;
-        let R_prime = GENERATOR_NUMS_EXTENDED * r;
-        let keys = PublicKeyPair((
-            NotePublicKey::from(R),
-            NotePublicKey::from(R_prime),
-        ));
-        // Compute challenge value, c = H(R||R_prime||H(m));
-        let c = challenge_hash(keys, message);
-
-        // Compute scalar signature, U = r - c * sk,
-        let u = r - (c * sk.as_ref());
-
+    /// Creates a new [`DoubleSignature`]
+    pub(crate) fn new(u: JubJubScalar, keys: PublicKeyPair) -> Self {
         Self { u, keys }
     }
 
@@ -234,15 +208,15 @@ impl Signature {
         message: BlsScalar,
     ) -> bool {
         // Compute challenge value, c = H(R||R_prime||H(m));
-        let c = challenge_hash(self.keys, message);
+        let c = challenge_hash(self.keys(), message);
 
         // Compute verification steps
         // u * G + c * public_key
-        let point_1 = (GENERATOR_EXTENDED * self.u)
-            + ((public_key_pair.0).0.as_ref() * c);
+        let point_1 =
+            (GENERATOR_EXTENDED * self.u) + (public_key_pair.R().as_ref() * c);
         // u * G_nums + c * public_key_prime
         let point_2 = (GENERATOR_NUMS_EXTENDED * self.u)
-            + ((public_key_pair.0).1.as_ref() * c);
+            + (public_key_pair.R_prime().as_ref() * c);
 
         point_1.eq(self.keys.R().as_ref())
             && point_2.eq(self.keys.R_prime().as_ref())
@@ -263,7 +237,6 @@ impl Signature {
     ///
     /// A tuple comprising the `Witness` of scalar `u`, and `WitnessPoint`s of
     /// `(R, R')`.
-
     #[cfg(feature = "alloc")]
     pub fn to_witness<C: Composer>(
         &self,
