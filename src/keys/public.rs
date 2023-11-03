@@ -74,7 +74,7 @@ impl Serializable<32> for NotePublicKey {
 }
 
 impl NotePublicKey {
-    /// Create a public key from its internal parts
+    /// Create a note public key from its internal parts
     ///
     /// The public keys are generated from a bijective function that takes a
     /// secret keys domain. If keys are generated directly from curve
