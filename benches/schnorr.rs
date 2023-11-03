@@ -66,7 +66,7 @@ impl Circuit for SingleSigCircuit {
     where
         C: Composer,
     {
-        let (u, r) = self.signature.to_witness(composer);
+        let (u, r) = self.signature.append(composer);
 
         let pub_key = composer.append_point(self.pub_key);
         let m = composer.append_witness(self.message);
@@ -132,7 +132,7 @@ impl Circuit for DoubleSigCircuit {
     where
         C: Composer,
     {
-        let (u, r, r_p) = self.signature.to_witness(composer);
+        let (u, r, r_p) = self.signature.append(composer);
 
         let pk = composer.append_point(self.pk);
         let pk_p = composer.append_point(self.pk_p);

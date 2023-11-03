@@ -138,7 +138,7 @@ impl Signature {
     /// Returns a tuple `(Witness, WitnessPoint)` containing converted `u` and
     /// `R` fields.
     #[cfg(feature = "alloc")]
-    pub fn to_witness<C: Composer>(
+    pub fn append<C: Composer>(
         &self,
         composer: &mut C,
     ) -> (Witness, WitnessPoint) {

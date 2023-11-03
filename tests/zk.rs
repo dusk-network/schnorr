@@ -66,7 +66,7 @@ impl SingleSigCircuit {
 
 impl Circuit for SingleSigCircuit {
     fn circuit<C: Composer>(&self, composer: &mut C) -> Result<(), PlonkError> {
-        let (u, r) = self.signature.to_witness(composer);
+        let (u, r) = self.signature.append(composer);
 
         let pk = composer.append_point(self.pk);
         let msg = composer.append_witness(self.message);
@@ -154,7 +154,7 @@ impl DoubleSigCircuit {
 
 impl Circuit for DoubleSigCircuit {
     fn circuit<C: Composer>(&self, composer: &mut C) -> Result<(), PlonkError> {
-        let (u, r, r_p) = self.signature.to_witness(composer);
+        let (u, r, r_p) = self.signature.append(composer);
 
         let pk = composer.append_point(self.pk);
         let pk_p = composer.append_point(self.pk_p);
