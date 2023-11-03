@@ -238,7 +238,7 @@ impl Signature {
     /// A tuple comprising the `Witness` of scalar `u`, and `WitnessPoint`s of
     /// `(R, R')`.
     #[cfg(feature = "alloc")]
-    pub fn to_witness<C: Composer>(
+    pub fn append<C: Composer>(
         &self,
         composer: &mut C,
     ) -> (Witness, WitnessPoint, WitnessPoint) {

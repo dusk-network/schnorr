@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Change double and single signature creation to be a method on `NoteSecretKey` [#81]
 - Rename internal `key_variants` module to `signatures` [#96]
+- Rename the signatures method `to_witness` to `append` [#99]
 - Update benchmarks to latest version of plonk [#94]
 - Update test structure [#94]
 
@@ -200,6 +201,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix byte truncation for BLS -> JubJub conversion
 
 <!-- ISSUES -->
+[#99]: https://github.com/dusk-network/schnorr/issues/99
 [#96]: https://github.com/dusk-network/schnorr/issues/96
 [#94]: https://github.com/dusk-network/schnorr/issues/94
 [#89]: https://github.com/dusk-network/schnorr/issues/89
