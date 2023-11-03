@@ -20,6 +20,7 @@
 //! - **Zero-Knowledge Gadgets**: The library offers pluggable zero-knowledge
 //!   gadgets when compiled with the `alloc` feature.
 //! - **No-Std Support**: This library has a `no_std` feature, making it
+//!   compatible for embedded systems.
 //!
 //! ## Modules
 //!

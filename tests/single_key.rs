@@ -33,7 +33,7 @@ fn test_wrong_keys() {
 
     let sig = sk.sign_single(&mut rng, message);
 
-    // Derive random public key
+    // Derive random note public key
     let pk = NotePublicKey::from(&wrong_sk);
 
     assert!(!sig.verify(&pk, message));

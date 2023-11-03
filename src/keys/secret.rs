@@ -14,7 +14,7 @@ use crate::{DoubleSignature, NotePublicKey, PublicKeyPair, Signature};
 #[cfg(feature = "rkyv-impl")]
 use rkyv::{Archive, Deserialize, Serialize};
 
-/// Structure repesenting a secret key
+/// Structure repesenting a [`NoteSecretKey`]
 #[allow(non_snake_case)]
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, HexDebug)]
 #[cfg_attr(
@@ -72,7 +72,7 @@ impl Serializable<32> for NoteSecretKey {
 }
 
 impl NoteSecretKey {
-    /// Signs a chosen message with a given secret key
+    /// Signs a chosen message with a given note secret key
     /// using the dusk variant of the Schnorr signature scheme.
     ///
     /// This function performs the following cryptographic operations:

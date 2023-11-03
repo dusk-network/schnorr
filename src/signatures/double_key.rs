@@ -8,7 +8,7 @@
 //!
 //! This module implements a Schnorr signature scheme with a double-key
 //! mechanism. It is primarily used in Phoenix to allow for proof delegation
-//! without leaking the secret key.
+//! without leaking the note secret key.
 //!
 //! The module includes the [`PublicKeyPair`] and [`Signature`] structs. The
 //! [`PublicKeyPair`] struct contains the public key pairs `(R, R')`, where `R`
@@ -211,10 +211,10 @@ impl Signature {
         let c = challenge_hash(self.keys(), message);
 
         // Compute verification steps
-        // u * G + c * public_key
+        // u * G + c * note_public_key
         let point_1 =
             (GENERATOR_EXTENDED * self.u) + (public_key_pair.R().as_ref() * c);
-        // u * G_nums + c * public_key_prime
+        // u * G_nums + c * note_public_key_prime
         let point_2 = (GENERATOR_NUMS_EXTENDED * self.u)
             + (public_key_pair.R_prime().as_ref() * c);
 

@@ -95,16 +95,17 @@ impl Signature {
         Self { u, R }
     }
 
-    /// Verifies the Schnorr signature against a given public key and message.
+    /// Verifies the Schnorr signature against a given note public key and
+    /// message.
     ///
     /// This function computes a challenge hash using the stored `R` point and
     /// the provided message, then performs the verification by checking the
-    /// equality of `u * G + c * public_key` and `R`.
+    /// equality of `u * G + c * note_public_key` and `R`.
     ///
     /// ## Parameters
     ///
-    /// - `public_key`: Reference to the [`NotePublicKey`] against which the
-    ///   signature is verified.
+    /// - `note_public_key`: Reference to the [`NotePublicKey`] against which
+    ///   the signature is verified.
     /// - `message`: The message in [`BlsScalar`] format.
     ///
     /// ## Returns
@@ -120,7 +121,7 @@ impl Signature {
         let c = challenge_hash(self.R(), message);
 
         // Compute verification steps
-        // u * G + c * public_key
+        // u * G + c * note_public_key
         let point_1 = (GENERATOR_EXTENDED * self.u) + (public_key.as_ref() * c);
 
         point_1.eq(&self.R)
