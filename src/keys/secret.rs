@@ -9,7 +9,7 @@ use dusk_bytes::{Error, HexDebug, Serializable};
 use dusk_jubjub::{JubJubScalar, GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED};
 use rand_core::{CryptoRng, RngCore};
 
-use crate::{DoubleSignature, NotePublicKey, PublicKeyPair, Signature};
+use crate::{DoubleSignature, Signature};
 
 #[cfg(feature = "rkyv-impl")]
 use rkyv::{Archive, Deserialize, Serialize};
@@ -142,16 +142,14 @@ impl NoteSecretKey {
         // R_prime = r * G_NUM
         let R = GENERATOR_EXTENDED * r;
         let R_prime = GENERATOR_NUMS_EXTENDED * r;
-        let keys = PublicKeyPair((
-            NotePublicKey::from(R),
-            NotePublicKey::from(R_prime),
-        ));
         // Compute challenge value, c = H(R||R_prime||H(m));
-        let c = crate::signatures::double_key::challenge_hash(&keys, message);
+        let c = crate::signatures::double_key::challenge_hash(
+            &R, &R_prime, message,
+        );
 
-        // Compute scalar signature, U = r - c * sk,
+        // Compute scalar signature, u = r - c * sk,
         let u = r - (c * self.as_ref());
 
-        DoubleSignature::new(u, keys)
+        DoubleSignature::new(u, R, R_prime)
     }
 }
