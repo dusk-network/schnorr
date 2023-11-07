@@ -5,10 +5,11 @@
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
 //! # Keys
-//! 
-//! Modules for the note secret and public keys. 
-//! 
-//! - `public`: Contains the public note key and keypair. Used in signature verification.
+//!
+//! Modules for the note secret and public keys.
+//!
+//! - `public`: Contains the public note key and keypair. Used in signature
+//!   verification.
 //! - `secret`: Contains the secret note key. Used for signing messages.
 
 pub mod public;

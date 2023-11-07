@@ -25,9 +25,9 @@ use rkyv::{Archive, Deserialize, Serialize};
 ///
 /// ## Fields
 ///
-/// - `0`: A private [`JubJubScalar`] scalar value representing the secret
-///   key for Schnorr signature operations. This field is not directly
-///   accessible due to being private.
+/// - `0`: A private [`JubJubScalar`] scalar value representing the secret key
+///   for Schnorr signature operations. This field is not directly accessible
+///   due to being private.
 ///
 /// ## Examples
 ///

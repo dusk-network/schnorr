@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Update README with keys structure [#104]
+- Add documentation to the new key structs [#105]
+
 ### Changed
 
 - Change double and single signature creation to be a method on `NoteSecretKey` [#81]
@@ -206,6 +211,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix byte truncation for BLS -> JubJub conversion
 
 <!-- ISSUES -->
+[#105]: https://github.com/dusk-network/schnorr/issues/105
+[#104]: https://github.com/dusk-network/schnorr/issues/104
 [#99]: https://github.com/dusk-network/schnorr/issues/99
 [#96]: https://github.com/dusk-network/schnorr/issues/96
 [#95]: https://github.com/dusk-network/schnorr/issues/95

@@ -28,8 +28,8 @@ use rkyv::{Archive, Deserialize, Serialize};
 ///
 /// ## Fields
 ///
-/// - `0`: The [`JubJubExtended`] point representing the public key on the JubJub curve. This field is not directly
-///   accessible due to being private.
+/// - `0`: The [`JubJubExtended`] point representing the public key on the
+///   JubJub curve. This field is not directly accessible due to being private.
 ///
 /// ## Examples
 ///
@@ -42,7 +42,7 @@ use rkyv::{Archive, Deserialize, Serialize};
 ///
 /// let mut rng = StdRng::seed_from_u64(12345);
 /// let note_secret_key = NoteSecretKey::random(&mut rng);
-/// 
+///
 /// let pk = NotePublicKey::from(&sk);
 /// let pk_pair: NotePublicKeyPair::from(&sk);
 /// // `signature` is now a secure representation of the signed message.
