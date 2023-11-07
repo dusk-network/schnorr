@@ -6,7 +6,7 @@
 
 //! # Schnorr Signatures
 //!
-//! `schnorr_signatures` is a no-std library implementing the schnorr signature
+//! `dusk-schnorr` is a no-std library implementing the schnorr signature
 //! scheme. This library is optimized for zero-knowledge proof applications.
 //! It relies on cryptographic primitives such as the Poseidon Hash and the
 //! JubJub elliptic Curve.
@@ -26,6 +26,9 @@
 //!
 //! - `signatures`: Contains implementations for both single-key and double-key
 //!   variants of Schnorr signatures.
+//! - `keys`: Contains the implementation for [`NoteSecretKey`] to sign messages
+//!   and [`NotePublicKey`] & [`NotePublicKeyPair`] used in signature
+//!   verification.
 //! - `gadgets`: Provides zero-knowledge gadgets for use in circuits. Available
 //!   only when compiled with the `alloc` feature.
 #![no_std]

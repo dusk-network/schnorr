@@ -4,6 +4,13 @@
 //
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
+//! # Note Public Key Module
+//!
+//! This module provides the public key components for the Schnorr signature
+//! scheme, necessary for vverifying note validity. It includes single and
+//! pair-based public keys. Public keys in this context are points on the JubJub
+//! elliptic curve generated from the [`NoteSecretKey`], which provide the basis
+//! for signature verification.
 use dusk_bytes::{DeserializableSlice, Error, HexDebug, Serializable};
 use dusk_jubjub::{
     JubJubAffine, JubJubExtended, GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED,
@@ -14,7 +21,32 @@ use crate::NoteSecretKey;
 #[cfg(feature = "rkyv-impl")]
 use rkyv::{Archive, Deserialize, Serialize};
 
-/// Structure repesenting a [`NotePublicKey`]
+/// Structure repesenting a [`NotePublicKey`] an extended point on the JubJub
+/// curve [`JubJubExtended`]. This public key allows for the verification of
+/// signatures created with its corresponding secret key without revealing the
+/// secret key itself.
+///
+/// ## Fields
+///
+/// - `0`: The [`JubJubExtended`] point representing the public key on the JubJub curve. This field is not directly
+///   accessible due to being private.
+///
+/// ## Examples
+///
+/// Generating a random `NoteSecretKey` and signing a message with single and
+/// double signatures: ```rust
+/// use dusk_schnorr::{NoteSecretKey, NotePublicKey, NotePublicKeyPair};
+/// use dusk_bls12_381::BlsScalar;
+/// use rand::rngs::StdRng;
+/// use rand::SeedableRng;
+///
+/// let mut rng = StdRng::seed_from_u64(12345);
+/// let note_secret_key = NoteSecretKey::random(&mut rng);
+/// 
+/// let pk = NotePublicKey::from(&sk);
+/// let pk_pair: NotePublicKeyPair::from(&sk);
+/// // `signature` is now a secure representation of the signed message.
+/// ```
 #[derive(Default, Copy, Clone, HexDebug)]
 #[cfg_attr(
     feature = "rkyv-impl",
