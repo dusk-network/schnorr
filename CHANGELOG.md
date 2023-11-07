@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rename the signatures method `to_witness` to `append` [#99]
 - Update benchmarks to latest version of plonk [#94]
 - Update test structure [#94]
+- Move `PublicKeyPair` from `DoubleSignature` to `public_keys` [#95]
+
+### Removed
+
+- Hide `(Double)Signature::new()` from the public API [#81]
 
 ## [0.15.0] - 2023-11-1
 
@@ -203,6 +208,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- ISSUES -->
 [#99]: https://github.com/dusk-network/schnorr/issues/99
 [#96]: https://github.com/dusk-network/schnorr/issues/96
+[#95]: https://github.com/dusk-network/schnorr/issues/95
 [#94]: https://github.com/dusk-network/schnorr/issues/94
 [#89]: https://github.com/dusk-network/schnorr/issues/89
 [#81]: https://github.com/dusk-network/schnorr/issues/81
