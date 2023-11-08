@@ -7,7 +7,7 @@
 //! # Note Public Key Module
 //!
 //! This module provides the public key components for the Schnorr signature
-//! scheme, necessary for vverifying note validity. It includes single and
+//! scheme, necessary for verifying note validity. It includes single and
 //! pair-based public keys. Public keys in this context are points on the JubJub
 //! elliptic curve generated from the [`NoteSecretKey`], which provide the basis
 //! for signature verification.
@@ -26,11 +26,6 @@ use rkyv::{Archive, Deserialize, Serialize};
 /// signatures created with its corresponding secret key without revealing the
 /// secret key itself.
 ///
-/// ## Fields
-///
-/// - `0`: The [`JubJubExtended`] point representing the public key on the
-///   JubJub curve. This field is not directly accessible due to being private.
-///
 /// ## Examples
 ///
 /// Generating a random `NoteSecretKey` and signing a message with single and
@@ -45,7 +40,6 @@ use rkyv::{Archive, Deserialize, Serialize};
 ///
 /// let pk = NotePublicKey::from(&sk);
 /// let pk_pair: NotePublicKeyPair::from(&sk);
-/// // `signature` is now a secure representation of the signed message.
 /// ```
 #[derive(Default, Copy, Clone, HexDebug)]
 #[cfg_attr(

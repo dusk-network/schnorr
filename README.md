@@ -22,6 +22,26 @@ The library is partitioned into two components:
 - **Signatures**: Module containing functions to verify the validity of Schnorr signatures.
 - **Gadgets**: Contains the Plonk gadgets for signature verification.
 
+## Schnorr Sigma Protocol
+
+The signature scheme implemented within the Phoenix protocol is based on the Schnorr Sigma protocol, compiled alongside the Fiat–Shamir transformation, to serve as a non-interactive signature scheme. Specifically, the Phoenix protocol employs a variant that utilizes double keys, enabling the delegation of computational processes within the protocol's later stages.
+
+### Signature Scheme Description
+
+The details of the signature scheme are as follows:
+
+- **Setup**: A secret key `sk` is sampled from the finite field `F_t`, and corresponding public keys are computed as `pk = sk * G` and `pk' = sk * G'`, where `G` and `G'` are generators of the JubJub elliptic curve group `J`. The public key pair is represented as `(pk, pk')`.
+
+- **Signing Process**: To sign a message `m` using the secret key `sk`, a random scalar `r` is drawn from `F_t`. The commitment points `(R, R')` are calculated by multiplying `r` with the base points `G` and `G'`. A challenge `c` is derived by hashing the tuple `(m, R, R')`, and the response `u` is computed as `u = r - c * sk`. The signature is then the tuple `(R, R', u)`.
+
+- **Verification Procedure**: Given a public key pair `(pk, pk')`, a message `m`, and a signature `(R, R', u)`, the verification involves recalculating the challenge `c` using the hash of `(m, R, R')` and checking if the equalities `R = u * G + c * pk` and `R' = u * G' + c * pk'` are satisfied. If both equalities hold, the signature is deemed valid.
+
+### Notes on Security and Implementation
+
+The implemented signature scheme is existentially unforgeable under chosen-message attacks assuming the hardness of the discrete logarithm problem in the random oracle model. This property is detailed in Section 12.5.1 of Katz and Lindell's Introduction to Modern Cryptography.
+
+While the basic Schnorr signature scheme is a widely recognized construct, the double-key variant as employed by Phoenix is a novel introduction. In the context of the transaction protocol, this allows for the delegation of proof computations without compromising the confidentiality of the signer's secret key.
+
 ## Usage
 To integrate the `dusk-schnorr` crate into your project, add it with the following command:
 ```bash
@@ -48,8 +68,7 @@ fn main() {
     let signature = sk.sign_single(&mut rng, message);
 
     // Verify the signature
-    let is_valid = signature.verify(&pk, message);
-    assert!(is_valid, "The signature should be valid.");
+    assert!(signature.verify(&pk, message), "The signature should be valid.");
 }
 ```
 

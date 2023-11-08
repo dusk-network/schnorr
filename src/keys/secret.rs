@@ -23,28 +23,16 @@ use rkyv::{Archive, Deserialize, Serialize};
 /// Structure repesenting a [`NoteSecretKey`], represented as a private scalar
 /// in the JubJub scalar field.
 ///
-/// ## Fields
-///
-/// - `0`: A private [`JubJubScalar`] scalar value representing the secret key
-///   for Schnorr signature operations. This field is not directly accessible
-///   due to being private.
-///
 /// ## Examples
 ///
 /// Generating a random `NoteSecretKey` and signing a message with single and
 /// double signatures: ```rust
 /// use dusk_schnorr::NoteSecretKey;
-/// use dusk_bls12_381::BlsScalar;
 /// use rand::rngs::StdRng;
 /// use rand::SeedableRng;
 ///
 /// let mut rng = StdRng::seed_from_u64(12345);
 /// let note_secret_key = NoteSecretKey::random(&mut rng);
-/// let message = BlsScalar::uni_random(&mut rng);
-///
-/// let signature = note_secret_key.sign_single(&mut rng, message);
-/// let double_signature = note_secret_key.sign_double(&mut rng, message);
-/// // `signature` is now a secure representation of the signed message.
 /// ```
 #[allow(non_snake_case)]
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, HexDebug)]
