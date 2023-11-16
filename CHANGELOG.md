@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Change the NotePublicKey tuple struct to directly be a tuple with two fields [#111]
 - Change double and single signature creation to be a method on `NoteSecretKey` [#81]
 - Rename internal `key_variants` module to `signatures` [#96]
 - Rename the signatures method `to_witness` to `append` [#99]
@@ -211,6 +212,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix byte truncation for BLS -> JubJub conversion
 
 <!-- ISSUES -->
+[#111]: https://github.com/dusk-network/schnorr/issues/111
 [#105]: https://github.com/dusk-network/schnorr/issues/105
 [#104]: https://github.com/dusk-network/schnorr/issues/104
 [#99]: https://github.com/dusk-network/schnorr/issues/99
