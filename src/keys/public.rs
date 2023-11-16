@@ -151,21 +151,24 @@ impl NotePublicKey {
     derive(Archive, Deserialize, Serialize),
     archive_attr(derive(bytecheck::CheckBytes))
 )]
-pub struct NotePublicKeyPair(pub(crate) (NotePublicKey, NotePublicKey));
+pub struct NotePublicKeyPair(
+    pub(crate) NotePublicKey,
+    pub(crate) NotePublicKey,
+);
 
 impl NotePublicKeyPair {
     /// Returns the `NotePublicKey` corresponding to the standard elliptic curve
     /// generator point `sk * G`.
     #[allow(non_snake_case)]
     pub fn pk(&self) -> &NotePublicKey {
-        &self.0 .0
+        &self.0
     }
 
     /// Returns the `NotePublicKey` corresponding to the secondary elliptic
     /// curve generator point `sk * G_NUM`.
     #[allow(non_snake_case)]
     pub fn pk_prime(&self) -> &NotePublicKey {
-        &self.0 .1
+        &self.1
     }
 }
 
@@ -175,7 +178,7 @@ impl From<&NoteSecretKey> for NotePublicKeyPair {
         let public_key_prime =
             NotePublicKey::from(GENERATOR_NUMS_EXTENDED * sk.as_ref());
 
-        NotePublicKeyPair((public_key, public_key_prime))
+        NotePublicKeyPair(public_key, public_key_prime)
     }
 }
 
@@ -190,8 +193,8 @@ impl Serializable<64> for NotePublicKeyPair {
 
     fn to_bytes(&self) -> [u8; Self::SIZE] {
         let mut buf = [0u8; Self::SIZE];
-        buf[..32].copy_from_slice(&(self.0).0.to_bytes()[..]);
-        buf[32..].copy_from_slice(&(self.0).1.to_bytes()[..]);
+        buf[..32].copy_from_slice(&self.0.to_bytes()[..]);
+        buf[32..].copy_from_slice(&self.1.to_bytes()[..]);
         buf
     }
 
@@ -199,6 +202,6 @@ impl Serializable<64> for NotePublicKeyPair {
         let pk: JubJubExtended = JubJubAffine::from_slice(&bytes[..32])?.into();
         let pk_prime: JubJubExtended =
             JubJubAffine::from_slice(&bytes[32..])?.into();
-        Ok(NotePublicKeyPair((pk.into(), pk_prime.into())))
+        Ok(NotePublicKeyPair(pk.into(), pk_prime.into()))
     }
 }
