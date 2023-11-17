@@ -18,7 +18,7 @@ For a reference to the algorithm, please see the
 ## Library Structure
 The library is partitioned into two components:
 
-- **Keys**: Module containing the secret note key structure for signing messages, and the public note key & keypair structures used in verification.
+- **Keys**: Module containing the secret key structure for signing messages, and the public key & keypair structures used in verification.
 - **Signatures**: Module containing functions to verify the validity of Schnorr signatures.
 - **Gadgets**: Contains the Plonk gadgets for signature verification.
 
@@ -51,7 +51,7 @@ cargo add dusk-schnorr
 A basic example demonstrating how to generate and verify a Schnorr signature:
 ```rust
 use dusk_bls12_381::BlsScalar;
-use dusk_schnorr::{NotePublicKey, NoteSecretKey, Signature};
+use dusk_schnorr::{PublicKey, SecretKey, Signature};
 use rand::rngs::StdRng;
 use rand::SeedableRng;
 
@@ -60,8 +60,8 @@ fn main() {
     let mut rng = StdRng::seed_from_u64(1234u64);
 
     // Key generation
-    let sk = NoteSecretKey::random(&mut rng);
-    let pk = NotePublicKey::from(&sk);
+    let sk = SecretKey::random(&mut rng);
+    let pk = PublicKey::from(&sk);
 
     // Sign the message in the form of a BLS scalar
     let message = BlsScalar::uni_random(&mut rng);

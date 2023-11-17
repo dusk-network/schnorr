@@ -15,7 +15,7 @@ use dusk_jubjub::GENERATOR_EXTENDED;
 use dusk_plonk::prelude::*;
 use dusk_poseidon::sponge;
 
-use crate::NotePublicKey;
+use crate::PublicKey;
 
 #[cfg(feature = "rkyv-impl")]
 use rkyv::{Archive, Deserialize, Serialize};
@@ -32,7 +32,7 @@ pub(crate) fn challenge_hash(
 }
 
 /// An Schnorr signature, produced by signing a message with a
-/// [`NoteSecretKey`].
+/// [`SecretKey`].
 ///
 /// The `Signature` struct encapsulates variables of the Schnorr scheme.
 ///
@@ -49,15 +49,15 @@ pub(crate) fn challenge_hash(
 ///
 /// ```
 /// use dusk_bls12_381::BlsScalar;
-/// use dusk_schnorr::{NotePublicKey, NoteSecretKey, Signature};
+/// use dusk_schnorr::{PublicKey, SecretKey, Signature};
 /// use rand::rngs::StdRng;
 /// use rand::SeedableRng;
 ///
 /// let mut rng = StdRng::seed_from_u64(1234u64);
 ///
-/// let sk = NoteSecretKey::random(&mut rng);
+/// let sk = SecretKey::random(&mut rng);
 /// let message = BlsScalar::uni_random(&mut rng);
-/// let pk = NotePublicKey::from(&sk);
+/// let pk = PublicKey::from(&sk);
 ///
 /// // Sign the message
 /// let signature = sk.sign_single(&mut rng, message);
@@ -95,33 +95,29 @@ impl Signature {
         Self { u, R }
     }
 
-    /// Verifies the Schnorr signature against a given note public key and
+    /// Verifies the Schnorr signature against a given public key and
     /// message.
     ///
     /// This function computes a challenge hash using the stored `R` point and
     /// the provided message, then performs the verification by checking the
-    /// equality of `u * G + c * note_public_key` and `R`.
+    /// equality of `u * G + c * public_key` and `R`.
     ///
     /// ## Parameters
     ///
-    /// - `note_public_key`: Reference to the [`NotePublicKey`] against which
-    ///   the signature is verified.
+    /// - `public_key`: Reference to the [`PublicKey`] against which the
+    ///   signature is verified.
     /// - `message`: The message in [`BlsScalar`] format.
     ///
     /// ## Returns
     ///
     /// Returns a boolean value indicating the verification result. `true` if
     /// verification is successful, `false` otherwise.
-    pub fn verify(
-        &self,
-        public_key: &NotePublicKey,
-        message: BlsScalar,
-    ) -> bool {
+    pub fn verify(&self, public_key: &PublicKey, message: BlsScalar) -> bool {
         // Compute challenge value, c = H(R||H(m));
         let c = challenge_hash(self.R(), message);
 
         // Compute verification steps
-        // u * G + c * note_public_key
+        // u * G + c * public_key
         let point_1 = (GENERATOR_EXTENDED * self.u) + (public_key.as_ref() * c);
 
         point_1.eq(&self.R)

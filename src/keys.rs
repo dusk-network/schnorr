@@ -6,11 +6,11 @@
 
 //! # Keys
 //!
-//! Modules for the note secret and public keys.
+//! Modules for the secret and public keys.
 //!
-//! - `public`: Contains the public note key and keypair. Used in signature
+//! - `public`: Contains the public key and keypair. Used in signature
 //!   verification.
-//! - `secret`: Contains the secret note key. Used for signing messages.
+//! - `secret`: Contains the secret key. Used for signing messages.
 
 pub mod public;
 pub mod secret;

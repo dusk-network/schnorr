@@ -8,7 +8,7 @@ use criterion::{criterion_group, criterion_main, Criterion};
 
 use dusk_jubjub::{GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED};
 use dusk_plonk::error::Error as PlonkError;
-use dusk_schnorr::{gadgets, DoubleSignature, NoteSecretKey, Signature};
+use dusk_schnorr::{gadgets, DoubleSignature, SecretKey, Signature};
 use rand::rngs::StdRng;
 use rand::SeedableRng;
 
@@ -47,7 +47,7 @@ struct SingleSigCircuit {
 
 impl SingleSigCircuit {
     pub fn valid(rng: &mut StdRng) -> Self {
-        let sk = NoteSecretKey::random(rng);
+        let sk = SecretKey::random(rng);
         let message = BlsScalar::uni_random(rng);
         let signature = sk.sign_single(rng, message);
 
@@ -111,7 +111,7 @@ struct DoubleSigCircuit {
 
 impl DoubleSigCircuit {
     pub fn valid(rng: &mut StdRng) -> Self {
-        let sk = NoteSecretKey::random(rng);
+        let sk = SecretKey::random(rng);
         let message = BlsScalar::uni_random(rng);
         let signature = sk.sign_double(rng, message);
 

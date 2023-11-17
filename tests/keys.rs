@@ -5,19 +5,19 @@
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
 use dusk_jubjub::{JubJubAffine, JubJubExtended, JubJubScalar};
-use dusk_schnorr::{NotePublicKey, NoteSecretKey};
+use dusk_schnorr::{PublicKey, SecretKey};
 use rand_core::OsRng;
 
 #[test]
 #[allow(clippy::eq_op)]
 fn partial_eq_pk() {
-    let sk1 = NoteSecretKey::random(&mut OsRng);
-    let sk2 = NoteSecretKey::random(&mut OsRng);
+    let sk1 = SecretKey::random(&mut OsRng);
+    let sk2 = SecretKey::random(&mut OsRng);
 
     assert_ne!(sk1, sk2);
 
-    let pk1 = NotePublicKey::from(&sk1);
-    let pk2 = NotePublicKey::from(&sk2);
+    let pk1 = PublicKey::from(&sk1);
+    let pk2 = PublicKey::from(&sk2);
 
     assert_eq!(pk1, pk1);
     assert_ne!(pk1, pk2);
@@ -48,6 +48,6 @@ fn partial_eq_pk() {
 
     assert_eq!(JubJubAffine::from(right), JubJubAffine::from(left));
 
-    assert_eq!(NotePublicKey::from(left), NotePublicKey::from(right));
-    assert_ne!(NotePublicKey::from(left), NotePublicKey::from(wrong))
+    assert_eq!(PublicKey::from(left), PublicKey::from(right));
+    assert_ne!(PublicKey::from(left), PublicKey::from(wrong))
 }

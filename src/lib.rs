@@ -16,7 +16,7 @@ pub mod gadgets;
 #[deprecated(note = "Please use DoubleSignature instead")]
 pub type Proof = signatures::double_key::Signature;
 
-pub use keys::public::{NotePublicKey, NotePublicKeyPair};
-pub use keys::secret::NoteSecretKey;
+pub use keys::public::{PublicKey, PublicKeyPair};
+pub use keys::secret::SecretKey;
 pub use signatures::double_key::Signature as DoubleSignature;
 pub use signatures::single_key::Signature;
