@@ -7,8 +7,7 @@
 //! # Double-Key Schnorr Signature
 //!
 //! This module implements a Schnorr signature scheme with a double-key
-//! mechanism. It is primarily used in Phoenix to allow for proof delegation
-//! without leaking the note secret key.
+//! mechanism.
 //!
 //! The module includes the [`Signature`] struct , which holds the scalar `u`
 //! and two nonce points `R` and `R'`.
@@ -18,7 +17,7 @@ use dusk_jubjub::{GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED};
 use dusk_plonk::prelude::*;
 use dusk_poseidon::sponge::truncated;
 
-use crate::NotePublicKeyPair;
+use crate::PublicKeyPair;
 
 #[cfg(feature = "rkyv-impl")]
 use rkyv::{Archive, Deserialize, Serialize};
@@ -73,14 +72,14 @@ pub(crate) fn challenge_hash(
 /// ```
 /// use rand::rngs::StdRng;
 /// use rand::SeedableRng;
-/// use dusk_schnorr::{NoteSecretKey, NotePublicKeyPair, DoubleSignature};
+/// use dusk_schnorr::{SecretKey, PublicKeyPair, DoubleSignature};
 /// use dusk_bls12_381::BlsScalar;
 ///
 /// let mut rng = StdRng::seed_from_u64(2321u64);
 ///
-/// let sk = NoteSecretKey::random(&mut rng);
+/// let sk = SecretKey::random(&mut rng);
 /// let message = BlsScalar::uni_random(&mut rng);
-/// let pk_pair: NotePublicKeyPair = sk.into();
+/// let pk_pair: PublicKeyPair = sk.into();
 ///
 /// let signature = sk.sign_double(&mut rng, message);
 ///
@@ -108,13 +107,13 @@ impl Signature {
         &self.u
     }
 
-    /// Returns the `NotePublicKey` `R`
+    /// Returns the nonce point `R`
     #[allow(non_snake_case)]
     pub fn R(&self) -> &JubJubExtended {
         &self.R
     }
 
-    /// Returns the `NotePublicKey` `R_pime`
+    /// Returns the nonce point `R_prime`
     #[allow(non_snake_case)]
     pub fn R_prime(&self) -> &JubJubExtended {
         &self.R_prime
@@ -138,24 +137,20 @@ impl Signature {
     ///
     /// # Parameters
     ///
-    /// * `pk_pair`: [`NotePublicKeyPair`] corresponding to the secret key used
-    ///   for the signature
+    /// * `pk_pair`: [`PublicKeyPair`] corresponding to the secret key used for
+    ///   the signature
     /// * `mgs_hash`: Message hashed to a `BlsScalar`.
     ///
     /// # Returns
     ///
     /// A boolean value indicating the validity of the Schnorr signature.
     #[allow(non_snake_case)]
-    pub fn verify(
-        &self,
-        pk_pair: &NotePublicKeyPair,
-        msg_hash: BlsScalar,
-    ) -> bool {
+    pub fn verify(&self, pk_pair: &PublicKeyPair, msg_hash: BlsScalar) -> bool {
         // Compute challenge value, c = H(R||R_prime||H(m));
         let c = challenge_hash(self.R(), self.R_prime(), msg_hash);
 
         // Compute verification steps
-        // u * G + c * note_public_key
+        // u * G + c * public_key
         let point_1 =
             (GENERATOR_EXTENDED * self.u) + (pk_pair.pk().as_ref() * c);
         // u * G_nums + c * public_key_prime

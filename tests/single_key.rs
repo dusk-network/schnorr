@@ -6,7 +6,7 @@
 
 use dusk_bls12_381::BlsScalar;
 use dusk_bytes::Serializable;
-use dusk_schnorr::{NotePublicKey, NoteSecretKey, Signature};
+use dusk_schnorr::{PublicKey, SecretKey, Signature};
 use rand::rngs::StdRng;
 use rand::SeedableRng;
 
@@ -14,9 +14,9 @@ use rand::SeedableRng;
 fn sign_verify() {
     let mut rng = StdRng::seed_from_u64(2321u64);
 
-    let sk = NoteSecretKey::random(&mut rng);
+    let sk = SecretKey::random(&mut rng);
     let message = BlsScalar::uni_random(&mut rng);
-    let pk = NotePublicKey::from(&sk);
+    let pk = PublicKey::from(&sk);
 
     let sig = sk.sign_single(&mut rng, message);
 
@@ -27,14 +27,13 @@ fn sign_verify() {
 fn test_wrong_keys() {
     let mut rng = StdRng::seed_from_u64(2321u64);
 
-    let sk = NoteSecretKey::random(&mut rng);
-    let wrong_sk = NoteSecretKey::random(&mut rng);
+    let sk = SecretKey::random(&mut rng);
     let message = BlsScalar::uni_random(&mut rng);
 
     let sig = sk.sign_single(&mut rng, message);
 
-    // Derive random note public key
-    let pk = NotePublicKey::from(&wrong_sk);
+    // Derive random public key
+    let pk = PublicKey::from(&SecretKey::random(&mut rng));
 
     assert!(!sig.verify(&pk, message));
 }
@@ -43,7 +42,7 @@ fn test_wrong_keys() {
 fn to_from_bytes() {
     let mut rng = StdRng::seed_from_u64(2321u64);
 
-    let sk = NoteSecretKey::random(&mut rng);
+    let sk = SecretKey::random(&mut rng);
     let message = BlsScalar::uni_random(&mut rng);
 
     let sig = sk.sign_single(&mut rng, message);

@@ -4,42 +4,42 @@
 //
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
-//! # Note Public Key Module
+//! # Public Key Module
 //!
 //! This module provides the public key components for the Schnorr signature
-//! scheme, necessary for verifying note validity. It includes single and
+//! scheme, necessary for verifying signature validity. It includes single and
 //! pair-based public keys. Public keys in this context are points on the JubJub
-//! elliptic curve generated from the [`NoteSecretKey`], which provide the basis
+//! elliptic curve generated from the [`SecretKey`], which provide the basis
 //! for signature verification.
 use dusk_bytes::{DeserializableSlice, Error, HexDebug, Serializable};
 use dusk_jubjub::{
     JubJubAffine, JubJubExtended, GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED,
 };
 
-use crate::NoteSecretKey;
+use crate::SecretKey;
 
 #[cfg(feature = "rkyv-impl")]
 use rkyv::{Archive, Deserialize, Serialize};
 
-/// Structure repesenting a [`NotePublicKey`] an extended point on the JubJub
+/// Structure repesenting a [`PublicKey`] an extended point on the JubJub
 /// curve [`JubJubExtended`]. This public key allows for the verification of
 /// signatures created with its corresponding secret key without revealing the
 /// secret key itself.
 ///
 /// ## Examples
 ///
-/// Generating a random `NoteSecretKey` and signing a message with single and
+/// Generating a random `SecretKey` and signing a message with single and
 /// double signatures: ```rust
-/// use dusk_schnorr::{NoteSecretKey, NotePublicKey, NotePublicKeyPair};
+/// use dusk_schnorr::{SecretKey, PublicKey, PublicKeyPair};
 /// use dusk_bls12_381::BlsScalar;
 /// use rand::rngs::StdRng;
 /// use rand::SeedableRng;
 ///
 /// let mut rng = StdRng::seed_from_u64(12345);
-/// let note_secret_key = NoteSecretKey::random(&mut rng);
+/// let secret_key = SecretKey::random(&mut rng);
 ///
-/// let pk = NotePublicKey::from(&sk);
-/// let pk_pair: NotePublicKeyPair::from(&sk);
+/// let pk = PublicKey::from(&sk);
+/// let pk_pair: PublicKeyPair::from(&sk);
 /// ```
 #[derive(Default, Copy, Clone, HexDebug)]
 #[cfg_attr(
@@ -47,17 +47,17 @@ use rkyv::{Archive, Deserialize, Serialize};
     derive(Archive, Serialize, Deserialize),
     archive_attr(derive(bytecheck::CheckBytes))
 )]
-pub struct NotePublicKey(pub(crate) JubJubExtended);
+pub struct PublicKey(pub(crate) JubJubExtended);
 
-impl From<&NoteSecretKey> for NotePublicKey {
-    fn from(sk: &NoteSecretKey) -> Self {
+impl From<&SecretKey> for PublicKey {
+    fn from(sk: &SecretKey) -> Self {
         let public_key = GENERATOR_EXTENDED * sk.0;
 
-        NotePublicKey(public_key)
+        PublicKey(public_key)
     }
 }
 
-impl PartialEq for NotePublicKey {
+impl PartialEq for PublicKey {
     fn eq(&self, other: &Self) -> bool {
         self.0.get_u() * other.0.get_z() == other.0.get_u() * self.0.get_z()
             && self.0.get_v() * other.0.get_z()
@@ -65,27 +65,27 @@ impl PartialEq for NotePublicKey {
     }
 }
 
-impl Eq for NotePublicKey {}
+impl Eq for PublicKey {}
 
-impl From<JubJubExtended> for NotePublicKey {
-    fn from(p: JubJubExtended) -> NotePublicKey {
-        NotePublicKey(p)
+impl From<JubJubExtended> for PublicKey {
+    fn from(p: JubJubExtended) -> PublicKey {
+        PublicKey(p)
     }
 }
 
-impl From<&JubJubExtended> for NotePublicKey {
-    fn from(p: &JubJubExtended) -> NotePublicKey {
-        NotePublicKey(*p)
+impl From<&JubJubExtended> for PublicKey {
+    fn from(p: &JubJubExtended) -> PublicKey {
+        PublicKey(*p)
     }
 }
 
-impl AsRef<JubJubExtended> for NotePublicKey {
+impl AsRef<JubJubExtended> for PublicKey {
     fn as_ref(&self) -> &JubJubExtended {
         &self.0
     }
 }
 
-impl Serializable<32> for NotePublicKey {
+impl Serializable<32> for PublicKey {
     type Error = Error;
 
     fn to_bytes(&self) -> [u8; 32] {
@@ -102,8 +102,8 @@ impl Serializable<32> for NotePublicKey {
     }
 }
 
-impl NotePublicKey {
-    /// Create a note public key from its internal parts
+impl PublicKey {
+    /// Create a public key from its internal parts
     ///
     /// The public keys are generated from a bijective function that takes a
     /// secret keys domain. If keys are generated directly from curve
@@ -118,10 +118,10 @@ impl NotePublicKey {
     }
 }
 
-/// Structure representing a pair of [`NotePublicKey`] objects generated from a
-/// [`NoteSecretKey`].
+/// Structure representing a pair of [`PublicKey`] objects generated from a
+/// [`SecretKey`].
 ///
-/// The `NotePublicKeyPair` struct contains two public keys: `(pk, pk')`,
+/// The `PublicKeyPair` struct contains two public keys: `(pk, pk')`,
 /// which are generated from different bases.
 /// Specifically: `pk = sk * G` with the standard generator point [`G`],
 /// and `pk' = sk * G_NUMS` with generator point [`G_NUMS`].
@@ -132,15 +132,15 @@ impl NotePublicKey {
 ///
 /// ## Fields
 ///
-/// - `(pk, pk')`: A [`NotePublicKey`] pair
+/// - `(pk, pk')`: A [`PublicKey`] pair
 ///
 /// ## Example
 /// ```
 /// use rand::thread_rng;
-/// use dusk_schnorr::{NoteSecretKey, NotePublicKeyPair};
+/// use dusk_schnorr::{SecretKey, PublicKeyPair};
 ///
-/// let sk = NoteSecretKey::random(&mut thread_rng());
-/// let pk_pair = NotePublicKeyPair::from(&sk);
+/// let sk = SecretKey::random(&mut thread_rng());
+/// let pk_pair = PublicKeyPair::from(&sk);
 /// ```
 ///
 /// [`G`]: `GENERATOR_EXTENDED`
@@ -151,44 +151,41 @@ impl NotePublicKey {
     derive(Archive, Deserialize, Serialize),
     archive_attr(derive(bytecheck::CheckBytes))
 )]
-pub struct NotePublicKeyPair(
-    pub(crate) NotePublicKey,
-    pub(crate) NotePublicKey,
-);
+pub struct PublicKeyPair(pub(crate) PublicKey, pub(crate) PublicKey);
 
-impl NotePublicKeyPair {
-    /// Returns the `NotePublicKey` corresponding to the standard elliptic curve
+impl PublicKeyPair {
+    /// Returns the `PublicKey` corresponding to the standard elliptic curve
     /// generator point `sk * G`.
     #[allow(non_snake_case)]
-    pub fn pk(&self) -> &NotePublicKey {
+    pub fn pk(&self) -> &PublicKey {
         &self.0
     }
 
-    /// Returns the `NotePublicKey` corresponding to the secondary elliptic
+    /// Returns the `PublicKey` corresponding to the secondary elliptic
     /// curve generator point `sk * G_NUM`.
     #[allow(non_snake_case)]
-    pub fn pk_prime(&self) -> &NotePublicKey {
+    pub fn pk_prime(&self) -> &PublicKey {
         &self.1
     }
 }
 
-impl From<&NoteSecretKey> for NotePublicKeyPair {
-    fn from(sk: &NoteSecretKey) -> Self {
-        let public_key = NotePublicKey::from(sk);
+impl From<&SecretKey> for PublicKeyPair {
+    fn from(sk: &SecretKey) -> Self {
+        let public_key = PublicKey::from(sk);
         let public_key_prime =
-            NotePublicKey::from(GENERATOR_NUMS_EXTENDED * sk.as_ref());
+            PublicKey::from(GENERATOR_NUMS_EXTENDED * sk.as_ref());
 
-        NotePublicKeyPair(public_key, public_key_prime)
+        PublicKeyPair(public_key, public_key_prime)
     }
 }
 
-impl From<NoteSecretKey> for NotePublicKeyPair {
-    fn from(sk: NoteSecretKey) -> Self {
+impl From<SecretKey> for PublicKeyPair {
+    fn from(sk: SecretKey) -> Self {
         (&sk).into()
     }
 }
 
-impl Serializable<64> for NotePublicKeyPair {
+impl Serializable<64> for PublicKeyPair {
     type Error = Error;
 
     fn to_bytes(&self) -> [u8; Self::SIZE] {
@@ -202,6 +199,6 @@ impl Serializable<64> for NotePublicKeyPair {
         let pk: JubJubExtended = JubJubAffine::from_slice(&bytes[..32])?.into();
         let pk_prime: JubJubExtended =
             JubJubAffine::from_slice(&bytes[32..])?.into();
-        Ok(NotePublicKeyPair(pk.into(), pk_prime.into()))
+        Ok(PublicKeyPair(pk.into(), pk_prime.into()))
     }
 }

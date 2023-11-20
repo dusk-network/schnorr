@@ -6,7 +6,7 @@
 
 use dusk_jubjub::{GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED};
 use dusk_plonk::error::Error as PlonkError;
-use dusk_schnorr::{gadgets, DoubleSignature, NoteSecretKey, Signature};
+use dusk_schnorr::{gadgets, DoubleSignature, SecretKey, Signature};
 use rand::rngs::StdRng;
 use rand::SeedableRng;
 
@@ -35,7 +35,7 @@ struct SingleSigCircuit {
 
 impl SingleSigCircuit {
     pub fn valid_random(rng: &mut StdRng) -> Self {
-        let sk = NoteSecretKey::random(rng);
+        let sk = SecretKey::random(rng);
         let message = BlsScalar::uni_random(rng);
         let signature = sk.sign_single(rng, message);
 
@@ -49,11 +49,11 @@ impl SingleSigCircuit {
     }
 
     pub fn invalid_random(rng: &mut StdRng) -> Self {
-        let sk = NoteSecretKey::random(rng);
+        let sk = SecretKey::random(rng);
         let message = BlsScalar::uni_random(rng);
         let signature = sk.sign_single(rng, message);
 
-        let sk_wrong = NoteSecretKey::random(rng);
+        let sk_wrong = SecretKey::random(rng);
         let pk = GENERATOR_EXTENDED * sk_wrong.as_ref();
 
         Self {
@@ -119,7 +119,7 @@ struct DoubleSigCircuit {
 
 impl DoubleSigCircuit {
     pub fn valid_random(rng: &mut StdRng) -> Self {
-        let sk = NoteSecretKey::random(rng);
+        let sk = SecretKey::random(rng);
         let message = BlsScalar::uni_random(rng);
         let signature = sk.sign_double(rng, message);
 
@@ -135,11 +135,11 @@ impl DoubleSigCircuit {
     }
 
     pub fn invalid_random(rng: &mut StdRng) -> Self {
-        let sk = NoteSecretKey::random(rng);
+        let sk = SecretKey::random(rng);
         let message = BlsScalar::uni_random(rng);
         let signature = sk.sign_double(rng, message);
 
-        let sk_wrong = NoteSecretKey::random(rng);
+        let sk_wrong = SecretKey::random(rng);
         let pk = GENERATOR_EXTENDED * sk_wrong.as_ref();
         let pk_p = GENERATOR_NUMS_EXTENDED * sk_wrong.as_ref();
 

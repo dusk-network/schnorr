@@ -4,9 +4,9 @@
 //
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
-//! # Note Secret Key Module
+//! # Secret Key Module
 //!
-//! This module provides the `NoteSecretKey`, essential for signing notes,
+//! This module provides the `SecretKey`, essential for signing messages,
 //! proving ownership. It facilitates the generation of a Schnorr signatures,
 //! supporting both single and double signature schemes.
 
@@ -20,19 +20,19 @@ use crate::{DoubleSignature, Signature};
 #[cfg(feature = "rkyv-impl")]
 use rkyv::{Archive, Deserialize, Serialize};
 
-/// Structure repesenting a [`NoteSecretKey`], represented as a private scalar
+/// Structure repesenting a [`SecretKey`], represented as a private scalar
 /// in the JubJub scalar field.
 ///
 /// ## Examples
 ///
-/// Generating a random `NoteSecretKey` and signing a message with single and
+/// Generating a random `SecretKey` and signing a message with single and
 /// double signatures: ```rust
-/// use dusk_schnorr::NoteSecretKey;
+/// use dusk_schnorr::SecretKey;
 /// use rand::rngs::StdRng;
 /// use rand::SeedableRng;
 ///
 /// let mut rng = StdRng::seed_from_u64(12345);
-/// let note_secret_key = NoteSecretKey::random(&mut rng);
+/// let secret_key = SecretKey::random(&mut rng);
 /// ```
 #[allow(non_snake_case)]
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, HexDebug)]
@@ -41,40 +41,40 @@ use rkyv::{Archive, Deserialize, Serialize};
     derive(Archive, Serialize, Deserialize),
     archive_attr(derive(bytecheck::CheckBytes))
 )]
-pub struct NoteSecretKey(pub(crate) JubJubScalar);
+pub struct SecretKey(pub(crate) JubJubScalar);
 
-impl From<JubJubScalar> for NoteSecretKey {
-    fn from(s: JubJubScalar) -> NoteSecretKey {
-        NoteSecretKey(s)
+impl From<JubJubScalar> for SecretKey {
+    fn from(s: JubJubScalar) -> SecretKey {
+        SecretKey(s)
     }
 }
 
-impl From<&JubJubScalar> for NoteSecretKey {
-    fn from(s: &JubJubScalar) -> NoteSecretKey {
-        NoteSecretKey(*s)
+impl From<&JubJubScalar> for SecretKey {
+    fn from(s: &JubJubScalar) -> SecretKey {
+        SecretKey(*s)
     }
 }
 
-impl AsRef<JubJubScalar> for NoteSecretKey {
+impl AsRef<JubJubScalar> for SecretKey {
     fn as_ref(&self) -> &JubJubScalar {
         &self.0
     }
 }
 
-impl NoteSecretKey {
-    /// This will create a random [`NoteSecretKey`] from a scalar
+impl SecretKey {
+    /// This will create a random [`SecretKey`] from a scalar
     /// of the Field JubJubScalar.
-    pub fn random<T>(rand: &mut T) -> NoteSecretKey
+    pub fn random<T>(rand: &mut T) -> SecretKey
     where
         T: RngCore + CryptoRng,
     {
         let fr = JubJubScalar::random(rand);
 
-        NoteSecretKey(fr)
+        SecretKey(fr)
     }
 }
 
-impl Serializable<32> for NoteSecretKey {
+impl Serializable<32> for SecretKey {
     type Error = Error;
 
     fn to_bytes(&self) -> [u8; 32] {
@@ -90,9 +90,9 @@ impl Serializable<32> for NoteSecretKey {
     }
 }
 
-impl NoteSecretKey {
-    /// Signs a chosen message with a given note secret key
-    /// using the dusk variant of the Schnorr signature scheme.
+impl SecretKey {
+    /// Signs a chosen message with a given secret key using the dusk variant
+    /// of the Schnorr signature scheme.
     ///
     /// This function performs the following cryptographic operations:
     /// - Generates a random nonce `r`.
@@ -130,7 +130,7 @@ impl NoteSecretKey {
     }
 
     /// Constructs a new `Signature` instance by signing a given message with
-    /// a `NoteSecretKey`.
+    /// a `SecretKey`.
     ///
     /// Utilizes a secure random number generator to create a unique random
     /// scalar, and subsequently computes public key points `(R, R')` and a

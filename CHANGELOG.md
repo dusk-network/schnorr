@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update benchmarks to latest version of plonk [#94]
 - Update test structure [#94]
 - Move `PublicKeyPair` from `DoubleSignature` to `public_keys` [#95]
+- Rename keys: `NoteSecretKey` -> `SecretKey`, `NotePublicKey` -> `PublicKey` [#108]
 
 ### Removed
 
@@ -213,6 +214,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- ISSUES -->
 [#111]: https://github.com/dusk-network/schnorr/issues/111
+[#108]: https://github.com/dusk-network/schnorr/issues/108
 [#105]: https://github.com/dusk-network/schnorr/issues/105
 [#104]: https://github.com/dusk-network/schnorr/issues/104
 [#99]: https://github.com/dusk-network/schnorr/issues/99
