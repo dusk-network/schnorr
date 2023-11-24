@@ -12,10 +12,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rename `PublicKeyPair` to `PublicKeyDouble` [#110]
 - Rename `sign-single` to `sign` [#110]
 - Restructure code internally [#110]
+- Rename `DoubleSignature` to `SignatureDouble` [#107]
+- Rename gadgets [#107]:
+  - `single_key_verify` -> `verify_signature`
+  - `double_key_verify` -> `verify_signature_double`
+- Replace `HexDebug` trait by `Debug` for `SecretKey` and `PublicKey` [#107]
+- Derive `PartialEq` trait instead of implementing it manually [#107]
+- Derive `PartialEq` for `PublicKeyDouble` [#107]
 
 ### Added
 
 - Add latex documentation of the signature scheme to the README [#110]
+- Add `SecretKeyVarGen`, `PublicKeyVarGen` and `SignatureVarGen` [#107]
+- Add "double" feature for `SignatureDouble` [#107]
+- Add "var_generator" feature for `SignatureVarGen` [#107]
+- Add gadget `verify_signature_var_gen` [#107]
 
 ## [0.16.0] - 2023-11-22
 
