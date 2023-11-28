@@ -29,8 +29,8 @@ use dusk_plonk::prelude::*;
 ///
 /// ### Returns
 ///
-/// - `Result<(), Error>`: Returns an empty `Result` on successful verification
-///   or an `Error` if the witness `u` is not a valid [`JubJubScalar`].
+/// - `Result<(), Error>`: Returns an empty `Result` on successful gadget
+///   creation or an `Error` if the witness `u` is not a valid [`JubJubScalar`].
 ///
 /// ### Errors
 ///
@@ -58,31 +58,30 @@ pub fn single_key_verify<C: Composer>(
     Ok(())
 }
 
-/// Verifies a double-key Schnorr proof within a Plonk circuit without requiring
+/// Verifies a [`DoubleSignature`] within a Plonk circuit without requiring
 /// the secret key as a witness.
-///
-/// This function is an extended version of `single_key_verify`, optimized for
-/// double key pairs.
 ///
 /// ### Parameters
 ///
 /// - `composer`: A mutable reference to the Plonk [`Composer`].
 /// - `u`: Witness for the random nonce used during signature generation.
-/// - `r`: Witness Point representing the nonce points `r = u*G`
-/// - `r_p`: Witness Point representing the nonce points `r_p = u*G_prime`.
-/// - `pk`: Witness Point public key `pk = sk*G`
-/// - `pk_p`: Witness Point public key `pk_p = sk*G_prime`
+/// - `r`: Witness Point representing the nonce points `R = u*G`
+/// - `r_p`: Witness Point representing the nonce points `R' = u*G'`.
+/// - `pk`: Witness Point public key `PK = sk*G`
+/// - `pk_p`: Witness Point public key `PK' = sk*G'`
 /// - `msg`: Witness for the message.
 ///
 /// ### Returns
 ///
-/// - `Result<(), Error>`: Returns an empty `Result` on successful verification
-///   or an `Error` if the witness `u` is not a valid [`JubJubScalar`].
+/// - `Result<(), Error>`: Returns an empty `Result` on successful gadget
+///   creation or an `Error` if the witness `u` is not a valid [`JubJubScalar`].
 ///
 /// ### Errors
 ///
 /// This function will return an `Error` if the witness `u` is not a valid
 /// [`JubJubScalar`].
+///
+/// [`DoubleSignature`]: [`crate::DoubleSignature`]
 pub fn double_key_verify<C: Composer>(
     composer: &mut C,
     u: Witness,

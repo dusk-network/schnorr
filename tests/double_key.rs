@@ -5,7 +5,7 @@
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
 use dusk_bls12_381::BlsScalar;
-use dusk_schnorr::{PublicKeyPair, SecretKey};
+use dusk_schnorr::{PublicKeyDouble, SecretKey};
 use rand::rngs::StdRng;
 use rand::SeedableRng;
 
@@ -15,11 +15,11 @@ fn signature_verify() {
 
     let sk = SecretKey::random(&mut rng);
     let message = BlsScalar::uni_random(&mut rng);
-    let pk_pair: PublicKeyPair = sk.into();
+    let pk_double: PublicKeyDouble = sk.into();
 
     let sig = sk.sign_double(&mut rng, message);
 
-    assert!(sig.verify(&pk_pair, message));
+    assert!(sig.verify(&pk_double, message));
 }
 
 #[test]
@@ -33,7 +33,7 @@ fn test_wrong_keys() {
 
     // Derive random public key
     let wrong_sk = SecretKey::random(&mut rng);
-    let pk_pair: PublicKeyPair = wrong_sk.into();
+    let pk_double: PublicKeyDouble = wrong_sk.into();
 
-    assert!(!sig.verify(&pk_pair, message));
+    assert!(!sig.verify(&pk_double, message));
 }

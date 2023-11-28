@@ -26,7 +26,8 @@ use rkyv::{Archive, Deserialize, Serialize};
 /// ## Examples
 ///
 /// Generating a random `SecretKey` and signing a message with single and
-/// double signatures: ```rust
+/// double signatures:
+/// ```
 /// use dusk_schnorr::SecretKey;
 /// use rand::rngs::StdRng;
 /// use rand::SeedableRng;
@@ -97,7 +98,7 @@ impl SecretKey {
     /// This function performs the following cryptographic operations:
     /// - Generates a random nonce `r`.
     /// - Computes `R = r * G`.
-    /// - Computes the challenge `c = H(R || H(m))`.
+    /// - Computes the challenge `c = H(R || m)`.
     /// - Computes the signature `u = r - c * sk`.
     ///
     /// ## Parameters
@@ -109,7 +110,7 @@ impl SecretKey {
     ///
     /// Returns a new [`Signature`] containing the `u` scalar and `R` point.
     #[allow(non_snake_case)]
-    pub fn sign_single<R>(&self, rng: &mut R, msg: BlsScalar) -> Signature
+    pub fn sign<R>(&self, rng: &mut R, msg: BlsScalar) -> Signature
     where
         R: RngCore + CryptoRng,
     {
@@ -120,8 +121,8 @@ impl SecretKey {
         // R = r * G
         let R = GENERATOR_EXTENDED * r;
 
-        // Compute challenge value, c = H(R||H(m));
-        let c = crate::signatures::single_key::challenge_hash(&R, msg);
+        // Compute challenge value, c = H(R||m);
+        let c = crate::signatures::challenge_hash(&R, msg);
 
         // Compute scalar signature, U = r - c * sk,
         let u = r - (c * self.as_ref());
@@ -158,13 +159,12 @@ impl SecretKey {
 
         // Derive two points from r, to sign with the message
         // R = r * G
-        // R_prime = r * G_NUM
+        // R_prime = r * G'
         let R = GENERATOR_EXTENDED * r;
         let R_prime = GENERATOR_NUMS_EXTENDED * r;
-        // Compute challenge value, c = H(R||R_prime||H(m));
-        let c = crate::signatures::double_key::challenge_hash(
-            &R, &R_prime, message,
-        );
+        // Compute challenge value, c = H(R||R_prime||m);
+        let c =
+            crate::signatures::double::challenge_hash(&R, &R_prime, message);
 
         // Compute scalar signature, u = r - c * sk,
         let u = r - (c * self.as_ref());
