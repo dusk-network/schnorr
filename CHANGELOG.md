@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Rename `PublicKeyPair` to `PublicKeyDouble` [#110]
+- Rename `sign-single` to `sign` [#110]
+- Restructure code internally [#110]
+
+### Added
+
+- Add latex documentation of the signature scheme to the README [#110]
+
 ## [0.16.0] - 2023-11-22
 
 ### Added
@@ -216,6 +226,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- ISSUES -->
 [#111]: https://github.com/dusk-network/schnorr/issues/111
+[#110]: https://github.com/dusk-network/schnorr/issues/110
 [#108]: https://github.com/dusk-network/schnorr/issues/108
 [#105]: https://github.com/dusk-network/schnorr/issues/105
 [#104]: https://github.com/dusk-network/schnorr/issues/104

@@ -18,7 +18,7 @@ fn sign_verify() {
     let message = BlsScalar::uni_random(&mut rng);
     let pk = PublicKey::from(&sk);
 
-    let sig = sk.sign_single(&mut rng, message);
+    let sig = sk.sign(&mut rng, message);
 
     assert!(sig.verify(&pk, message));
 }
@@ -30,7 +30,7 @@ fn test_wrong_keys() {
     let sk = SecretKey::random(&mut rng);
     let message = BlsScalar::uni_random(&mut rng);
 
-    let sig = sk.sign_single(&mut rng, message);
+    let sig = sk.sign(&mut rng, message);
 
     // Derive random public key
     let pk = PublicKey::from(&SecretKey::random(&mut rng));
@@ -45,6 +45,6 @@ fn to_from_bytes() {
     let sk = SecretKey::random(&mut rng);
     let message = BlsScalar::uni_random(&mut rng);
 
-    let sig = sk.sign_single(&mut rng, message);
+    let sig = sk.sign(&mut rng, message);
     assert_eq!(sig, Signature::from_bytes(&sig.to_bytes()).unwrap());
 }

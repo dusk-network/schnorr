@@ -8,7 +8,7 @@
 //!
 //! Modules for the secret and public keys.
 //!
-//! - `public`: Contains the public key and keypair. Used in signature
+//! - `public`: Contains the public key and double public key. Used in signature
 //!   verification.
 //! - `secret`: Contains the secret key. Used for signing messages.
 

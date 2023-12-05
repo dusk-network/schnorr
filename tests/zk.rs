@@ -37,7 +37,7 @@ impl SingleSigCircuit {
     pub fn valid_random(rng: &mut StdRng) -> Self {
         let sk = SecretKey::random(rng);
         let message = BlsScalar::uni_random(rng);
-        let signature = sk.sign_single(rng, message);
+        let signature = sk.sign(rng, message);
 
         let pk = GENERATOR_EXTENDED * sk.as_ref();
 
@@ -51,7 +51,7 @@ impl SingleSigCircuit {
     pub fn invalid_random(rng: &mut StdRng) -> Self {
         let sk = SecretKey::random(rng);
         let message = BlsScalar::uni_random(rng);
-        let signature = sk.sign_single(rng, message);
+        let signature = sk.sign(rng, message);
 
         let sk_wrong = SecretKey::random(rng);
         let pk = GENERATOR_EXTENDED * sk_wrong.as_ref();

@@ -1,10 +1,6 @@
 [package]
 name = "dusk-schnorr"
 version = "0.16.0"
-authors = [
-  "Luke Pearson <luke@dusk.network>", "zer0 <matteo@dusk.network>",
-  "Victor Lopez <victor@dusk.network>", "CPerezz <carlos@dusk.network>"
-]
 edition = "2021"
 readme = "README.md"
 repository = "https://github.com/dusk-network/schnorr"
@@ -33,6 +29,7 @@ rkyv = { version = "0.7", default-features = false, features = ["size_32"] }
 criterion = "0.3"
 rand = "0.8"
 lazy_static = "1.4"
+ff = { version = "0.13", default-features = false }
 
 [[bench]]
 name = "schnorr"
@@ -56,3 +53,8 @@ rkyv-impl = [
 name = "zk"
 path = "tests/zk.rs"
 required-features = ["alloc"]
+
+# we use the approach from https://github.com/victe/rust-latex-doc-minimal-example
+# to render latex on docs.rs
+[package.metadata.docs.rs]
+rustdoc-args = [ "--html-in-header", "./katex-header.html" ]

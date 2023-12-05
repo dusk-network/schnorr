@@ -49,7 +49,7 @@ impl SingleSigCircuit {
     pub fn valid(rng: &mut StdRng) -> Self {
         let sk = SecretKey::random(rng);
         let message = BlsScalar::uni_random(rng);
-        let signature = sk.sign_single(rng, message);
+        let signature = sk.sign(rng, message);
 
         let pub_key = GENERATOR_EXTENDED * sk.as_ref();
 

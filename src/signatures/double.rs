@@ -4,57 +4,47 @@
 //
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
-//! # Double-Key Schnorr Signature
+//! # Double Schnorr Signature
 //!
-//! This module implements a Schnorr signature scheme with a double-key
-//! mechanism.
+//! This module provides functionality for a Schnorr-based signature for a
+//! double public key.
+//! Given two fixed generator-points `G` (in our case [`GENERATOR_EXTENDED`])
+//! and `G'` (in our case [`GENERATOR_NUMS_EXTENDED`], the [`Signature`]
+//! consists of the tuple `(u, R)`, where
+//! ```text
+//! u = r - sk*c
+//! ```
+//! for random `r`, secret key `sk` and challenge hash `c = hash(R || m)`, and
+//! ```text
+//! R = sk * G
+//! R' = sk * G'
+//! ```
+//! the points resulting by adding the two generator point `sk` times to
+//! themselves.
 //!
-//! The module includes the [`Signature`] struct , which holds the scalar `u`
-//! and two nonce points `R` and `R'`.
+//! Given the public keys
+//! ```text
+//! PK = sk * G
+//! PK' = sk * G'
+//! ```
+//! and signature `(u, R, R')` the verifier can verify the authenticity of the
+//! signature by checking:
+//! ```text
+//! u * G + c * PK == R
+//! u * G' + c * PK' == R'
+//! ```
 
 use dusk_bytes::{DeserializableSlice, Error as BytesError, Serializable};
-use dusk_jubjub::{GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED};
+use dusk_jubjub::{
+    JubJubExtended, JubJubScalar, GENERATOR_EXTENDED, GENERATOR_NUMS_EXTENDED,
+};
 use dusk_plonk::prelude::*;
-use dusk_poseidon::sponge::truncated;
+use dusk_poseidon::sponge::truncated::hash;
 
-use crate::PublicKeyPair;
+use crate::PublicKeyDouble;
 
 #[cfg(feature = "rkyv-impl")]
 use rkyv::{Archive, Deserialize, Serialize};
-
-/// Function that creates a challenge hash for the signature scheme.
-///
-/// ## Parameters
-///
-/// - 'R': A [`JubJubExtended`] point representing the nonce generated with the
-///   generator point [`G`].
-/// - 'R_prime': A [`JubJubExtended`] point representing the nonce generated
-///   with the generator point [`G_NUMS`].
-/// - `message`: A `BlsScalar` representing the message to be signed.
-///
-/// ## Returns
-///
-/// A `JubJubScalar` representing the challenge hash.
-///
-/// [`G`]: `GENERATOR_EXTENDED`
-/// [`G_NUMS`]: `GENERATOR_NUMS_EXTENDED`
-#[allow(non_snake_case)]
-pub(crate) fn challenge_hash(
-    R: &JubJubExtended,
-    R_prime: &JubJubExtended,
-    message: BlsScalar,
-) -> JubJubScalar {
-    let R_coordinates = R.to_hash_inputs();
-    let R_p_coordinates = R_prime.to_hash_inputs();
-
-    truncated::hash(&[
-        R_coordinates[0],
-        R_coordinates[1],
-        R_p_coordinates[0],
-        R_p_coordinates[1],
-        message,
-    ])
-}
 
 /// Structure representing a Schnorr signature with a double-key
 /// mechanism.
@@ -66,28 +56,28 @@ pub(crate) fn challenge_hash(
 /// - 'R': A [`JubJubExtended`] point representing the nonce generated with the
 ///   generator point [`G`].
 /// - 'R_prime': A [`JubJubExtended`] point representing the nonce generated
-///   with the generator point [`G_NUMS`].
+///   with the generator point [`G'`].
 ///
 /// ## Example
 /// ```
 /// use rand::rngs::StdRng;
 /// use rand::SeedableRng;
-/// use dusk_schnorr::{SecretKey, PublicKeyPair, DoubleSignature};
+/// use dusk_schnorr::{SecretKey, PublicKeyDouble, DoubleSignature};
 /// use dusk_bls12_381::BlsScalar;
 ///
 /// let mut rng = StdRng::seed_from_u64(2321u64);
 ///
 /// let sk = SecretKey::random(&mut rng);
 /// let message = BlsScalar::uni_random(&mut rng);
-/// let pk_pair: PublicKeyPair = sk.into();
+/// let pk_double: PublicKeyDouble = sk.into();
 ///
 /// let signature = sk.sign_double(&mut rng, message);
 ///
-/// assert!(signature.verify(&pk_pair, message));
+/// assert!(signature.verify(&pk_double, message));
 /// ```
 ///
 /// [`G`]: `GENERATOR_EXTENDED`
-/// [`G_NUMS`]: `GENERATOR_NUMS_EXTENDED`
+/// [`G'`]: `GENERATOR_NUMS_EXTENDED`
 #[derive(Default, Clone, Copy, Debug)]
 #[cfg_attr(
     feature = "rkyv-impl",
@@ -137,25 +127,29 @@ impl Signature {
     ///
     /// # Parameters
     ///
-    /// * `pk_pair`: [`PublicKeyPair`] corresponding to the secret key used for
-    ///   the signature
+    /// * `pk_double`: [`PublicKeyDouble`] corresponding to the secret key used
+    ///   for the signature
     /// * `mgs_hash`: Message hashed to a `BlsScalar`.
     ///
     /// # Returns
     ///
     /// A boolean value indicating the validity of the Schnorr signature.
     #[allow(non_snake_case)]
-    pub fn verify(&self, pk_pair: &PublicKeyPair, msg_hash: BlsScalar) -> bool {
-        // Compute challenge value, c = H(R||R_prime||H(m));
+    pub fn verify(
+        &self,
+        pk_double: &PublicKeyDouble,
+        msg_hash: BlsScalar,
+    ) -> bool {
+        // Compute challenge value, c = H(R||R_prime||m);
         let c = challenge_hash(self.R(), self.R_prime(), msg_hash);
 
         // Compute verification steps
-        // u * G + c * public_key
+        // u * G + c * PK
         let point_1 =
-            (GENERATOR_EXTENDED * self.u) + (pk_pair.pk().as_ref() * c);
-        // u * G_nums + c * public_key_prime
+            (GENERATOR_EXTENDED * self.u) + (pk_double.pk().as_ref() * c);
+        // u * G' + c * PK'
         let point_2 = (GENERATOR_NUMS_EXTENDED * self.u)
-            + (pk_pair.pk_prime().as_ref() * c);
+            + (pk_double.pk_prime().as_ref() * c);
 
         // Verify point equations
         // point_1 = R && point_2 = R_prime
@@ -215,4 +209,23 @@ impl Serializable<96> for Signature {
 
         Ok(Self { u, R, R_prime })
     }
+}
+
+// Create a challenge hash for the double signature scheme.
+#[allow(non_snake_case)]
+pub(crate) fn challenge_hash(
+    R: &JubJubExtended,
+    R_prime: &JubJubExtended,
+    message: BlsScalar,
+) -> JubJubScalar {
+    let R_coordinates = R.to_hash_inputs();
+    let R_p_coordinates = R_prime.to_hash_inputs();
+
+    hash(&[
+        R_coordinates[0],
+        R_coordinates[1],
+        R_p_coordinates[0],
+        R_p_coordinates[1],
+        message,
+    ])
 }
