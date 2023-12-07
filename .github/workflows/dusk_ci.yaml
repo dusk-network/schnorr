@@ -8,7 +8,7 @@ jobs:
     uses: dusk-network/.github/.github/workflows/code-analysis.yml@main
     with:
       clippy_default: false
-      clippy_args: --features=rkyv/size_32
+      clippy_args: --features=rkyv/size_32,double,var_generator
 
   dusk_analyzer:
     name: Dusk Analyzer
@@ -20,14 +20,28 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: Swatinem/rust-cache@v2
-      - run: cargo bench --no-run
+      - run: cargo bench --no-run --features=double,var_generator
 
   test_nightly_std:
     name: Nightly tests std
     uses: dusk-network/.github/.github/workflows/run-tests.yml@main
+    with:
+      test_flags: --features=double,var_generator
+
+  test_nightly_std_double:
+    name: Nightly tests std
+    uses: dusk-network/.github/.github/workflows/run-tests.yml@main
+    with:
+      test_flags: --features=var_generator
+
+  test_nightly_std_var_generator:
+    name: Nightly tests std
+    uses: dusk-network/.github/.github/workflows/run-tests.yml@main
+    with:
+      test_flags: --features=double
 
   test_nightly_no_std:
     name: Nightly tests no_std
     uses: dusk-network/.github/.github/workflows/run-tests.yml@main
     with:
-      test_flags: --no-default-features
+      test_flags: --no-default-features --features=double,var_generator

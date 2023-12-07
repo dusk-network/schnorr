@@ -14,9 +14,21 @@ mod signatures;
 pub mod gadgets;
 
 #[deprecated(note = "Please use DoubleSignature instead")]
-pub type Proof = signatures::double::Signature;
+#[cfg(feature = "double")]
+pub type Proof = signatures::SignatureDouble;
 
-pub use keys::public::{PublicKey, PublicKeyDouble};
+pub use keys::public::PublicKey;
 pub use keys::secret::SecretKey;
-pub use signatures::double::Signature as DoubleSignature;
 pub use signatures::Signature;
+
+#[cfg(feature = "double")]
+pub use keys::public::PublicKeyDouble;
+#[cfg(feature = "double")]
+pub use signatures::SignatureDouble;
+
+#[cfg(feature = "var_generator")]
+pub use keys::public::PublicKeyVarGen;
+#[cfg(feature = "var_generator")]
+pub use keys::secret::SecretKeyVarGen;
+#[cfg(feature = "var_generator")]
+pub use signatures::SignatureVarGen;

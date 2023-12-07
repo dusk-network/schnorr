@@ -121,32 +121,41 @@ cargo add dusk-schnorr
 A basic example demonstrating how to generate and verify a Schnorr signature:
 ```rust
 use dusk_bls12_381::BlsScalar;
-use dusk_schnorr::{SecretKey, PublicKey, PublicKeyDouble};
+use dusk_schnorr::{SecretKey, PublicKey};
 use rand::rngs::StdRng;
 use rand::SeedableRng;
 use ff::Field;
 
 fn main() {
-    // Create random number generator with a seed
+    // Setup
     let mut rng = StdRng::seed_from_u64(1234u64);
+    let message = BlsScalar::random(&mut rng);
 
     // Key generation
     let sk = SecretKey::random(&mut rng);
 
-    // Sign the message in the form of a BLS scalar
-    let message = BlsScalar::random(&mut rng);
-
     // Standard Dusk-Schnorr signature scheme:
     let pk = PublicKey::from(&sk);
     let signature = sk.sign(&mut rng, message);
-    // Verify the signature
     assert!(signature.verify(&pk, message), "The signature should be valid.");
 
     // Double Dusk-Schnorr signature scheme:
-    let pk = PublicKeyDouble::from(&sk);
-    let signature = sk.sign_double(&mut rng, message);
-    // Verify the signature
-    assert!(signature.verify(&pk, message), "The signature should be valid.");
+    #[cfg(features = "double")]
+    {
+        let pk = dusk_schnorr::PublicKeyDouble::from(&sk);
+        let signature = sk.sign_double(&mut rng, message);
+        assert!(signature.verify(&pk, message), "The signature should be valid.");
+    }
+
+    // Dusk-Schnorr signature scheme with variable generator:
+    #[cfg(features = "var_generator")]
+    {
+        let generator = dusk_jubjub::GENERATOR_EXTENDED * JubJubScalar::from(42u64);
+        let sk = sk.with_variable_generator(generator);
+        let pk = dusk_schnorr::PublicKeyVarGen::from(&sk);
+        let signature = sk.sign(&mut rng, message);
+        assert!(signature.verify(&pk, message), "The signature should be valid.");
+    }
 }
 ```
 

@@ -32,8 +32,18 @@ lazy_static = "1.4"
 ff = { version = "0.13", default-features = false }
 
 [[bench]]
-name = "schnorr"
+name = "signature"
 harness = false
+
+[[bench]]
+name = "signature_double"
+harness = false
+required-features = ["double"]
+
+[[bench]]
+name = "signature_var_generator"
+harness = false
+required-features = ["var_generator"]
 
 [features]
 default = ["std"]
@@ -48,10 +58,22 @@ rkyv-impl = [
   "rkyv",
   "bytecheck",
 ]
+double = []
+var_generator = []
 
 [[test]]
-name = "zk"
-path = "tests/zk.rs"
+name = "double"
+path = "tests/schnorr_double.rs"
+required-features = ["double"]
+
+[[test]]
+name = "var_generator"
+path = "tests/schnorr_var_generator.rs"
+required-features = ["var_generator"]
+
+[[test]]
+name = "gadgets"
+path = "tests/gadgets.rs"
 required-features = ["alloc"]
 
 # we use the approach from https://github.com/victe/rust-latex-doc-minimal-example
