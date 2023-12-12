@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Move `verify` method to the public key structs [#81]
 - Rename `PublicKeyPair` to `PublicKeyDouble` [#110]
 - Rename `sign-single` to `sign` [#110]
 - Restructure code internally [#110]
@@ -22,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add `from_raw_unchecked` to `PublicKeyDouble` [#81]
 - Add latex documentation of the signature scheme to the README [#110]
 - Add `SecretKeyVarGen`, `PublicKeyVarGen` and `SignatureVarGen` [#107]
 - Add "double" feature for `SignatureDouble` [#107]

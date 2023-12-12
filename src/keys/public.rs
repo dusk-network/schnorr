@@ -13,18 +13,21 @@
 //! elliptic curve generated from the [`SecretKey`] and generator point, and
 //! they provide the basis for signature verification.
 
+use dusk_bls12_381::BlsScalar;
 use dusk_bytes::{Error, Serializable};
 use dusk_jubjub::{JubJubAffine, JubJubExtended, GENERATOR_EXTENDED};
 
-use crate::SecretKey;
+use crate::{SecretKey, Signature};
 
+#[cfg(feature = "double")]
+use crate::SignatureDouble;
 #[cfg(feature = "double")]
 use dusk_bytes::DeserializableSlice;
 #[cfg(feature = "double")]
 use dusk_jubjub::GENERATOR_NUMS_EXTENDED;
 
 #[cfg(feature = "var_generator")]
-use crate::SecretKeyVarGen;
+use crate::{SecretKeyVarGen, SignatureVarGen};
 
 #[cfg(feature = "rkyv-impl")]
 use rkyv::{Archive, Deserialize, Serialize};
@@ -98,7 +101,35 @@ impl Serializable<32> for PublicKey {
 }
 
 impl PublicKey {
-    /// Create a public key from its internal parts
+    /// Verifies that the given Schnorr [`Signature`] is valid.
+    ///
+    /// This function computes a challenge hash `c` using the stored `R` point
+    /// and the provided message, then performs the verification by checking
+    /// that:
+    /// ```text
+    /// u * G + c * PK == R
+    /// ```
+    ///
+    /// ## Parameters
+    ///
+    /// - `sig`: Reference to the [`Signature`] to be verified.
+    /// - `message`: The message as [`BlsScalar`].
+    ///
+    /// ## Returns
+    ///
+    /// A boolean value indicating the validity of the Schnorr [`Signature`].
+    pub fn verify(&self, sig: &Signature, message: BlsScalar) -> bool {
+        // Compute challenge value, c = H(R||m);
+        let c = crate::signatures::challenge_hash(sig.R(), message);
+
+        // Compute verification steps
+        // u * G + c * PK
+        let point_1 = (GENERATOR_EXTENDED * sig.u()) + (self.as_ref() * c);
+
+        point_1.eq(&sig.R())
+    }
+
+    /// Create a [`PublicKey`] from its internal parts.
     ///
     /// The public keys are generated from a bijective function that takes a
     /// secret keys domain. If keys are generated directly from curve
@@ -171,6 +202,62 @@ impl PublicKeyDouble {
     #[allow(non_snake_case)]
     pub fn pk_prime(&self) -> &JubJubExtended {
         &self.1
+    }
+
+    /// Verifies that the given Schnorr [`SignatureDouble`] is valid.
+    ///
+    /// It computes the challenge scalar and verifies the equality of points,
+    /// thereby ensuring the [`SignatureDouble`] is valid.
+    ///
+    /// # Parameters
+    ///
+    /// * `sig_double`: Reference to the [`SignatureDouble`] to be verified.
+    /// - `message`: The message as [`BlsScalar`].
+    ///
+    /// # Returns
+    ///
+    /// A boolean value indicating the validity of the Schnorr
+    /// [`SignatureDouble`].
+    #[allow(non_snake_case)]
+    pub fn verify(
+        &self,
+        sig_double: &SignatureDouble,
+        message: BlsScalar,
+    ) -> bool {
+        // Compute challenge value, c = H(R||R_prime||m);
+        let c = crate::signatures::challenge_hash_double(
+            sig_double.R(),
+            sig_double.R_prime(),
+            message,
+        );
+
+        // Compute verification steps
+        // u * G + c * PK
+        let point_1 = (GENERATOR_EXTENDED * sig_double.u()) + (self.pk() * c);
+        // u * G' + c * PK'
+        let point_2 =
+            (GENERATOR_NUMS_EXTENDED * sig_double.u()) + (self.pk_prime() * c);
+
+        // Verify point equations
+        // point_1 = R && point_2 = R_prime
+        point_1.eq(sig_double.R()) && point_2.eq(sig_double.R_prime())
+    }
+
+    /// Create a [`PublicKeyDouble`] from its internal parts
+    ///
+    /// The public keys are generated from a bijective function that takes a
+    /// secret keys domain. If keys are generated directly from curve
+    /// points, there is no guarantee a secret key exists - in fact, the
+    /// discrete logarithm property will guarantee the secret key cannot be
+    /// extracted from this public key.
+    ///
+    /// If you opt to generate the keys manually, be sure you have its secret
+    /// counterpart - otherwise this key will be of no use.
+    pub const fn from_raw_unchecked(
+        pk: JubJubExtended,
+        pk_prime: JubJubExtended,
+    ) -> Self {
+        Self(pk, pk_prime)
     }
 }
 
@@ -296,7 +383,38 @@ impl PublicKeyVarGen {
         &self.generator
     }
 
-    /// Create a public key from its internal parts
+    /// Verifies that the given Schnorr [`SignatureVarGen`] is valid.
+    ///
+    /// This function computes a challenge hash using the stored `R` point and
+    /// the provided message, then performs the verification by checking the
+    /// equality of `u * G + c * PK` and `R`.
+    ///
+    /// ## Parameters
+    ///
+    /// - `sig_var_gen`: Reference to the [`SignatureVarGen`] to be verified.
+    /// - `message`: The message in [`BlsScalar`] format.
+    ///
+    /// ## Returns
+    ///
+    /// A boolean value indicating the validity of the Schnorr
+    /// [`SignatureVarGen`].
+    pub fn verify(
+        &self,
+        sig_var_gen: &SignatureVarGen,
+        message: BlsScalar,
+    ) -> bool {
+        // Compute challenge value, c = H(R||H(m));
+        let c = crate::signatures::challenge_hash(sig_var_gen.R(), message);
+
+        // Compute verification steps
+        // u * G + c * PK
+        let point_1 =
+            (*self.generator() * sig_var_gen.u()) + (self.public_key() * c);
+
+        point_1.eq(&sig_var_gen.R())
+    }
+
+    /// Create a [`PublicKeyVarGen`] from its internal parts
     ///
     /// The public keys are generated from a bijective function that takes a
     /// secret keys domain. If keys are generated directly from curve
