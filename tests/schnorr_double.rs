@@ -21,7 +21,7 @@ fn sign_verify() {
 
     let sig = sk.sign_double(&mut rng, message);
 
-    assert!(sig.verify(&pk_double, message));
+    assert!(pk_double.verify(&sig, message));
 }
 
 #[test]
@@ -37,7 +37,7 @@ fn test_wrong_keys() {
     let wrong_sk = SecretKey::random(&mut rng);
     let pk_double: PublicKeyDouble = wrong_sk.into();
 
-    assert!(!sig.verify(&pk_double, message));
+    assert!(!pk_double.verify(&sig, message));
 }
 
 #[test]

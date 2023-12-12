@@ -21,7 +21,7 @@ fn sign_verify() {
 
     let sig = sk.sign(&mut rng, message);
 
-    assert!(sig.verify(&pk, message));
+    assert!(pk.verify(&sig, message));
 }
 
 #[test]
@@ -36,7 +36,7 @@ fn test_wrong_keys() {
     // Derive random public key
     let pk = PublicKeyVarGen::from(&SecretKeyVarGen::random(&mut rng));
 
-    assert!(!sig.verify(&pk, message));
+    assert!(!pk.verify(&sig, message));
 }
 
 #[test]

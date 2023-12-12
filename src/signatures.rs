@@ -11,19 +11,9 @@
 //! generator.
 
 use dusk_bytes::{DeserializableSlice, Error as BytesError, Serializable};
-use dusk_jubjub::{JubJubExtended, JubJubScalar, GENERATOR_EXTENDED};
+use dusk_jubjub::{JubJubExtended, JubJubScalar};
 use dusk_plonk::prelude::*;
 use dusk_poseidon::sponge::truncated::hash;
-
-use crate::PublicKey;
-
-#[cfg(feature = "double")]
-use crate::PublicKeyDouble;
-#[cfg(feature = "double")]
-use dusk_jubjub::GENERATOR_NUMS_EXTENDED;
-
-#[cfg(feature = "var_generator")]
-use crate::PublicKeyVarGen;
 
 #[cfg(feature = "rkyv-impl")]
 use rkyv::{Archive, Deserialize, Serialize};
@@ -54,7 +44,7 @@ use rkyv::{Archive, Deserialize, Serialize};
 /// let signature = sk.sign(&mut rng, message);
 ///
 /// // Verify the signature
-/// assert!(signature.verify(&pk, message));
+/// assert!(pk.verify(&signature, message));
 /// ```
 ///
 /// [`SecretKey`]: [`crate::SecretKey`]
@@ -86,35 +76,6 @@ impl Signature {
     #[allow(non_snake_case)]
     pub(crate) fn new(u: JubJubScalar, R: JubJubExtended) -> Self {
         Self { u, R }
-    }
-
-    /// Verifies the Schnorr signature against a given public key and message.
-    ///
-    /// This function computes a challenge hash `c` using the stored `R` point
-    /// and the provided message, then performs the verification by checking
-    /// that:
-    /// ```text
-    /// u * G + c * PK == R
-    /// ```
-    ///
-    /// ## Parameters
-    ///
-    /// - `pk`: Reference to the [`PublicKey`] against which the signature is
-    ///   verified.
-    /// - `message`: The message as [`BlsScalar`].
-    ///
-    /// ## Returns
-    ///
-    /// A boolean value indicating the validity of the Schnorr signature.
-    pub fn verify(&self, pk: &PublicKey, message: BlsScalar) -> bool {
-        // Compute challenge value, c = H(R||m);
-        let c = challenge_hash(self.R(), message);
-
-        // Compute verification steps
-        // u * G + c * PK
-        let point_1 = (GENERATOR_EXTENDED * self.u) + (pk.as_ref() * c);
-
-        point_1.eq(&self.R)
     }
 
     /// Appends the single key as a witness to the circuit composed by the
@@ -206,7 +167,7 @@ pub(crate) fn challenge_hash(
 ///
 /// let signature = sk.sign_double(&mut rng, message);
 ///
-/// assert!(signature.verify(&pk_double, message));
+/// assert!(pk_double.verify(&signature, message));
 /// ```
 ///
 /// [`G`]: `GENERATOR_EXTENDED`
@@ -252,42 +213,6 @@ impl SignatureDouble {
         R_prime: JubJubExtended,
     ) -> Self {
         Self { u, R, R_prime }
-    }
-
-    /// Verifies that two given points in a Schnorr signature share the same
-    /// Discrete Logarithm Problem (DLP).
-    ///
-    /// It computes the challenge scalar and verifies the equality of points,
-    /// thereby ensuring the signature is valid.
-    ///
-    /// # Parameters
-    ///
-    /// * `pk_double`: [`PublicKeyDouble`] corresponding to the secret key used
-    ///   for the signature
-    /// * `mgs_hash`: Message hashed to a `BlsScalar`.
-    ///
-    /// # Returns
-    ///
-    /// A boolean value indicating the validity of the Schnorr signature.
-    #[allow(non_snake_case)]
-    pub fn verify(
-        &self,
-        pk_double: &PublicKeyDouble,
-        msg_hash: BlsScalar,
-    ) -> bool {
-        // Compute challenge value, c = H(R||R_prime||m);
-        let c = challenge_hash_double(self.R(), self.R_prime(), msg_hash);
-
-        // Compute verification steps
-        // u * G + c * PK
-        let point_1 = (GENERATOR_EXTENDED * self.u) + (pk_double.pk() * c);
-        // u * G' + c * PK'
-        let point_2 =
-            (GENERATOR_NUMS_EXTENDED * self.u) + (pk_double.pk_prime() * c);
-
-        // Verify point equations
-        // point_1 = R && point_2 = R_prime
-        point_1.eq(self.R()) && point_2.eq(self.R_prime())
     }
 
     /// Appends the `Signature` as a witness to the circuit composed by the
@@ -400,7 +325,7 @@ pub(crate) fn challenge_hash_double(
 /// let signature = sk.sign(&mut rng, message);
 ///
 /// // Verify the signature
-/// assert!(signature.verify(&pk, message));
+/// assert!(pk.verify(&signature, message));
 /// ```
 ///
 /// [`SecretKeyVarGen`]: [`crate::SecretKeyVarGen`]
@@ -434,33 +359,6 @@ impl SignatureVarGen {
     #[allow(non_snake_case)]
     pub(crate) fn new(u: JubJubScalar, R: JubJubExtended) -> Self {
         Self { u, R }
-    }
-
-    /// Verifies the Schnorr [`SignatureVarGen`] against a given public key and
-    /// message.
-    ///
-    /// This function computes a challenge hash using the stored `R` point and
-    /// the provided message, then performs the verification by checking the
-    /// equality of `u * G + c * PK` and `R`.
-    ///
-    /// ## Parameters
-    ///
-    /// - `pk`: Reference to the [`PublicKeyVarGen`] against which the
-    ///   SignatureVarGen is verified.
-    /// - `message`: The message in [`BlsScalar`] format.
-    ///
-    /// ## Returns
-    ///
-    /// A boolean value indicating the validity of the Schnorr signature.
-    pub fn verify(&self, pk: &PublicKeyVarGen, message: BlsScalar) -> bool {
-        // Compute challenge value, c = H(R||H(m));
-        let c = crate::signatures::challenge_hash(self.R(), message);
-
-        // Compute verification steps
-        // u * G + c * PK
-        let point_1 = (*pk.generator() * self.u) + (pk.public_key() * c);
-
-        point_1.eq(&self.R)
     }
 
     /// Appends the single key as a witness to the circuit composed by the

@@ -141,7 +141,7 @@ impl SecretKey {
     ///
     /// let signature = sk.sign(&mut rng, message);
     ///
-    /// assert!(signature.verify(&pk, message));
+    /// assert!(pk.verify(&signature, message));
     /// ```
     ///
     /// [`PublicKey`]: [`crate::PublicKey`]
@@ -207,7 +207,7 @@ impl SecretKey {
     ///
     /// let signature = sk.sign_double(&mut rng, message);
     ///
-    /// assert!(signature.verify(&pk, message));
+    /// assert!(pk.verify(&signature, message));
     /// ```
     ///
     /// [`PublicKeyDouble`]: [`crate::PublicKeyDouble`]
@@ -424,7 +424,7 @@ impl SecretKeyVarGen {
     ///
     /// let signature = sk.sign(&mut rng, message);
     ///
-    /// assert!(signature.verify(&pk, message));
+    /// assert!(pk.verify(&signature, message));
     /// ```
     ///
     /// [`PublicKeyVarGen`]: [`crate::PublicKeyVarGen`]
