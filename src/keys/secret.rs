@@ -14,6 +14,7 @@
 use dusk_bls12_381::BlsScalar;
 use dusk_bytes::{Error, Serializable};
 use dusk_jubjub::{JubJubScalar, GENERATOR_EXTENDED};
+use ff::Field;
 use rand_core::{CryptoRng, RngCore};
 
 use crate::Signature;
@@ -367,8 +368,8 @@ impl SecretKeyVarGen {
     where
         T: RngCore + CryptoRng,
     {
-        let sk = JubJubScalar::random(rand);
-        let scalar = JubJubScalar::random(rand);
+        let sk = JubJubScalar::random(&mut *rand);
+        let scalar = JubJubScalar::random(&mut *rand);
         let generator = GENERATOR_EXTENDED * scalar;
 
         SecretKeyVarGen { sk, generator }
