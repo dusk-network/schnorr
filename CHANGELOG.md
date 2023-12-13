@@ -20,6 +20,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replace `HexDebug` trait by `Debug` for `SecretKey` and `PublicKey` [#107]
 - Derive `PartialEq` trait instead of implementing it manually [#107]
 - Derive `PartialEq` for `PublicKeyDouble` [#107]
+- Update `dusk-bls12_381` -> 0.13
+- Update `dusk-jubjub` -> 0.14
+- Update `dusk-plonk` -> 0.18
+- Update `dusk-poseidon` -> 0.32
 
 ### Added
 
@@ -29,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add "double" feature for `SignatureDouble` [#107]
 - Add "var_generator" feature for `SignatureVarGen` [#107]
 - Add gadget `verify_signature_var_gen` [#107]
+- Add `ff` dependency
 
 ## [0.16.0] - 2023-11-22
 
