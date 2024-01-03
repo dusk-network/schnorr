@@ -94,10 +94,7 @@ impl Signature {
     /// Returns a tuple `(Witness, WitnessPoint)` containing converted `u` and
     /// `R` fields.
     #[cfg(feature = "alloc")]
-    pub fn append<C: Composer>(
-        &self,
-        composer: &mut C,
-    ) -> (Witness, WitnessPoint) {
+    pub fn append(&self, composer: &mut Composer) -> (Witness, WitnessPoint) {
         // TODO: check whether the signature should be appended as public
         let u = composer.append_witness(self.u);
         let r = composer.append_point(self.R);
@@ -231,9 +228,9 @@ impl SignatureDouble {
     /// A tuple comprising the `Witness` of scalar `u`, and `WitnessPoint`s of
     /// `R` and `R'`.
     #[cfg(feature = "alloc")]
-    pub fn append<C: Composer>(
+    pub fn append(
         &self,
-        composer: &mut C,
+        composer: &mut Composer,
     ) -> (Witness, WitnessPoint, WitnessPoint) {
         // TODO: check whether the signature should be public
         let u = composer.append_witness(self.u);
@@ -377,10 +374,7 @@ impl SignatureVarGen {
     /// Returns a tuple `(Witness, WitnessPoint)` containing converted `u` and
     /// `R` fields.
     #[cfg(feature = "alloc")]
-    pub fn append<C: Composer>(
-        &self,
-        composer: &mut C,
-    ) -> (Witness, WitnessPoint) {
+    pub fn append(&self, composer: &mut Composer) -> (Witness, WitnessPoint) {
         // TODO: check whether the signature should be public
         let u = composer.append_witness(self.u);
         let r = composer.append_point(self.R);

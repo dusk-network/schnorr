@@ -6,12 +6,12 @@
 
 use criterion::{criterion_group, criterion_main, Criterion};
 
-use dusk_plonk::error::Error as PlonkError;
 use dusk_schnorr::{gadgets, PublicKey, SecretKey, Signature};
 use ff::Field;
 use rand::rngs::StdRng;
 use rand::SeedableRng;
 
+use dusk_plonk::prelude::Error as PlonkError;
 use dusk_plonk::prelude::*;
 
 const CAPACITY: usize = 13;
@@ -61,10 +61,7 @@ impl SignatureCircuit {
 }
 
 impl Circuit for SignatureCircuit {
-    fn circuit<C>(&self, composer: &mut C) -> Result<(), PlonkError>
-    where
-        C: Composer,
-    {
+    fn circuit(&self, composer: &mut Composer) -> Result<(), PlonkError> {
         let (u, r) = self.signature.append(composer);
 
         let pk = composer.append_point(self.pk.as_ref());
