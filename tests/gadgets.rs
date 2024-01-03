@@ -4,7 +4,7 @@
 //
 // Copyright (c) DUSK NETWORK. All rights reserved.
 
-use dusk_plonk::error::Error as PlonkError;
+use dusk_plonk::prelude::Error as PlonkError;
 use dusk_schnorr::{gadgets, PublicKey, SecretKey, Signature};
 use ff::Field;
 use rand::rngs::StdRng;
@@ -71,7 +71,7 @@ impl SignatureCircuit {
 }
 
 impl Circuit for SignatureCircuit {
-    fn circuit<C: Composer>(&self, composer: &mut C) -> Result<(), PlonkError> {
+    fn circuit(&self, composer: &mut Composer) -> Result<(), PlonkError> {
         let (u, r) = self.signature.append(composer);
 
         let pk = composer.append_point(self.pk.as_ref());
@@ -158,7 +158,7 @@ impl SignatureDoubleCircuit {
 
 #[cfg(feature = "double")]
 impl Circuit for SignatureDoubleCircuit {
-    fn circuit<C: Composer>(&self, composer: &mut C) -> Result<(), PlonkError> {
+    fn circuit(&self, composer: &mut Composer) -> Result<(), PlonkError> {
         let (u, r, r_p) = self.signature.append(composer);
 
         let pk = composer.append_point(self.pk_double.pk());
@@ -249,7 +249,7 @@ impl SignatureVarGenCircuit {
 
 #[cfg(feature = "var_generator")]
 impl Circuit for SignatureVarGenCircuit {
-    fn circuit<C: Composer>(&self, composer: &mut C) -> Result<(), PlonkError> {
+    fn circuit(&self, composer: &mut Composer) -> Result<(), PlonkError> {
         let (u, r) = self.signature.append(composer);
 
         let pk_var_gen = composer.append_point(self.pk_var_gen.public_key());

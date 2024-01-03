@@ -45,8 +45,8 @@ use dusk_plonk::prelude::*;
 /// [`JubJubScalar`].
 ///
 /// [`Signature`]: [`crate::Signature`]
-pub fn verify_signature<C: Composer>(
-    composer: &mut C,
+pub fn verify_signature(
+    composer: &mut Composer,
     u: Witness,
     r: WitnessPoint,
     pk: WitnessPoint,
@@ -96,8 +96,8 @@ pub fn verify_signature<C: Composer>(
 ///
 /// [`SignatureDouble`]: [`crate::SignatureDouble`]
 #[cfg(feature = "double")]
-pub fn verify_signature_double<C: Composer>(
-    composer: &mut C,
+pub fn verify_signature_double(
+    composer: &mut Composer,
     u: Witness,
     r: WitnessPoint,
     r_p: WitnessPoint,
@@ -159,8 +159,8 @@ pub fn verify_signature_double<C: Composer>(
 ///
 /// [`SignatureVarGen`]: [`crate::SignatureVarGen`]
 #[cfg(feature = "var_generator")]
-pub fn verify_signature_var_gen<C: Composer>(
-    composer: &mut C,
+pub fn verify_signature_var_gen(
+    composer: &mut Composer,
     u: Witness,
     r: WitnessPoint,
     pk: WitnessPoint,
