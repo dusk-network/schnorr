@@ -1,6 +1,6 @@
 [package]
 name = "dusk-schnorr"
-version = "0.17.0"
+version = "0.18.0"
 edition = "2021"
 readme = "README.md"
 repository = "https://github.com/dusk-network/schnorr"
