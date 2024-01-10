@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Deprecate crate [#123]
+  use [jubjub-schnorr](https://github.com/dusk-network/jubjub-schnorr) instead
+
 ## [0.18.0] - 2024-01-03
 
 ### Changed
@@ -252,6 +257,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix byte truncation for BLS -> JubJub conversion
 
 <!-- ISSUES -->
+[#123]: https://github.com/dusk-network/schnorr/issues/123
 [#111]: https://github.com/dusk-network/schnorr/issues/111
 [#110]: https://github.com/dusk-network/schnorr/issues/110
 [#108]: https://github.com/dusk-network/schnorr/issues/108
